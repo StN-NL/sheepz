@@ -1,0 +1,91 @@
+package WormRider
+import Assets
+import ClosureTimers
+import Fx2Entity
+import ConfigWeapons
+import HashMap
+import MyAssets
+import SheepEntity
+import Projectile3
+import Utils
+
+
+public function SheepEntity.wormRider()
+  SOUND_DUNE_WOMAN_1.playOnPoint(this.getPos()).snd.setVolume(60)
+  doAfter(wormRider.delay) -> 
+    this.getWormRider().duration += wormRider.duration
+
+
+public function SheepEntity.getWormRider() returns WormRider
+  return WormRider.get(this)
+
+
+class WormRider extends Projectile3
+  private static constant map = new HashMap<SheepEntity, thistype>
+
+  SheepEntity e
+  vec3 origin = vec3(-15, 0, 0)
+  real duration = 0.
+
+  construct(SheepEntity e)
+    super(e.pos, wormRider.minRadius, e.owner, angle(0), "")
+    this.e = e
+    setPermanent()
+    removeEffectPlain()
+
+    onHit3D() target ->
+      SOUNDS_WOR_HIT.getRandomElement().playOnPoint(pos)
+      e.blast(pos, target, wormRider.maxDamage)
+      doAfter(3.) -> 
+        if not done
+          removeHitUnit(target)
+        
+  protected static function get(SheepEntity e) returns thistype
+    if not map.has(e)
+      map.put(e, new WormRider(e))
+      
+    return map.get(e)
+
+  override function update()
+    if fx.eff == null and duration <= 0
+      DoNothing()
+    else if fx.eff == null
+      createEffect()
+    else if duration > 0
+      duration -= ANIMATION_PERIOD
+      super.update()
+      updateEffect()
+    else
+      removeEffect()
+
+    if e.pos.toVec2().isTerrainDeepWater() and duration > ANIMATION_PERIOD
+      duration = ANIMATION_PERIOD
+
+  private function createEffect()
+    e.setName(owner.getName() + " Muad'Dib")
+    SOUND_LISAN_AL_GAIB.playOnPoint(e.pos)
+    e.offsetModel(100)
+    setFx(Units.duneWorm1)
+    fx.eff.setScale(5)
+    fx.eff.playAnimation(ANIM_TYPE_WALK, 0.2)
+    // doAfter(1) -> 
+    //   SOUND_DUNE_WOMAN_2.playOnPoint(e.pos).snd.setVolume(60)
+      
+  private function updateEffect()
+    let facing = e.actor.getFacingAngle()
+    e.setXY(e.getPos().offset2d(facing, 6))
+    setPos(origin + e.getPos())
+    fx.eff.setYaw(facing)
+    if onceEvery(0.2)
+      flashEffect(Objects.impaleTargetDust, pos)
+
+  private function removeEffect()
+    e.resetName()
+    e.offsetModel(-100)
+    removeEffectPlain()
+
+  private function removeEffectPlain()
+    fx.eff.setAlpha(0)
+    fx.eff.destr()
+    fx.eff = null
+    

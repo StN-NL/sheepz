@@ -1,0 +1,20 @@
+package Bladestorm
+import Arsenal
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import SheepEntity
+
+
+public function SheepEntity.bladestorm()
+  addEffect(MyModels.bladestorm, this.actor, AttachmentPoints.origin)
+    ..setScale(0.6)
+    ..destr()
+  let maxDamage = (2 + this.owner.getFiringPower(2)) / 4 * bladestorm.maxDamage
+  this.whirl(maxDamage)
+  doPeriodicallyCounted(bladestorm.duration / bladestorm.numberOfWaves, bladestorm.numberOfWaves) cb ->
+    this.whirl(maxDamage)
+
+function SheepEntity.whirl(real maxDamage)
+  this.blastArea(this.getPos(), bladestorm.minRadius, bladestorm.maxRadius, maxDamage, 2 * maxDamage, 0.7, false)

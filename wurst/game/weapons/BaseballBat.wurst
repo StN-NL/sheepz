@@ -1,0 +1,47 @@
+package BaseballBat
+import ClosureForGroups
+import ClosureTimers
+import ConfigWeapons
+import Fx2Entity
+import MyAssets
+import SheepEntity
+
+
+public function SheepEntity.bat()
+  new BaseballBat(this)
+
+
+class BaseballBat extends Fx2Entity
+  SheepEntity source
+  vec3 origin = vec3(-15, 0, 30)
+  angle yaw = angle(3 * bj_PI / 2)
+  real lifetime = 0.
+
+  construct(SheepEntity source)
+    super(source.owner, source.pos, baseballBat.maxRadius, yaw, MyModels.baseballBat)
+    this.source = source
+    silent = true
+    fx.eff.setScale(2)
+    let facing = source.actor.getFacingAngle()
+    let posBat = origin + source.getPos().offset2d(facing, 30)
+    punch(posBat)
+
+  override function update()
+    let facing = source.actor.getFacingAngle()
+    let posBat = origin + source.getPos().offset2d(facing, 30)
+    yaw += angle(bj_PI / 20)
+    fx.eff.setYaw(facing + yaw)
+    setPos(posBat)
+
+    lifetime += ANIMATION_PERIOD
+    if lifetime > 0.5
+      terminate()
+
+  function punch(vec3 posBat)
+    SOUND_BASEBALL_BAT.playOnPoint(posBat)
+    doAfter(0.5) ->
+      forUnitsInRange(posBat.toVec2(), radius) u ->
+        let target = u.getEntity()
+        let distance = target.getPos().distanceTo(posBat)
+        if distance < radius and u != source.actor
+          source.blast(source.getPos(), target, baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)

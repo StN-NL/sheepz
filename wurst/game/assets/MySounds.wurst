@@ -1,0 +1,146 @@
+package MySounds
+import LinkedList
+import SoundUtils
+
+public class MyMusic
+  static constant shortIntro = "Music\\ShortIntro.mp3"
+  static constant staleSocks = "Music\\StaleSocks.mp3"
+  static constant axelF = "Music\\AxelF.mp3"
+  
+public class MySounds
+  static constant airhorn = "Sounds\\Airhorn.mp3"
+  static constant chickenNuggets = "Sounds\\ChickenNuggets.mp3"
+  static constant crazyFrogRing = "Sounds\\CrazyFrogRing.mp3"
+  static constant dejaVu = "Sounds\\DejaVu.mp3"
+  static constant duneWoman1 = "Sounds\\DuneWoman1.mp3"
+  static constant duneWoman2 = "Sounds\\DuneWoman2.mp3"
+  static constant fusRoDah = "Sounds\\FusRoDah.mp3"
+  static constant goldPlease = "Sounds\\GoldPlease.mp3"
+  static constant greatCrime = "Sounds\\GreatCrime.mp3"
+  static constant hihihi = "Sounds\\Hihihi.mp3"
+  static constant holyGrenade = "Sounds\\HolyGrenade.mp3"
+  static constant illBeBack = "Sounds\\IllBeBack.mp3"
+  static constant laugh = "Sounds\\Laugh.mp3"
+  static constant lisanAlGaib = "Sounds\\LisanAlGaib.mp3"
+  static constant marioJump = "Sounds\\MarioJump.mp3"
+  static constant mwahahaha = "Sounds\\Mwahahaha.mp3"
+  static constant needHealing = "Sounds\\NeedHealing.mp3"
+  static constant nooo = "Sounds\\Nooo.mp3"
+  static constant pumpShotgun = "Sounds\\PumpShotgun.mp3"
+  static constant punch = "Sounds\\Punch.mp3"
+  static constant smeagol = "Sounds\\Smeagol.mp3"
+  static constant sparta = "Sounds\\Sparta.mp3"
+  static constant widePutinMeme = "Sounds\\WidePutinMeme.mp3"
+  static constant whosYourDaddy = "Sounds\\WhosYourDaddy.mp3"
+  static constant woLoLo = "Sounds\\WoLoLo.mp3"
+  static constant yeet = "Sounds\\Yeet.mp3"
+  static constant youAreAnIdiot = "Sounds\\YouAreAnIdiot.mp3"
+  static constant youShallNotPass = "Sounds\\YouShallNotPass.mp3"
+
+public constant MUSIC_SHORT_INTRO = new SoundDefinition(MyMusic.shortIntro)
+public constant MUSIC_STALE_SOCKS = new SoundDefinition(MyMusic.staleSocks, true)
+public constant MUSIC_AXEL_F = new SoundDefinition(MyMusic.axelF, true)
+
+public constant SOUND_AIRHORN = new SoundDefinition(MySounds.airhorn)
+public constant SOUND_ARCHIMONDE_LAUGH = new SoundDefinition(Sounds.n01Archimonde30)
+public constant SOUND_BALOONICIDE = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1)
+public constant SOUND_BASEBALL_BAT = new SoundDefinition(MySounds.punch)
+public constant SOUND_BOUNCE_METAL = new SoundDefinition(Sounds.metalLightChopMetal1)
+public constant SOUND_BUTTON_CLICK = new SoundDefinition(Sounds.bigButtonClick)
+public constant SOUND_CHICKEN_NUGGETS = new SoundDefinition(MySounds.chickenNuggets)
+public constant SOUND_COUNTDOWN = new SoundDefinition(Sounds.battleNetTick)
+public constant SOUND_CRAZY_FROG_RING = new SoundDefinition(MySounds.crazyFrogRing)
+public constant SOUND_DEJA_VU = new SoundDefinition(MySounds.dejaVu)
+public constant SOUND_DROP_SUPPLIES = new SoundDefinition(Sounds.goblinSapperPissed6)
+public constant SOUND_DUNE_WOMAN_1 = new SoundDefinition(MySounds.duneWoman1)
+public constant SOUND_DUNE_WOMAN_2 = new SoundDefinition(MySounds.duneWoman2)
+public constant SOUND_FROG = new SoundDefinition(Sounds.frogWhat1)
+public constant SOUND_GOLD_PLEASE = new SoundDefinition(MySounds.goldPlease)
+public constant SOUND_GREAT_CRIME = new SoundDefinition(MySounds.greatCrime)
+public constant SOUND_HOLY_GRENADE = new SoundDefinition(MySounds.holyGrenade)
+public constant SOUND_ILL_BE_BACK = new SoundDefinition(MySounds.illBeBack)
+public constant SOUND_LAUGH = new SoundDefinition(MySounds.laugh)
+public constant SOUND_LISAN_AL_GAIB = new SoundDefinition(MySounds.lisanAlGaib)
+public constant SOUND_MIN_SHOT = new SoundDefinition(Sounds.flakCannon)
+public constant SOUND_MWAHAHAHA = new SoundDefinition(MySounds.mwahahaha)
+public constant SOUND_NEED_HEALING = new SoundDefinition(MySounds.needHealing)
+public constant SOUND_NOOO = new SoundDefinition(MySounds.nooo)
+public constant SOUND_PICKUP_SUPPLIES = new SoundDefinition(Sounds.ammoDumpWhat1)
+public constant SOUND_RIOT_SHIELD = new SoundDefinition(Sounds.defendCaster1)
+public constant SOUND_SHEEP_1 = new SoundDefinition(Sounds.sheep1)
+public constant SOUND_SHEEP_2 = new SoundDefinition(Sounds.sheep2)
+public constant SOUND_SHEEP_3 = new SoundDefinition(Sounds.sheep3)
+public constant SOUND_SHEEP_JUMP = new SoundDefinition(MySounds.marioJump)
+public constant SOUND_SHEEP_TICKLE = new SoundDefinition(MySounds.hihihi)
+public constant SOUND_SHOTGUN_SHOT = new SoundDefinition(MySounds.pumpShotgun)
+public constant SOUND_SMEAGOL = new SoundDefinition(MySounds.smeagol)
+public constant SOUND_SPARTA = new SoundDefinition(MySounds.sparta)
+public constant SOUND_WHOS_YOUR_DADDY = new SoundDefinition(MySounds.whosYourDaddy)
+public constant SOUND_WIDE_PUTIN = new SoundDefinition(MySounds.widePutinMeme)
+public constant SOUND_WOLOLO = new SoundDefinition(MySounds.woLoLo)
+public constant SOUND_YEET = new SoundDefinition(MySounds.yeet)
+public constant SOUND_YOU_ARE_AN_IDIOT = new SoundDefinition(MySounds.youAreAnIdiot)
+public constant SOUND_YOU_SHALL_NOT_PASS = new SoundDefinition(MySounds.youShallNotPass)
+
+public constant SOUNDS_WATER_ENTER = asList(
+  new SoundDefinition(Sounds.bigWaterStep1),
+  new SoundDefinition(Sounds.bigWaterStep2),
+  new SoundDefinition(Sounds.bigWaterStep3),
+  new SoundDefinition(Sounds.bigWaterStep4)
+)
+
+public constant SOUNDS_WATER_EXIT = asList(
+  new SoundDefinition(Sounds.waterStep1),
+  new SoundDefinition(Sounds.waterStep2),
+  new SoundDefinition(Sounds.waterStep3),
+  new SoundDefinition(Sounds.waterStep4)
+)
+
+public constant SOUNDS_EXPLOSION = asList(
+  new SoundDefinition("Sound\\Destructibles\\BarrelExplosion1.flac"),
+  new SoundDefinition("Sound\\Destructibles\\BarrelExplosion2.flac"),
+  new SoundDefinition("Sound\\Destructibles\\BarrelExplosion3.flac")
+)
+
+public constant SOUNDS_DEATH = asList(
+  new SoundDefinition(Sounds.goblinSapperYes1),
+  new SoundDefinition(Sounds.goblinSapperYes2),
+  new SoundDefinition(Sounds.goblinSapperYes3),
+  new SoundDefinition(Sounds.goblinSapperYes4),
+  new SoundDefinition(Sounds.goblinSapperYes5),
+  new SoundDefinition(Sounds.goblinSapperYesAttack1),
+  new SoundDefinition(Sounds.goblinSapperYesAttack2),
+  new SoundDefinition(Sounds.goblinSapperYesAttack3),
+  new SoundDefinition(Sounds.goblinSapperYesAttack4),
+  new SoundDefinition(Sounds.goblinSapperYesAttack5),
+  new SoundDefinition(Sounds.goblinZeppelinPissed1),
+  new SoundDefinition(Sounds.goblinZeppelinWhat3),
+  new SoundDefinition(Sounds.goblinZeppelinYes3),
+  new SoundDefinition(Sounds.goblinZeppelinYes4),
+  new SoundDefinition(Sounds.heroAlchemistPissed1),
+  new SoundDefinition(Sounds.heroAlchemistPissed3)
+)
+
+public constant SOUNDS_AIR_STRIKE = asList(
+  new SoundDefinition(Sounds.goblinZeppelinYes1),
+  new SoundDefinition(Sounds.goblinZeppelinYes2),
+  new SoundDefinition(Sounds.goblinZeppelinYes3),
+  new SoundDefinition(Sounds.goblinZeppelinYes4)
+)
+
+public constant SOUND_CHICKEN = asList(
+  new SoundDefinition(Sounds.chickenWhat1),
+  new SoundDefinition(Sounds.chickenWhat11)
+)
+
+public constant SOUND_FLAMETHROWER = asList(
+  new SoundDefinition(Sounds.fireBallMissileLaunch1),
+  new SoundDefinition(Sounds.fireBallMissileLaunch2),
+  new SoundDefinition(Sounds.fireBallMissileLaunch3)
+)
+
+public constant SOUNDS_WOR_HIT = asList(
+  new SoundDefinition(Sounds.woodMediumBashFlesh1),
+  new SoundDefinition(Sounds.woodMediumBashFlesh2),
+  new SoundDefinition(Sounds.woodMediumBashFlesh3)
+)

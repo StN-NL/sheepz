@@ -1,0 +1,87 @@
+package MyMessages
+import LinkedList
+
+public constant DEATH_BY_ENEMY_MESSAGES = asList(
+  "Flockin' heck! That's one way to ruin a sheep's day",
+  "Counting sheep just got a lot harder",
+  "Woolly mammoth no more, just a woolly mess",
+  "Ewe gotta be kidding me!",
+  "Baaa-d timing for this sheep's grand exit",
+  "Time to cash in those woolly wings",
+  "Farewell, fluffy friend May your woolly dreams be eternal",
+  "Another sheep bites the pasture dust",
+  "Sheepishly slipping away from this mortal coil",
+  "The wool has been pulled over this sheep's eyes for the last time",
+  "Shear madness takes its final toll",
+  "Ewe-turns aren't an option anymore",
+  "Woolly jumper? More like woolly plummet!",
+  "A woolly end to a woolly tale",
+  "No more grazing in greener pastures for this sheep",
+  "Bleat it, defeat it, sheep are no more",
+  "The last baah for this brave wool warrior",
+  "Another sheep finds itself on the wrong side of the fence",
+  "Ewe-nique exit strategy, but not the best",
+  "Baa-daboom! Another sheep bows out of the flock"
+)
+
+public constant DEATH_BY_SUICIDE_MESSAGES = asList(
+  "Flocking into darkness, a woolly soul bids adieu",
+  "Counting stars just got harder as another woolly spirit departs",
+  "Woolly existence fades, remnants of a shattered dream",
+  "Ewe gotta be kidding me! The final leap beckons",
+  "Baaa-d timing for a woolly exit",
+  "Cashing in those woolly wings for eternal slumber",
+  "Farewell, dear friend May your dreams be eternal",
+  "Another member bites the dust, slipping away silently",
+  "Sheepishly slipping away, leaving a woolly legacy",
+  "The wool pulled over once more, life's final chapter"
+)
+
+public constant DEATH_BY_DROWNING_MESSAGES = asList(
+  "Diving headfirst, this sheep's day turned soggy",
+  "Swimming turned into a bubbly debacle",
+  "Mammoth to maritime misfit, a peculiar plunge",
+  "Sink or swim? A woolly splash",
+  "Timing couldn't be worse for a splashy entrance",
+  "Trading flight for a watery waltz",
+  "Adios, dry land Greetings, aquatic antics",
+  "Sneaking beneath with sheepish finesse",
+  "The final dip left this sheep washed up",
+  "No more dry grazing, just moist adventures"
+)
+
+public constant DEATH_BY_ADVENTURE_MESSAGES = asList(
+  "Venturing too far, this sheep's journey took an unexpected turn",
+  "A daring leap ended in a woolly tumble",
+  "Exploring new heights, this sheep found themselves on a rocky path",
+  "Seeking thrills, this sheep stumbled into unforeseen dangers",
+  "Braving the unknown, this sheep's adventure reached a sudden end",
+  "A quest for excitement led to an unexpected farewell",
+  "Chasing dreams led to a woolly misstep",
+  "Courageous endeavors took a woolly turn for the worse",
+  "Embracing the wild side, this sheep met an adventurous demise",
+  "An adrenaline rush ended in a woolly downfall"
+)
+
+public constant PICKUP_WEAPON_MESSAGES = asList(
+  "Time to spice things up with a new boomstick!",
+  "New weapon alert! Let's make some woolly chaos.",
+  "Gear upgrade! Ready to unleash the sheepocalypse",
+  "Incoming firepower! Woolly mayhem incoming",
+  "New toys! Let's wreak havoc with style",
+  "Fresh gear! Let's sheepify those opponents",
+  "New armaments! Let's turn up the baa",
+  "Armed and fabulous! Ready to kick some woolly behind",
+  "Get ready for some serious sheep shenanigans",
+  "Weapons upgrade! It's about to get woolly",
+  "Unleashing the sheepish fury with new gear!",
+  "Time to shake things up with some new sheep tricks",
+  "New tools of destruction! Let's cause some woolly chaos",
+  "Gear upgrade incoming! Let's sheepify the battlefield",
+  "New weapons, same mischief. Let's go!",
+  "Stocking up on sheepy surprises. Watch out, opponents!",
+  "New ordnance inbound! Get ready for some woolly fireworks",
+  "Prepare for some serious sheep warfare",
+  "New gear, new mischief. Let's cause some mayhem!",
+  "New toys for this woolly warrior. Let's wreak some havoc!"
+)

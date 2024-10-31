@@ -1,0 +1,30 @@
+package CloudGenerator
+import Assets
+import ClosureForGroups
+import ClosureTimers
+import ConfigWeapons
+import Entity
+import MySounds
+import ProjectileSheep
+import SheepEntity
+
+
+public class Cloud extends ProjectileSheep
+
+  construct(SheepEntity source)
+    super(source, cloudGenerator.minRadius, Abilities.cloudOfFog)
+    fx.eff.setScale(cloudGenerator.minRadius / 300.)
+    fx.eff.setAlpha(50)
+    gravity = 0
+    setVel(vec3(0, 0, 0))
+    setXY(vec3(pos.x + GetRandomReal(-30, 30), pos.y + GetRandomReal(-30, 30), pos.z + 256))
+    SOUND_WOLOLO.playOnPoint(source.pos)
+    doAfter(60) -> 
+      terminate()
+
+  override function update()
+    forUnitsInRange(pos.toVec2(), radius) u ->
+      let target = u.getEntity()
+      if (target.getPos().z - pos.z).abs() < cloudGenerator.thickness
+        target.setVel(vec3(target.vel.x, target.vel.y, max(target.vel.z, 2.)))
+      

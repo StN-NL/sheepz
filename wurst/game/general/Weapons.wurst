@@ -1,0 +1,65 @@
+package Weapons
+import Arsenal
+import ConfigWeapons
+// Weapons
+import AirStrike
+import Baloonicide
+import BaseballBat
+import Bazooka
+import Bladestorm
+import ChickenBomb
+import CloudGenerator
+import ClusterBomb
+import Dynamite
+import FlameThrower
+import FrogBomb
+import FusRoDah
+import Grenade
+import GuidedMissile
+import HammerDrop
+import HolyGrenade
+import LandMine
+import Minigun
+import Molotov
+import RainOfChaos
+import RiotShield
+import Shotgun
+import Teleport
+import WordOfPower
+import WormRider
+
+
+public function initWeapons()
+  addListenersOnChannel()
+  addListenersOnCast()
+
+function addListenersOnChannel()
+  baloonicide.onChannel(sheep -> sheep.swell())
+  wordOfPower.onChannel(sheep -> sheep.youShallNotPass())
+      
+function addListenersOnCast()
+  airStrike.onPointCast((sheep, target) -> new AirStrike(sheep, target))
+  baloonicide.onCast(sheep -> sheep.baloonicide())
+  baseballBat.onCast(sheep -> sheep.bat())
+  bazooka.onCast(sheep -> new BazookaProjectile(sheep))
+  bladestorm.onCast(sheep -> sheep.bladestorm())
+  chickenBomb.onCast((sheep -> new ChickenBomb(sheep)))
+  cloudGenerator.onCast(sheep -> new Cloud(sheep))
+  clusterBomb.onCast(sheep -> new ClusterBomb(sheep))
+  dynamite.onCast(sheep -> new Dynamite(sheep))
+  flameThrower.onCast(sheep -> sheep.flameThrower())
+  frogBomb.onCast(sheep -> new FrogBomb(sheep))
+  fusRoDah.onCast(sheep -> sheep.fusRoDah())
+  grenade.onCast(sheep -> new Grenade(sheep))
+  guidedMissile.onPointCast((sheep, target) -> new GuidedMissile(sheep, target))
+  hammerDrop.onPointCast((sheep, target) -> new HammerDrop(sheep, target))
+  holyGrenade.onCast(sheep -> new HolyGrenade(sheep))
+  landmine.onCast(sheep -> new LandMine(sheep))
+  minigun.onCast(sheep -> sheep.minigun())
+  molotov.onCast(sheep -> new MolotovCocktail(sheep))
+  riotShield.onCast(sheep -> sheep.riotShield())
+  rainOfChaos.onPointCast((sheep, target) -> sheep.rainOfChaos(target))
+  shotgun.onCast(sheep -> new ShotgunProjectile(sheep))
+  teleport.onPointCast((sheep, target) -> sheep.teleport(target))
+  wordOfPower.onCast(sheep -> sheep.wordOfpower())
+  wormRider.onCast(sheep -> sheep.wormRider())

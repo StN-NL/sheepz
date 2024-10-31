@@ -1,0 +1,190 @@
+package MyEntity
+import public Entity
+import public UnitIndexer
+import Assets
+import Heightmap
+import MySounds
+import PhysicsEntity
+import ClosureForGroups
+import ConfigGame
+
+public function unit.getMyUnitEntity() returns MyUnitEntity
+  return this.getEntity() castTo MyUnitEntity
+
+
+public class MyUnitEntity extends UnitEntity
+  use PhysicsModule
+  
+  construct(unit actor)
+    super(actor)
+
+  override function update()
+    updatePhysics()
+    updateFire()
+    super.update()
+
+  // <<<<<<<<<<<< NAMETAG >>>>>>>>>>>>
+
+  private FText nameTag
+  private constant nameTagSize = 11.
+
+  function createNameTag()
+    let text = owner.getNameColored(true)
+    let colorA = PLAYER_COLORS[owner.getId()].withAlpha(255)
+    actor.setName(text)
+    nameTag = createFText(pos, text, nameTagSize, 0, ZERO2, colorA)
+
+  function updateNameTag()
+    nameTag.tt.setPos(pos + ZERO2.withZ(offsetZ) + vec3(-140, 0, 100 - terrainZ))
+
+  function setName(string text)
+    actor.setName(text.color(PLAYER_COLORS[owner.getId()]))
+    nameTag.tt.setText(text, nameTagSize)
+
+  function resetName()
+    let text = owner.getNameColored(true)
+    actor.setName(text)
+    nameTag.tt.setText(text, nameTagSize)
+
+  // <<<<<<<<<<<< UTILS >>>>>>>>>>>>
+
+  var scale = 1.
+  var offsetZ = 0.
+  var origin = vec3(0, 0, 0)
+
+  function setOrigin(vec3 origin)
+    this.origin = origin
+
+  override function setXY(vec3 tpos)
+    let offset = ZERO2.withZ(offsetZ)
+    super.setXY(tpos + offset)
+    pos -= offset
+
+  function offsetModel(real offsetZ)
+    this.offsetZ += offsetZ
+
+  function setScale(real value)
+    scale = value
+    actor.setScale(scale)
+
+  function addScale(real value)
+    scale += value
+    actor.setScale(scale)
+
+  function scaleVelXY(real scaling)
+    vel.x *= scaling
+    vel.y *= scaling
+
+  function scaleVelZ(real scaling)
+    vel.z *= scaling
+
+  // <<<<<<<<<<<< PHYSICS >>>>>>>>>>>>
+
+  function updatePhysics()
+    physicsUpdate(this)
+    applyAirFriction()
+    enforceCliffs()
+    enforceDeepWater()
+
+  override function onGroundHit()
+    actor.setPathing(true)
+    bounceOfGround()
+
+  function bounceOfGround()
+    scaleVelZ(vel.z < -3 ? -0.5 : 0)
+
+  override function onEscapeGround()
+    actor.setPathing(false)
+
+  function applyAirFriction()
+    scaleVelXY(0.97)
+
+  function enforceCliffs()
+    let target = pos.offset2d(actor.getFacingAngle(), 50)
+    if target.getHeightMap() > pos.z + 30
+      setXY(pos.moveTowards(target, -10))
+
+  // <<<<<<<<<<<< WATER >>>>>>>>>>>>
+  
+  var isDeepWater = false
+
+  function enforceDeepWater()
+    if pos.toVec2().isTerrainDeepWater() and pos.z < WATER_LEVEL
+      if not isDeepWater
+        onEnterDeepWater()
+
+    if not pos.toVec2().isTerrainDeepWater() or pos.z >= WATER_LEVEL
+      if isDeepWater
+        onExitDeepWater()
+
+  function inDeepWater() returns bool
+    return pos.toVec2().isTerrainDeepWater() and not flying
+
+  function onEnterDeepWater()
+    actor.setPathing(false)
+    isDeepWater = true
+    SOUNDS_WATER_ENTER.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+
+  function onExitDeepWater()
+    isDeepWater = false
+    SOUNDS_WATER_EXIT.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+
+  // <<<<<<<<<<<< FIRE >>>>>>>>>>>>
+
+  private effect fireEffect = null
+  private var fireStacks = 0
+  private var fireDuration = 0.
+
+  function getFireStacks() returns int
+    return fireStacks
+
+  function addFireStack()
+    addFireStacks(1, 5)
+
+  function addFireStacks(int fireStacks, real fireDuration)
+    this.fireStacks += fireStacks
+    this.fireDuration = max(this.fireDuration, fireDuration)
+
+  function removeFire()
+    fireStacks = 0
+    fireDuration = 0.
+    removeFireEffect()
+
+  function updateFire()
+    if fireEffect == null and fireDuration <= 0
+      DoNothing()
+    else if fireEffect == null
+      createFireEffect()
+    else if fireDuration > 0
+      fireDuration -= ANIMATION_PERIOD
+      updateFireEffect()
+    else
+      removeFireEffect()
+      fireStacks = 0
+
+  function createFireEffect()
+    fireEffect = addEffect(Doodads.townBurningFireEmitter, this.actor, AttachmentPoints.origin)
+    ..setScale(0.3)
+    ..setAlpha(180)
+
+  function updateFireEffect()
+    DoNothing()
+  
+  function removeFireEffect()
+    fireEffect.setAlpha(0)
+    fireEffect.destr()
+    fireEffect = null
+
+
+public function vec3.addFireStacks(real range)
+  this.addFireStacks(range, 1, 5)
+
+public function vec3.addFireStacks(real range, int fireStacks, real fireDuration)
+  forUnitsInRange(this.toVec2(), range) u ->
+    if this.distanceTo(u.getEntity().pos) < range
+      let e = u.getMyUnitEntity()
+      e.addFireStacks(fireStacks, fireDuration)
+      
+    

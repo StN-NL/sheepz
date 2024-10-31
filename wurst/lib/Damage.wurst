@@ -1,0 +1,103 @@
+package Damage
+import ClosureForGroups
+import DamageEvent
+
+public function unit.damage(
+    unit target,
+    real amount,
+    attacktype attackType,
+    damagetype damageType,
+    int damageId,
+    DamageElement damageElement
+)
+    DamageEvent.setNextDamageFromCode()
+    DamageEvent.setNextDamageId(damageId)
+    DamageEvent.setNextDamageElement(damageElement)
+    UnitDamageTarget(this, target, amount, true, false, attackType, damageType, WeaponSounds.WHOKNOWS)
+
+public function unit.damage(
+    unit target,
+    real amount,
+    attacktype attackType,
+    damagetype damageType
+)
+    this.damage(target, amount, attackType, damageType, '0000', DAMAGE_ELEMENT_ATTACK)
+    
+public function unit.spellDamage(unit target, real amount)
+    this.damage(target, amount, AttackTypes.SPELLS, DamageTypes.MAGIC)
+
+public function unit.damageArea(
+    vec2 target,
+    real range,
+    real amount,
+    attacktype attackType,
+    damagetype damageType,
+    int damageId,
+    DamageElement damageElement,
+    bool friendlyFire
+)
+    forUnitsInRange(target, range) u ->
+        if u.isAlive() and (u.isEnemyOf(this) or friendlyFire)
+            this.damage(u, amount, attackType, damageType, damageId, damageElement)
+
+public function unit.damageArea(
+    vec2 target,
+    real range,
+    real amount,
+    attacktype attackType,
+    damagetype damageType,
+    bool friendlyFire
+)
+    this.damageArea(target, range, amount, attackType, damageType, '0000', DAMAGE_ELEMENT_ATTACK, friendlyFire)
+
+public function unit.spellDamageArea(vec2 target, real range, real amount, bool friendlyFire)
+    this.damageArea(target, range, amount, AttackTypes.SPELLS, DamageTypes.MAGIC, friendlyFire)
+
+
+/** Covers all available attack types. */
+class AttackTypes
+    static constant SPELLS = ATTACK_TYPE_NORMAL
+    static constant MAGIC = ATTACK_TYPE_MAGIC
+    static constant NORMAL = ATTACK_TYPE_MELEE
+    static constant PIERCING = ATTACK_TYPE_PIERCE
+    static constant SIEGE = ATTACK_TYPE_SIEGE
+    static constant HERO = ATTACK_TYPE_HERO
+    static constant CHAOS = ATTACK_TYPE_CHAOS
+
+/** Covers all four functional damage types. */
+class DamageTypes
+    /** Physical */
+    static constant PHYSICAL = DAMAGE_TYPE_NORMAL
+    /** Enhanced: Ignores armor. */
+    static constant ENHANCED = DAMAGE_TYPE_ENHANCED
+    /** Magic: Ignores armor. Does not affect the spell immune. */
+    static constant MAGIC = DAMAGE_TYPE_MAGIC
+    /** Universal: Ignores armor. Ignores defense type. */
+    static constant UNIVERSAL = DAMAGE_TYPE_UNIVERSAL
+
+/** Covers all available weapon sounds. */
+class WeaponSounds
+    static constant WHOKNOWS = WEAPON_TYPE_WHOKNOWS
+    static constant METAL_LIGHT_CHOP = WEAPON_TYPE_METAL_LIGHT_CHOP
+    static constant METAL_MEDIUM_CHOP = WEAPON_TYPE_METAL_MEDIUM_CHOP
+    static constant METAL_HEAVY_CHOP = WEAPON_TYPE_METAL_HEAVY_CHOP
+    static constant METAL_LIGHT_SLICE = WEAPON_TYPE_METAL_LIGHT_SLICE
+    static constant METAL_MEDIUM_SLICE = WEAPON_TYPE_METAL_MEDIUM_SLICE
+    static constant METAL_HEAVY_SLICE = WEAPON_TYPE_METAL_HEAVY_SLICE
+    static constant METAL_MEDIUM_BASH = WEAPON_TYPE_METAL_MEDIUM_BASH
+    static constant METAL_HEAVY_BASH = WEAPON_TYPE_METAL_HEAVY_BASH
+    static constant METAL_MEDIUM_STAB = WEAPON_TYPE_METAL_MEDIUM_STAB
+    static constant METAL_HEAVY_STAB = WEAPON_TYPE_METAL_HEAVY_STAB
+    static constant WOOD_LIGHT_SLICE = WEAPON_TYPE_WOOD_LIGHT_SLICE
+    static constant WOOD_MEDIUM_SLICE = WEAPON_TYPE_WOOD_MEDIUM_SLICE
+    static constant WOOD_HEAVY_SLICE = WEAPON_TYPE_WOOD_HEAVY_SLICE
+    static constant WOOD_LIGHT_BASH = WEAPON_TYPE_WOOD_LIGHT_BASH
+    static constant WOOD_MEDIUM_BASH = WEAPON_TYPE_WOOD_MEDIUM_BASH
+    static constant WOOD_HEAVY_BASH = WEAPON_TYPE_WOOD_HEAVY_BASH
+    static constant WOOD_LIGHT_STAB = WEAPON_TYPE_WOOD_LIGHT_STAB
+    static constant WOOD_MEDIUM_STAB = WEAPON_TYPE_WOOD_MEDIUM_STAB
+    static constant CLAW_LIGHT_SLICE = WEAPON_TYPE_CLAW_LIGHT_SLICE
+    static constant CLAW_MEDIUM_SLICE = WEAPON_TYPE_CLAW_MEDIUM_SLICE
+    static constant CLAW_HEAVY_SLICE = WEAPON_TYPE_CLAW_HEAVY_SLICE
+    static constant AXE_MEDIUM_CHOP = WEAPON_TYPE_AXE_MEDIUM_CHOP
+    static constant ROCK_HEAVY_BASH = WEAPON_TYPE_ROCK_HEAVY_BASH

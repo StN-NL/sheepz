@@ -1,0 +1,66 @@
+package Molotov
+import Abilities
+import ConfigWeapons
+import MyEntity
+import ProjectileSheep
+import SheepEntity
+import Utils
+import ConfigGame
+import ClosureForGroups
+import ClosureTimers
+import Heightmap
+
+
+public class MolotovCocktail extends ProjectileSheep
+  
+  construct(SheepEntity source)
+    super(source, molotov.minRadius, Abilities.brewmasterMissile1)
+    onHit3D() target ->
+      if not done and distance > 30
+        terminate()
+    
+    onEnd() -> 
+      if not isDeepWater
+        explode()
+      
+  override function onGroundHit()
+    super.onGroundHit()
+    if not done
+      terminate()
+
+  override function update()
+    alignYawAndPitch()
+    super.update()
+   
+  function explode()
+    flashEffect(Abilities.fireBallMissile, pos, 2.5)
+    source.blastArea(pos, molotov.minRadius, molotov.maxRadius, molotov.maxDamage)
+    for _ = 1 to molotov.shards
+      new MolotovShard(source, pos)
+
+    doPeriodicallyTimed(0.5, molotov.duration) (CallbackCounted cb) ->
+      forUnitsInRange(pos.toVec2(), molotov.maxRadius) u ->
+        if u.isSheep() and u.getPos3Real().z < pos.getHeightMap() + 100
+          let target = u.getSheep()
+          source.fireBlast(target, molotov.maxDamage, pos)
+      
+
+public class MolotovShard extends ProjectileSheep
+
+  construct(SheepEntity source, vec3 pos)
+    super(source, molotov.minRadius, Abilities.flameStrikeEmbers)
+    sleeps = true
+    setPos(pos)
+    doAfter(molotov.duration) ->
+      if not done 
+        terminate()
+
+  override function setPhysics()
+    setXYAngle(getRandomAngle())
+    let power = GetRandomReal(0.5, 1.5) * SquareRoot(molotov.maxRadius) / 3.5
+    setSpeed(power)
+    vel.z = PROJECTILE_FACTOR_Z * power
+
+  override function onEnterDeepWater()
+    if not done 
+      terminate()

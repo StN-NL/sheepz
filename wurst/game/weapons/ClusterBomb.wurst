@@ -1,0 +1,86 @@
+package ClusterBomb
+import Assets
+import ClosureTimers
+import ConfigGame
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import TextTagEntity
+import Utils
+
+
+public class ClusterBomb extends ProjectileSheep
+  bool triggered = false
+  int countdown = clusterBomb.delay.toInt()
+
+  construct(SheepEntity source)
+    super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)
+    scaleVelXY(0.8)
+    fx.eff.setTimeScale(0.2)
+    countdown()
+
+    onEnd() -> 
+      explode()
+
+  function countdown()
+    doPeriodically(1.0) cb ->
+      if countdown == 0
+        destroy cb
+        if not done
+          terminate()
+      else
+        SOUND_COUNTDOWN.playOnPoint(pos)
+        new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
+        countdown -= 1
+
+  override function update()
+    alignYawAndPitch()
+    bounceOfWalls()
+    super.update()
+
+  override function onGroundHit()
+    super.onGroundHit()
+    bounceOfGround()
+
+  function explode()
+    boom()
+    for _ = 1 to clusterBomb.shards
+      new ClusterBombShard(source, pos)
+
+  function boom()
+    fx.eff.setScale(2)
+    fx.eff.setTimeScale(0.5)
+    SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
+    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.minRadius, clusterBomb.maxDamage)
+
+
+public class ClusterBombShard extends ProjectileSheep
+
+  construct(SheepEntity source, vec3 pos)
+    super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)
+    fx.eff.setScale(0.7 * PROJECTILE_DEFAULT_SCALE)
+    setPos(pos)
+    
+    onEnd() -> 
+      explode()
+
+  override function setPhysics()
+    setXYAngle(getRandomAngle())
+    let power = GetRandomReal(0.5, 1.5) * 8 // clusterBomb.shardsPower
+    setSpeed(power)
+    vel.z = PROJECTILE_FACTOR_Z * power
+
+  override function update()
+    alignYawAndPitch()
+    super.update()
+      
+  override function onGroundHit()
+    if not done
+      terminate()
+
+  function explode()
+    fx.eff.setScale(1)
+    fx.eff.setTimeScale(0.7)
+    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.maxRadius, clusterBomb.maxDamage)
+    

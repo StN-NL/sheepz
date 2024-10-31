@@ -1,0 +1,30 @@
+package Bazooka
+import Abilities
+import ConfigWeapons
+import ProjectileSheep
+import SheepEntity
+
+
+public class BazookaProjectile extends ProjectileSheep
+  
+  construct(SheepEntity source)
+    super(source, bazooka.minRadius, Abilities.cannonTowerMissile)
+    onHit3D() target ->
+      if not done and distance > 30
+        terminate()
+    
+    onEnd() -> 
+      explode()
+      
+  override function onGroundHit()
+    super.onGroundHit()
+    if not done
+      terminate()
+
+  override function update()
+    alignYawAndPitch()
+    super.update()
+   
+  function explode()
+    flashEffect(Abilities.cannonTowerMissile, pos, 2.5)
+    source.blastArea(pos, bazooka.minRadius, bazooka.maxRadius, bazooka.maxDamage)

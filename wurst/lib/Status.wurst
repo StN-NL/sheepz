@@ -1,0 +1,717 @@
+package Status
+import AbilityObjEditing
+import Assets
+import BuffObjEditing
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import InstantDummyCaster
+import ObjectIds
+import ObjectIdGenerator
+import Orders
+import StandardTextTags
+
+import Damage
+
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< CONFIG     >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+@configurable constant BASE_CRITICAL_HIT_DAMAGE = 0.5
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< BUFFS      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public constant BUFF_STUN = compiletime(
+  new Buff()
+    ..setArtTarget(Abilities.thunderclapTarget)
+    ..setIcon(Icons.bTNStun)
+    ..setTooltipNormal("Stunned", false)
+    ..setTooltipNormalExtended("This unit is stunned; it cannot move, attack or cast spells.")
+)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< API        >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+/** The prefered method as it will stack. */
+public function unit.setStatus(Status status, real duration)
+  StatusHandler.get(this).setStatus(status, duration)
+
+/** Avoid this method as it can does not stack. */
+public function unit.setStatus(Status status, bool active)
+  StatusHandler.get(this).setStatus(status, active)
+
+public function unit.getBonus(Bonus bonus) returns real
+  return StatusHandler.get(this).getBonus(bonus)
+
+public function unit.addBonus(Bonus bonus, real value)
+  StatusHandler.get(this).addBonus(bonus, value)
+
+public function unit.addBonus(Bonus bonus, real value, real duration)
+  StatusHandler.get(this).addBonus(bonus, value, duration)
+
+public function unit.setBuff(Buff b, bool active)
+  this.setBuff(b, active, 1)
+
+public function unit.setBuff(Buff b, bool active, int lvl)
+  StatusHandler.get(this).setBuff(b, active, lvl)
+  
+public function unit.setBuff(Buff b, real duration)
+  this.setBuff(b, duration, 1)
+
+public function unit.setBuff(Buff b, real duration, int lvl)
+  StatusHandler.get(this).setBuff(b, duration, lvl)
+
+public function unit.setStun(real duration)
+  this.setBuff(BUFF_STUN, duration)
+  this.setStatus(Status.STUNNED, duration)
+
+public function unit.setBaseAttackCooldown(real cooldown, int weaponIndex)
+  StatusHandler.get(this).setBaseAttackCooldown(cooldown, weaponIndex)
+
+public function unit.has(Buff b) returns boolean
+  return UnitHasBuffBJ(this, b.buffId)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ENUMS      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public enum Status
+  STUNNED 
+  INVULNERABLE
+  INVISIBLE
+
+public enum Bonus
+  ATTACK_SPEED
+  ATTACK_COOLDOWN_1
+  ATTACK_COOLDOWN_2
+  ATTACK_COOLDOWN_PCT_1
+  ATTACK_COOLDOWN_PCT_2
+  MOVE_SPEED
+  MOVE_SPEED_PCT
+  DAMAGE
+  ARMOR
+  LIFE
+  MANA
+  LIFE_REGEN
+  MANA_REGEN
+  STRENGTH
+  AGILITY
+  INTELLIGENCE
+  CRITICAL_HIT_CHANCE
+  CRITICAL_HIT_DAMAGE
+  LIFE_PER_HIT
+  MANA_PER_HIT
+  LIFE_STEAL
+  MANA_STEAL
+  BLOCK_CHANCE
+  BLOCK
+  PHYSICAL_RESISTANCE
+  SPELL_RESISTANCE
+  THORNS
+  BONUS_EXPERIENCE
+  GOLD_FIND
+  EVASION
+  FEEDBACK
+  SPELL_ABSORPTION
+  AREA_DAMAGE
+
+public function Bonus.toString() returns string
+  switch this
+    case ATTACK_SPEED
+      return "Attack Speed"
+    case ATTACK_COOLDOWN_1
+      return "Attack Cooldown"
+    case ATTACK_COOLDOWN_2
+      return "Attack Cooldown"
+    case ATTACK_COOLDOWN_PCT_1
+      return "Attack Cooldown"
+    case ATTACK_COOLDOWN_PCT_2
+      return "Attack Cooldown"
+    case MOVE_SPEED
+      return "Movement Speed"
+    case MOVE_SPEED_PCT
+      return "Movement Speed"
+    case DAMAGE
+      return "Bonus Damage"
+    case ARMOR
+      return "Armor"
+    case LIFE
+      return "Life"
+    case MANA
+      return "Mana"
+    case LIFE_REGEN
+      return "Life Regeneration"
+    case MANA_REGEN
+      return "Mana Regeneration"
+    case STRENGTH
+      return "Strength"
+    case AGILITY
+      return "Agility"
+    case INTELLIGENCE
+      return "Intelligence"
+    case CRITICAL_HIT_CHANCE
+      return "Critical Hit Chance"
+    case CRITICAL_HIT_DAMAGE
+      return "Critical Hit Damage"
+    case LIFE_PER_HIT
+      return "Life Per Hit"
+    case MANA_PER_HIT
+      return "Mana Per Hit"
+    case LIFE_STEAL
+      return "Life Steal"
+    case MANA_STEAL
+      return "Mana Steal"
+    case BLOCK_CHANCE
+      return "Block Chance"
+    case BLOCK
+      return "Block"
+    case PHYSICAL_RESISTANCE
+      return "Physical Resistance"
+    case SPELL_RESISTANCE
+      return "Spell Resistance"
+    case THORNS
+      return "Thorns"
+    case BONUS_EXPERIENCE
+      return "Bonus Experience"
+    case GOLD_FIND
+      return "Gold Per Kill"
+    case EVASION
+      return "Evasion"
+    case FEEDBACK
+      return "Feedback"
+    case SPELL_ABSORPTION
+      return "Spell absorption"
+    case AREA_DAMAGE
+      return "Area Damage"
+
+public function Bonus.isPercentage() returns bool
+  switch this
+    case ATTACK_SPEED
+      return true
+    case ATTACK_COOLDOWN_1
+      return false
+    case ATTACK_COOLDOWN_2
+      return false
+    case ATTACK_COOLDOWN_PCT_1
+      return true
+    case ATTACK_COOLDOWN_PCT_2
+      return true
+    case MOVE_SPEED
+      return false
+    case MOVE_SPEED_PCT
+      return true
+    case DAMAGE
+      return false
+    case ARMOR
+      return false
+    case LIFE
+      return false
+    case MANA
+      return false
+    case LIFE_REGEN
+      return false
+    case MANA_REGEN
+      return false
+    case STRENGTH
+      return false
+    case AGILITY
+      return false
+    case INTELLIGENCE
+      return false
+    case CRITICAL_HIT_CHANCE
+      return true
+    case CRITICAL_HIT_DAMAGE
+      return true
+    case LIFE_PER_HIT
+      return false
+    case MANA_PER_HIT
+      return false
+    case LIFE_STEAL
+      return true
+    case MANA_STEAL
+      return true
+    case BLOCK_CHANCE
+      return true
+    case BLOCK
+      return false
+    case PHYSICAL_RESISTANCE
+      return true
+    case SPELL_RESISTANCE
+      return true
+    case THORNS
+      return true
+    case BONUS_EXPERIENCE
+      return true
+    case GOLD_FIND
+      return false
+    case EVASION
+      return true
+    case FEEDBACK
+      return false
+    case SPELL_ABSORPTION
+      return true
+    case AREA_DAMAGE
+      return true
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< BUFF       >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public class Buff
+  private BuffDefinition buffDefinition
+  private AbilityDefinitionRejuvination abilityDefinition
+
+  int abilId
+  int buffId
+  int levels
+
+  construct()
+    gen(1)
+
+  construct(int maxLevel)
+    gen(maxLevel)
+
+  private function gen(int maxLevel)
+    if compiletime
+      abilId = ABIL_ID_GEN.next()
+      buffId = BUFF_ID_GEN.next()
+
+      buffDefinition = new BuffDefinition(buffId, 'Binf')
+
+      abilityDefinition = new AbilityDefinitionRejuvination(abilId)
+        ..setLevels(maxLevel)
+        ..presetBuffs(lvl -> buffId.toRawCode())
+        ..presetAllowWhenFull(lvl -> 3)
+        ..presetHitPointsGained(lvl -> 0.000001)
+        ..presetCastRange(lvl -> 92083)
+        ..presetCooldown(lvl -> 0)
+        ..presetDurationHero(lvl -> 99999)
+        ..presetDurationNormal(lvl -> 99999)
+        ..presetManaCost(lvl -> 0)
+        ..presetTargetsAllowed(lvl -> commaList(TargetsAllowed.vulnerable, TargetsAllowed.invulnerable))
+        ..setRequirements("")
+
+  function setName(string value)
+    buffDefinition.setName(1, value)
+
+  function setTooltipNormal(string value)
+    buffDefinition.setTooltipNormal(1, value.color(color(0, 255, 0)))
+
+  function setTooltipNormal(string value, bool friendly)
+    buffDefinition.setTooltipNormal(1, value.color(friendly ? color(0, 255, 0) : color(255, 0, 0)))
+
+  function setTooltipNormal(string value, string color)
+    buffDefinition.setTooltipNormal(1, value.color(color))
+
+  function setTooltipNormalExtended(string value)
+    buffDefinition.setTooltipNormalExtended(1, value)
+
+  function setIcon(string value)
+    buffDefinition.setIcon(value)
+
+  function setArtTarget(string value)
+    buffDefinition.setArtTarget(value)
+
+  function setTargetAttachmentPoint0(string value)
+    buffDefinition.setTargetAttachmentPoint0(1, value)
+
+  function setTargetAttachmentPoint1(string value)
+    buffDefinition.setTargetAttachmentPoint1(1, value)
+
+  function setTargetAttachmentPoint2(string value)
+    buffDefinition.setTargetAttachmentPoint2(1, value)
+
+  function setTargetAttachmentPoint3(string value)
+    buffDefinition.setTargetAttachmentPoint3(1, value)
+
+  function setTargetAttachmentPoint4(string value)
+    buffDefinition.setTargetAttachmentPoint4(1, value)
+
+  function setTargetAttachmentPoint5(string value)
+    buffDefinition.setTargetAttachmentPoint5(1, value)
+
+  function add(unit u, int lvl)
+    UnitRemoveBuffBJ(buffId, u)
+    InstantDummyCaster.castTarget(u.getOwner(), abilId, lvl, Orders.rejuvination, u)
+
+  function remove(unit u)
+    UnitRemoveBuffBJ(buffId, u)
+    u.removeAbility(abilId)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< BONUS      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+class BonusDefinition
+  protected static constant map = new IterableMap<Bonus, thistype>
+
+  protected int array[16] abilIds
+  protected Bonus bonus
+
+  private construct(Bonus bonus)
+    this.bonus = bonus
+    var value = 1.
+    for ii = 0 to 15
+      abilIds[ii] = ABIL_ID_GEN.next() 
+      
+      switch bonus
+        case ATTACK_SPEED
+          new AbilityDefinitionAttackSpeedIncrease(abilIds[ii])
+            ..setAttackSpeedIncrease(1, 0.01 * value)
+        case DAMAGE 
+          new AbilityDefinitionAttackBonus(abilIds[ii])
+            ..setAttackBonus(1, value.toInt())
+        case ARMOR
+          new AbilityDefinitionDefenseBonusPlus1(abilIds[ii])
+            ..setDefenseBonus(1, value.toInt())
+        case LIFE
+          new AbilityDefinitionMaxLifeBonusLeast(abilIds[ii])
+            ..setMaxLifeGained(1, value.toInt())
+        case MANA
+          new AbilityDefinitionMaxManaBonusLeast(abilIds[ii])
+            ..setMaxManaGained(1, value.toInt())
+        case LIFE_REGEN
+          new AbilityDefinitionRegenLife(abilIds[ii])
+            ..setHitPointsRegeneratedPerSecond(1, value.toInt())
+        case MANA_REGEN
+          new AbilityDefinitionNeutralRegenmanaonly(abilIds[ii])
+            ..setPercentage(1, false)
+            ..setAmountRegenerated(1, value)
+        case STRENGTH
+          new AbilityDefinitionStrengthBonusPlus1(abilIds[ii])
+            ..setStrengthBonus(1, value.toInt())
+        case AGILITY
+          new AbilityDefinitionAgilityBonusPlus1(abilIds[ii])
+            ..setAgilityBonus(1, value.toInt())
+        case INTELLIGENCE
+          new AbilityDefinitionIntelligenceBonusPlus1(abilIds[ii])
+            ..setIntelligenceBonus(1, value.toInt())
+        case EVASION
+          new AbilityDefinitionEvasioncreep(abilIds[ii])
+            ..setChancetoEvade(1, value)
+        default
+
+      value *= 2
+
+  static function update(unit u, Bonus bonus, real value)
+    if map.has(bonus)
+      map.get(bonus).update(u, value)
+
+  private function update(unit u, real value)
+    for ii = 0 to 15
+      u.removeAbility(abilIds[ii])
+
+    var remainder = value
+    for ii = 1 to 16
+      let exp = 16 - ii
+      let divisor = 2..pow(exp.toReal())
+      if divisor <= remainder
+        remainder -= divisor
+        u.addAbility(abilIds[exp])
+        u.hideAbility(abilIds[exp], true)
+
+  protected static function setup()
+    map.put(Bonus.ATTACK_SPEED, compiletime(new BonusDefinition(Bonus.ATTACK_SPEED)))
+    map.put(Bonus.DAMAGE, compiletime(new BonusDefinition(Bonus.DAMAGE)))
+    map.put(Bonus.ARMOR, compiletime(new BonusDefinition(Bonus.ARMOR)))
+    map.put(Bonus.LIFE, compiletime(new BonusDefinition(Bonus.LIFE)))
+    map.put(Bonus.MANA, compiletime(new BonusDefinition(Bonus.MANA)))
+    map.put(Bonus.LIFE_REGEN, compiletime(new BonusDefinition(Bonus.LIFE_REGEN)))
+    map.put(Bonus.MANA_REGEN, compiletime(new BonusDefinition(Bonus.MANA_REGEN)))
+    map.put(Bonus.STRENGTH, compiletime(new BonusDefinition(Bonus.STRENGTH)))
+    map.put(Bonus.AGILITY, compiletime(new BonusDefinition(Bonus.AGILITY)))
+    map.put(Bonus.INTELLIGENCE, compiletime(new BonusDefinition(Bonus.INTELLIGENCE)))
+    map.put(Bonus.EVASION, compiletime(new BonusDefinition(Bonus.EVASION)))
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< HANDLER    >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+constant INVISIBILITY = compiletime(ABIL_ID_GEN.next())
+
+class StatusHandler
+  private static constant map = new HashMap<unit, thistype>
+  private constant buffMap = new IterableMap<Buff, int>
+  private constant statusMap = new IterableMap<Status, int>
+  private constant bonusMap = new HashMap<Bonus, real>
+  unit u
+  player p
+
+  real baseMoveSpeed
+  real array[2] baseAttackCooldown
+
+  static function get(unit u) returns thistype
+    if not map.has(u)
+      map.put(u, new StatusHandler(u))
+
+    return map.get(u)
+
+  construct(unit u)
+    this.u = u
+    this.p = u.getOwner()
+    this.baseMoveSpeed = u.getMoveSpeed()
+    this.baseAttackCooldown[0] = u.getAttackCooldown(0)
+    this.baseAttackCooldown[1] = u.getAttackCooldown(1)
+
+  function setBaseAttackCooldown(real cooldown, int weaponIndex)
+    this.baseAttackCooldown[weaponIndex] = cooldown
+    if weaponIndex == 0
+      updateBonus(Bonus.ATTACK_COOLDOWN_1, 0)
+    else
+      updateBonus(Bonus.ATTACK_COOLDOWN_2, 0)
+
+  // BUFF
+
+  function setBuff(Buff b, bool active, int lvl)
+    updateBuff(b, active ? 1 : -1, lvl)
+
+  function setBuff(Buff b, real duration, int lvl)
+    updateBuff(b, 1, lvl)
+    doAfter(duration) ->
+      if u.isAlive()
+        updateBuff(b, -1, lvl)
+
+  function updateBuff(Buff b, int value, int lvl)
+    let oldValue = buffMap.get(b)
+    let newValue = max(oldValue + value, 0)
+    buffMap.put(b, newValue)
+
+    if newValue == 0
+      b.remove(u)
+    else if newValue > 0
+      b.add(u, lvl)
+
+  // STATUS
+
+  function setStatus(Status status, bool value)
+    updateStatus(status, value ? 1 : -1)
+
+  function setStatus(Status status, real duration)
+    updateStatus(status, 1)
+    doAfter(duration) ->
+      if u.isAlive()
+        updateStatus(status, -1)
+
+  function updateStatus(Status status, int value)
+    let oldValue = statusMap.get(status)
+    let newValue = max(oldValue + value, 0)
+    statusMap.put(status, newValue)
+
+    if newValue == 0 and oldValue > 0
+      removeStatus(status)
+    else if newValue > 0 and oldValue == 0
+      addStatus(status)
+
+  private function addStatus(Status status)
+    switch status
+      case STUNNED
+        u.pauseEx()
+      case INVULNERABLE
+        u.setInvulnerable(true)
+      case INVISIBLE
+        u.addAbility(INVISIBILITY)
+
+  private function removeStatus(Status status)
+    switch status
+      case STUNNED
+        u.unpauseEx()
+      case INVULNERABLE
+        u.setInvulnerable(false)
+      case INVISIBLE
+        u.removeAbility(INVISIBILITY)
+
+  // BONUS
+
+  function getBonus(Bonus bonus) returns real
+    return bonusMap.get(bonus)
+
+  function addBonus(Bonus bonus, real value)
+    updateBonus(bonus, value)
+
+  function addBonus(Bonus bonus, real value, real duration)
+    updateBonus(bonus, value)
+    doAfter(duration) ->
+      if u.isAlive()
+        updateBonus(bonus, -value)
+
+  private function updateBonus(Bonus bonus, real addValue)
+    let value = bonusMap.get(bonus) + addValue
+    bonusMap.put(bonus, value)
+
+    switch bonus
+      case ATTACK_COOLDOWN_1
+        let val = bonusMap.get(Bonus.ATTACK_COOLDOWN_1)
+        let cooldown = max((1. + value) * (baseAttackCooldown[0] + val), 0.01)
+        u.setAttackCooldown(cooldown, 0)
+      case ATTACK_COOLDOWN_2
+        let val = bonusMap.get(Bonus.ATTACK_COOLDOWN_2)
+        let cooldown = max((1. + value) * (baseAttackCooldown[1] + val), 0.01)
+        u.setAttackCooldown(cooldown, 1)
+      case ATTACK_COOLDOWN_PCT_1
+        let pct = bonusMap.get(Bonus.ATTACK_COOLDOWN_PCT_1)
+        let cooldown = max((1. + pct) * (baseAttackCooldown[0] + value), 0.01)
+        u.setAttackCooldown(cooldown, 0)
+      case ATTACK_COOLDOWN_PCT_2
+        let pct = bonusMap.get(Bonus.ATTACK_COOLDOWN_PCT_2)
+        let cooldown = max((1. + pct) * (baseAttackCooldown[1] + value), 0.01)
+        u.setAttackCooldown(cooldown, 1)
+      case MOVE_SPEED
+        let pct = bonusMap.get(Bonus.MOVE_SPEED_PCT)
+        u.setMoveSpeed((1. + pct) * (baseMoveSpeed + value))
+      case MOVE_SPEED_PCT
+        let val = bonusMap.get(Bonus.MOVE_SPEED)
+        u.setMoveSpeed((1. + value) * (baseMoveSpeed + val))
+      case BONUS_EXPERIENCE
+        SetPlayerHandicapXPBJ(p, 100 * (1 + value))
+      case ATTACK_SPEED
+        BonusDefinition.update(u, bonus, value / 0.01)
+      default
+        BonusDefinition.update(u, bonus, value)
+  
+  // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+  // <<<<<<<<<< <<<<<<<<<< SETUP      >>>>>>>>>> >>>>>>>>>>
+  // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+  
+  protected static function setup()
+    for ii = 0 to 5
+      DamageEvent.addUnreducedListener(ii) ->
+        let source = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let amount = DamageEvent.getAmount()
+
+        if ii == 0
+          if map.has(source)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(source).areaDamage(source, target, amount)
+
+        else if ii == 1
+          if map.has(source)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(source).rollForCrit(amount)
+          if map.has(target)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(target).resistPhysical(amount)
+            if DamageEvent.getType() == DamageType.SPELL
+              map.get(target).resistSpell(amount)
+        
+        else if ii == 2
+          if map.has(target)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(target).thorns(source, amount)
+            if DamageEvent.getType() == DamageType.SPELL
+              map.get(target).absorption(amount)
+
+        else if ii == 4
+          if map.has(target)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(target).block(amount)
+
+        else if ii == 5
+          if map.has(source)
+            if DamageEvent.getType() == DamageType.ATTACK
+              map.get(source)
+                ..lifeOnHit(amount)
+                ..manaOnHit(amount)
+                ..feedback(target)
+
+    EventListener.add(EVENT_PLAYER_UNIT_DEATH) ->
+      let killer = EventData.getKillingUnit()
+      if map.has(killer)
+        map.get(killer).findGold()
+
+  private function areaDamage(unit source, unit target, real amount)
+    let damage = bonusMap.get(Bonus.AREA_DAMAGE) * amount
+    source.damageArea(target.getPos(), 128, damage, DamageEvent.getAttackType(), DamageEvent.getDamageType(), false)
+
+  private function rollForCrit(real amount)
+    if bonusMap.get(Bonus.CRITICAL_HIT_CHANCE) > GetRandomReal(0., 1.)
+      let modified = (1 + BASE_CRITICAL_HIT_DAMAGE + bonusMap.get(Bonus.CRITICAL_HIT_DAMAGE)) * amount
+      DamageEvent.setAmount(modified)
+      createCriticalStrikeTextTag(u, modified.toInt())
+
+  private function resistPhysical(real amount)
+    let modified = (1 - bonusMap.get(Bonus.PHYSICAL_RESISTANCE)) * amount
+    DamageEvent.setAmount(max(0, modified))
+
+  private function resistSpell(real amount)
+    let modified = (1 - bonusMap.get(Bonus.SPELL_RESISTANCE)) * amount
+    DamageEvent.setAmount(max(0, modified))
+
+  private function absorption(real amount)
+    let absorbed = bonusMap.get(Bonus.SPELL_ABSORPTION) * amount
+    u.addMana(absorbed)
+    DamageEvent.setAmount(max(0, amount - absorbed))
+    if amount > 5. and GetRandomInt(0, 4) == 0
+      flashEffect(Abilities.moonWellCasterArt, u, AttachmentPoints.origin)
+
+  private function thorns(unit source, real amount)
+    let reflected = bonusMap.get(Bonus.THORNS) * amount
+    DamageEvent.setAmount(max(0, amount - reflected))
+    u.damage(source, reflected, DamageEvent.getAttackType(), DamageEvent.getDamageType())
+    flashEffect(Abilities.barkSkinTarget, u, AttachmentPoints.chest)
+
+  private function block(real amount)
+    if bonusMap.get(Bonus.BLOCK_CHANCE) > GetRandomReal(0., 1.)
+      let modified = max(0, amount - bonusMap.get(Bonus.BLOCK))
+      DamageEvent.setAmount(modified)
+      flashEffect(Abilities.defendCaster, u, AttachmentPoints.origin)
+      standardTextTag(u.getPos(), (amount - modified).toInt().toString())
+        ..setColor(135, 206, 235, 255)
+
+  private function lifeOnHit(real amount)
+    let lifePerHit = bonusMap.get(Bonus.LIFE_PER_HIT)
+    let lifeSteal = bonusMap.get(Bonus.LIFE_STEAL) * amount
+    u.addHP(lifePerHit + lifeSteal)
+    if lifeSteal > 1. or lifePerHit > 1.
+      standardTextTag(u.getPos(), (lifePerHit + lifeSteal).toInt().toString())
+        ..setColor(96, 255, 96, 255)
+    if lifeSteal > 0.
+      flashEffect(Abilities.vampiricAuraTarget, u, AttachmentPoints.origin)
+    if lifePerHit > 0.
+      let eff = addEffect(Abilities.healTarget, u, AttachmentPoints.origin)
+      doAfter(3) ->
+        eff.destr()
+
+  private function manaOnHit(real amount)
+    let manaPerHit = bonusMap.get(Bonus.MANA_PER_HIT)
+    let manaSteal = bonusMap.get(Bonus.MANA_STEAL) * amount
+    u.addMana(manaPerHit + manaSteal)
+    if manaSteal > 1. or manaPerHit > 1.
+      flashEffect(Abilities.spiritTouchTarget, u, AttachmentPoints.chest)
+      standardTextTag(u.getPos(), (manaPerHit + manaSteal).toInt().toString())
+        ..setColor(0, 0, 255, 255)
+
+  private function feedback(unit target)
+    let mana_burned = min(bonusMap.get(Bonus.FEEDBACK), target.getMana())
+    if mana_burned > 1.
+      target.addMana(-mana_burned)
+      u.spellDamage(target, mana_burned)
+      flashEffect(Abilities.spellBreakerAttack, target, AttachmentPoints.origin)
+
+  private function findGold()
+    let gold = bonusMap.get(Bonus.GOLD_FIND).toInt()
+    if gold > 0
+      p.addGold(gold)
+      createGoldBountyTextTag(u, gold)
+  
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< INIT       >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+init
+  BonusDefinition.setup()
+  StatusHandler.setup()
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< COMPILE    >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+@compiletime function gen()
+  new AbilityDefinitionPermanentInvisibility(INVISIBILITY)
+    ..setDurationHero(1, 0)
+    ..setDurationNormal(1, 0)

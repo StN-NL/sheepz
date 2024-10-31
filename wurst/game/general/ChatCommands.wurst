@@ -1,0 +1,38 @@
+package ChatCommands
+import MyAssets
+import ClosureEvents
+
+public function addListenersChat()
+  EventListener.add(EVENT_PLAYER_CHAT_FILTER) ->
+    if EventData.getChatMessage() == "1"
+      SOUND_NOOO.play().snd.setVolume(70)
+    else if EventData.getChatMessage() == "2"
+      SOUND_LAUGH.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "3"
+      SOUND_MWAHAHAHA.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "4"
+      SOUND_YEET.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "5"
+      SOUND_WOLOLO.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "6"
+      SOUND_ILL_BE_BACK.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "7"
+      SOUND_SPARTA.play().snd.setVolume(70)
+    else if EventData.getChatMessage() == "8"
+      SOUND_NEED_HEALING.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "9"
+      SOUND_GOLD_PLEASE.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "10"
+      SOUND_AIRHORN.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "11"
+      SOUND_WHOS_YOUR_DADDY.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "12"
+      SOUND_YOU_ARE_AN_IDIOT.play().snd.setVolume(40)
+    else if EventData.getChatMessage() == "13"
+      SOUND_SMEAGOL.play()
+    else if EventData.getChatMessage() == "14"
+      SOUND_DUNE_WOMAN_2.play().snd.setVolume(60)
+    else if EventData.getChatMessage() == "15"
+      SOUND_CHICKEN_NUGGETS.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "16"
+      SOUND_GREAT_CRIME.play().snd.setVolume(40)

@@ -1,0 +1,637 @@
+package SheepEntity
+import Assets
+import ChannelAbilityPreset
+import ClosureTimers
+import ClosureForGroups
+import ConfigGame
+import Damage
+import Globals
+import Heightmap
+import MyAssets
+import MyEntity
+import MultiBoard
+import Orders
+import SoundUtils
+import Sheeps
+import TextTagEntity
+import UnitAnimations
+import Utils
+
+SheepEntity array[24] sheeps
+
+enum State
+  ALIVE
+  DEATH_BY_ENEMY
+  DEATH_BY_SUICIDE
+  DEATH_BY_DROWNING
+  DEATH_BY_ADVENTURE
+  IN_HEAVEN
+
+function State.toString() returns string
+  switch this
+    case ALIVE
+      return "ALIVE"
+    case DEATH_BY_ENEMY
+      return "DEATH_BY_ENEMY"
+    case DEATH_BY_SUICIDE
+      return "DEATH_BY_SUICIDE"
+    case DEATH_BY_DROWNING
+      return "DEATH_BY_DROWNING"
+    case DEATH_BY_ADVENTURE
+      return "DEATH_BY_ADVENTURE"
+    case IN_HEAVEN
+      return "IN_HEAVEN"
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< API        >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public function UnitEntity.isSheep() returns bool
+  return this instanceof SheepEntity
+
+public function UnitEntity.toSheep() returns SheepEntity
+  return this castTo SheepEntity
+
+public function unit.isSheep() returns bool
+  return this.getEntity().isSheep()
+
+public function unit.getSheep() returns SheepEntity
+  return this.getEntity().toSheep()
+
+public function player.getSheep() returns SheepEntity
+  return sheeps[this.getId()]
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< OTHER      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+function player.createSheep() returns unit
+  return createUnit(this, UNIT_IDS_SHEEPZ.getRandomElement())
+
+public function vec3.knockback(UnitEntity target, real amount, real factorZ)
+  if target.actor.isAlive()
+    let factorXY = min(this.distanceTo2d(target.getPos()) / 25, 1)
+    let angle = this.angleTo2d(target.getPos())
+    target.vel.x += 0.4 * KNOCKBACK_FACTOR_XY * factorXY * angle.cos() * amount
+    target.vel.y += 0.4 * KNOCKBACK_FACTOR_XY * factorXY * angle.sin() * amount
+    target.vel.z += 0.55 * KNOCKBACK_FACTOR_Z * factorZ * amount
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< SHEEP      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public class SheepEntity extends MyUnitEntity
+
+  // <<<<<<<<<<<< CONSTRUCT >>>>>>>>>>>>
+
+  private static var isListening = false
+
+  construct(player owner)
+    super(owner.createSheep())
+    sheeps[owner.getId()] = this
+    sleeps = false
+    addListeners()
+    setOrigin(vec3(-15, 0, 0))
+    setState(State.IN_HEAVEN)
+    createNameTag()
+
+  private function addListeners()
+    if not isListening
+      isListening = true
+      addListenerJump()
+      addListenerJetPack()
+      addListenerParachute()
+      addListenerTickle()
+
+  // <<<<<<<<<<<< STATE >>>>>>>>>>>>
+  
+  private var state = State.IN_HEAVEN
+
+  function setState(State state)
+    this.state = state
+    if state == State.IN_HEAVEN
+      onEnterHeaven()
+    if state == State.ALIVE
+      onLeaveHeaven()
+
+  function isAlive() returns bool
+    return state == State.ALIVE
+
+  function isDead() returns bool
+    return state != State.ALIVE and state != State.IN_HEAVEN
+
+  // <<<<<<<<<<<< HEAVEN >>>>>>>>>>>>
+
+  function onEnterHeaven()
+    owner.clearSelection()
+    this.toHeaven()
+    gravity = 0.
+    setVel(ZERO3)
+    actor.setMaxHP(SHEEP_MAX_HP.toInt())
+    actor.setHP(SHEEP_MAX_HP)
+    setOxygenLevel(SHEEP_MAX_HP)
+    setScale(SHEEP_SCALING_VALUE)
+    setTormentor(null)
+    actor.removeAbility(ABIL_ID_JUMP)
+    actor.removeAbility(ABIL_ID_JETPACK)
+    actor.removeAbility(ABIL_ID_PARACHUTE)
+    actor.removeAbility(ABIL_ID_TICKLE)
+    actor.addAbility(GHOST_INVIS_ID)
+    actor.setName(owner.getNameColored(true) + " (in heaven)")
+    reincarnate()
+
+  function reincarnate()
+    if owner.getLives() > 0 or GAME_MODE == GameMode.TIMED
+      doAfter(2) ->
+        drop()
+        if GAME_MODE == GameMode.SURVIVAL
+          owner.addLives(-1)
+    
+  function onLeaveHeaven()
+    gravity = defaultGravity
+    actor.addAbility(ABIL_ID_JUMP)
+    actor.addAbility(ABIL_ID_JETPACK)
+    actor.addAbility(ABIL_ID_PARACHUTE)
+    actor.addAbility(ABIL_ID_TICKLE)
+    actor.removeAbility(GHOST_INVIS_ID)
+    actor.setName(owner.getNameColored(true))
+
+  // <<<<<<<<<<<< BIRTH >>>>>>>>>>>>
+
+  private function drop()
+    let newZ = isSinglePlayer() ? 0. : 600.
+    let newPos = getRandomPosOnLand().withZ(newZ)
+    owner.panCameraTo(vec3(newPos.x, newPos.y, newPos.z))
+    let delay = isSinglePlayer() ? 1. : 5.
+    doAfter(delay) -> 
+      setup(newPos)
+  
+  private function setup(vec3 newPos)
+    setState(State.ALIVE)
+    setPos(newPos)
+    flashEffect(Abilities.polyMorphTarget, newPos)
+    owner.select(actor)
+    nullTimer() -> 
+      actor.disableAbility(ABIL_ID_PARACHUTE, false, false)
+      orderOpenParachute()
+
+  // <<<<<<<<<<<< UPDATE >>>>>>>>>>>>
+
+  override function update()
+    if onceEvery(1) and owner == players[0]
+      print(pos.toString())
+
+    updateNameTag()
+    updateJetPack()
+    updateParachute()
+    breatheAir()
+    adventureOutOfBounds()
+    updatePowerIndicator()
+    updateMoveSpeed()
+    if isDead()
+      onDeath()
+    if not done
+      super.update()
+
+  // <<<<<<<<<<<< Movement >>>>>>>>>>>>
+  
+  var modifierMoveSpeed = 0.
+  var immobalized = 0
+
+  function immobalize(bool value)
+    immobalized += value ? 1 : -1
+
+  function modifyMoveSpeed(real value)
+    this.modifierMoveSpeed += value
+
+  private function updateMoveSpeed()
+    if isDead() or immobalized > 0
+      actor.setMoveSpeed(0.)
+    else if isDeepWater
+      actor.setMoveSpeed(SHEEP_MS_DEEP_WATER)
+    else if isJetPackOn and flying
+      actor.setMoveSpeed(SHEEP_MS_JET_PACK)
+    else if flying
+      actor.setMoveSpeed(SHEEP_MS_FLYING)
+    else
+      actor.setMoveSpeed(SHEEP_MS_NORMAL + modifierMoveSpeed)
+
+  // <<<<<<<<<<<< MISC >>>>>>>>>>>>
+  
+  private function randomBleating()
+    if oneOutOf(100)
+      SOUND_SHEEP_1.playOnPoint(pos)
+    if oneOutOf(100)
+      SOUND_SHEEP_2.playOnPoint(pos)
+    if oneOutOf(100)
+      SOUND_SHEEP_3.playOnPoint(pos)
+
+  private function adventureOutOfBounds()
+    if not (actor.getPos() + 2 * vel * speedFactor).inPlayable()
+      setState(State.DEATH_BY_ADVENTURE)
+
+  // <<<<<<<<<<<< WATER >>>>>>>>>>>>
+  
+  private var oxygenLevel = SHEEP_MAX_HP
+
+  protected function setOxygenLevel(real oxygenLevel)
+    this.oxygenLevel = oxygenLevel
+
+  private function breatheAir()
+    if isDeepWater
+      oxygenLevel -= DELTA_OXYGEN
+      randomBleating()
+      if onceEvery(0.5)
+        flashEffect(Objects.illidanWaterSpawnFootPrint, pos)
+      if onceEvery(1)
+        actor.setAnimation(UnitAnimations.Sheep.swimWalk.idx)
+    else if oxygenLevel < actor.getHP() - DELTA_OXYGEN
+      oxygenLevel += DELTA_OXYGEN
+    else
+      oxygenLevel = actor.getHP()
+
+    if oxygenLevel < actor.getHP()
+      if onceEvery(0.5)
+        new TextTagEntity(pos, vec3(0, 0, 8), oxygenLevel.toInt().toString(), 10, 1, colorA(100, 206, 255, 255))
+    
+    if oxygenLevel < 0
+      setState(State.DEATH_BY_DROWNING)
+
+  override function onEnterDeepWater()
+    super.onEnterDeepWater()
+    if getFireStacks() > 0
+      removeFireEffect()
+      flashEffect(Abilities.arcaneTowerAttack, pos)
+
+  // <<<<<<<<<<<< JUMP >>>>>>>>>>>>
+
+  private static function addListenerJump()
+    EventListener.onCast(ABIL_ID_JUMP) u ->
+      u.getSheep().jump()
+
+  private function jump()
+    SOUND_SHEEP_JUMP.playOnPoint(pos).snd.setVolume(40)
+    if pos.z < pos.getHeightMap() + JUMP_MAX_HEIGHT
+      let direction = actor.getFacingAngle().direction()
+      vel.x += 3 * direction.x
+      vel.y += 3 * direction.y
+      vel.z += 25
+      
+  // <<<<<<<<<<<< JET PACK >>>>>>>>>>>>
+  
+  private var isJetPackOn = false
+
+  function orderStartJetPack()
+    actor.issueImmediateOrderById(OrderIds.defend)
+
+  function orderStopJetPack()
+    actor.issueImmediateOrderById(OrderIds.undefend)
+
+  private static function addListenerJetPack()
+    EventListener.add(EVENT_PLAYER_UNIT_ISSUED_ORDER) ->
+      detectJetPack()
+
+  private static function detectJetPack()
+    let u = EventData.getOrderedUnit()
+    if u.isSheep()
+      let e = u.getSheep()
+      if isOrderStartJetPack()
+        e.startJetPack()
+      else if isOrderStopJetPack()
+        e.stopJetPack()
+
+  private static function isOrderStartJetPack() returns bool
+    return EventData.getIssuedOrderId() == OrderIds.defend
+
+  private static function isOrderStopJetPack() returns bool
+    return EventData.getIssuedOrderId() == OrderIds.undefend
+
+  private function startJetPack()
+    SOUND_SHEEP_2.playOnPoint(pos)
+    isJetPackOn = true
+    doAfter(10) -> 
+      orderStopJetPack()
+
+  private function stopJetPack()
+    SOUND_SHEEP_3.playOnPoint(pos)
+    isJetPackOn = false
+    nullTimer() -> 
+      actor.disableAbility(ABIL_ID_JETPACK, true, false)
+      doAfter(JET_PACK_COOLDOWN) -> 
+        actor.disableAbility(ABIL_ID_JETPACK, false, false)
+
+  private function updateJetPack()
+    let jetPos = vec3(pos.x, pos.y, pos.z - 30)
+    let path = Abilities.incinerateBuff
+    if isJetPackOn and vel.z > 0 and pos.z > pos.getHeightMap() + JET_PACK_MAX_HEIGHT
+      flashEffect(path, jetPos)
+    else if isJetPackOn and vel.z < 5
+      vel.z += 1.1
+      flashEffect(path, jetPos)
+
+  // <<<<<<<<<<<< PARACHUTE >>>>>>>>>>>>
+
+  private effect parachute
+
+  function orderOpenParachute()
+    actor.issueImmediateOrderById(OrderIds.magicdefense)
+
+  function orderCloseParachute()
+    actor.issueImmediateOrderById(OrderIds.magicundefense)
+
+  private static function addListenerParachute()
+    EventListener.add(EVENT_PLAYER_UNIT_ISSUED_ORDER) ->
+      detectParachute()
+
+  private static function detectParachute()
+    let u = EventData.getOrderedUnit()
+    if u.isSheep()
+      let e = u.getSheep()
+      if isOrderStartParachute()
+        e.openParachute()
+      else if isOrderStopParachute()
+        e.closeParachute()
+
+  private static function isOrderStartParachute() returns bool
+    return EventData.getIssuedOrderId() == OrderIds.magicdefense
+
+  private static function isOrderStopParachute() returns bool
+    return EventData.getIssuedOrderId() == OrderIds.magicundefense
+
+  private function openParachute()
+    parachute = addEffect(MyModels.parachute, actor, AttachmentPoints.chest)
+    SOUND_SHEEP_2.playOnPoint(pos)
+
+  private function closeParachute()
+    parachute.destr()
+    parachute = null
+    SOUND_SHEEP_3.playOnPoint(pos)
+    nullTimer() -> 
+      actor.disableAbility(ABIL_ID_PARACHUTE, true, false)
+      doAfter(PARACHUTE_COOLDOWN) -> 
+        actor.disableAbility(ABIL_ID_PARACHUTE, false, false)
+
+  private function updateParachute()
+    if parachute != null
+      updateParachutePhysics()
+
+  private function updateParachutePhysics()
+    if vel.z < -5
+      vel.z = -5
+    if pos.z < pos.getHeightMap() + 30
+      orderCloseParachute()
+    if vel.x.abs() > 10
+      vel.x *= 10 / vel.x.abs()
+    if vel.y.abs() > 10
+      vel.y *= 10 / vel.y.abs()
+
+  // <<<<<<<<<<<< TICKLE >>>>>>>>>>>>
+
+  private static function addListenerTickle()
+    EventListener.onTargetCast(ABIL_ID_TICKLE) (caster, target) ->
+      caster.getSheep().tickle(target)
+
+  private function tickle(unit target)
+    SOUND_SHEEP_TICKLE.playOnPoint(pos).snd.setVolume(60)
+    blast(pos, target.getEntity(), 0, TICKLE_KNOCK_BACK, 0.5)
+
+  // <<<<<<<<<<<< DEAL DAMAGE >>>>>>>>>>>>
+
+  function blastArea(vec3 pos, real minRadius, real maxRadius, real maxAmount)
+    this.blastArea(pos, minRadius, maxRadius, maxAmount, maxAmount)
+
+  function blastArea(vec3 pos, real minRadius, real maxRadius, real maxAmount, real maxKnockback)
+    this.blastArea(pos, minRadius, maxRadius, maxAmount, maxKnockback, 1.)
+
+  function blastArea(vec3 pos, real minRadius, real maxRadius, real maxAmount, real maxKnockback, real factorZ)
+    this.blastArea(pos, minRadius, maxRadius, maxAmount, maxKnockback, factorZ, true)
+
+  function blastArea(vec3 pos, real minRadius, real maxRadius, real maxAmount, real maxKnockback, real factorZ, bool targetSelf)
+    forUnitsInRange(pos.toVec2(), maxRadius) u ->
+      let target = u.getEntity()
+      let distance = target.getPos().distanceTo(pos)
+      if distance < maxRadius and (targetSelf or target.toSheep() != this)
+        let factor = 1 - max(distance - minRadius, 0) / (maxRadius - minRadius)
+        let amount = factor * maxAmount
+        let knockback = factor * maxKnockback
+        this.blast(pos, target, amount, knockback, factorZ)
+
+  function blast(vec3 pos, UnitEntity target, real amount)
+    this.blast(pos, target, amount, amount)
+
+  function blast(vec3 pos, UnitEntity target, real amount, real knockback)
+    this.blast(pos, target, amount, knockback, 1)
+
+  function blast(vec3 pos, UnitEntity target, real amount, real knockback, real factorZ)
+    if target.actor.isAlive()
+      pos.knockback(target, knockback, factorZ)
+      if target.isSheep()
+        target.toSheep().setTormentor(this)
+        target.toSheep().takeDamage(this, amount)
+      else
+        this.actor.damage(target.actor, amount, AttackTypes.CHAOS, DamageTypes.UNIVERSAL)
+
+  function fireBlast(SheepEntity target, real damage)
+    fireBlast(target, damage, this.pos)
+
+  function fireBlast(SheepEntity target, real damage, vec3 pos)
+    target.addFireStack()
+    let fireDamage = damage / 10 * target.getFireStacks()
+    blast(pos, target, fireDamage, fireDamage, 4)
+
+  // <<<<<<<<<<<< TAKE DAMAGE >>>>>>>>>>>>
+
+  private SheepEntity tormentor = null
+  private SheepEntity killer = null
+
+  function setTormentor(SheepEntity source)
+    if source == null
+      killer = tormentor
+      tormentor = source
+    else if source.owner != owner
+      tormentor = source
+
+  private function takeDamage(SheepEntity source, real amount)
+    SOUND_SHEEP_1.playOnPoint(pos)
+    let hp = actor.getHP()
+    let damage = min(hp, amount)
+    if damage == hp
+      if source.owner == owner
+        setState(State.DEATH_BY_SUICIDE)
+      else
+        setState(State.DEATH_BY_ENEMY)
+    else
+      actor.addHP(-damage)
+      givePoints(damage)
+      
+  private function givePoints(real amount)
+    if tormentor != null
+      flashEffect(UI.goldCredit, tormentor.pos)
+      tormentor.owner.addPoints(amount.toInt())
+    
+    if GAME_MODE == GameMode.TIMED
+      for ii = 0 to MAX_PLAYERS - 1
+        let p = players[ii]
+        if p != owner and (p.isIngame() or isSinglePlayer())
+          p.addPoints(amount.toInt())
+
+  override function onGroundHit()
+    takeFallDamage()
+    super.onGroundHit()
+
+  private function takeFallDamage()
+    let impact = - FALL_DAMAGE_MIN_VEL_Z - vel.z
+    if impact > 0
+      let amount = FALL_DAMAGE_DAMAGE_FACTOR * impact
+      let knockback = FALL_DAMAGE_KNOCKBACK_FACTOR * impact
+      flashEffect(Abilities.thunderclapCaster, pos, 0.5 + impact / 25)
+      takeDamage(this, amount)
+      this.blastArea(pos, FALL_DAMAGE_RADIUS, amount, knockback)
+
+  // <<<<<<<<<<<< POWER INDICATOR >>>>>>>>>>>>
+
+  // private effect indicator
+  // private real indicatorScaling
+  // private int indicatorColor
+  private TextTagEntity timerTag = new TextTagEntity(ZERO3, ZERO3, "", timerTagSize, 0, colorA(200, 0, 0, 255))
+  private constant timerTagSize = 11.
+  private real powerChannelTime = 0.
+
+  function showPowerIndicator()
+    // indicatorScaling = 0.5
+    // indicatorColor = 0
+    // indicator = addEffect(Abilities.manaFlareTarget, pos)
+    //   ..setScale(indicatorScaling)
+    //   ..setColor(color(255, 255, 0))
+
+    powerChannelTime = ANIMATION_PERIOD
+    timerTag.ftext.tt.setVisibility(true)
+    
+  function hidePowerIndicator()
+    // indicator.setAlpha(0)
+    // indicator.destr()
+    // indicatorScaling = 0
+
+    timerTag.ftext.tt.setVisibility(false)
+
+  private function updatePowerIndicator()
+    // if indicatorScaling > 0
+    //   indicatorScaling = min(indicatorScaling + 0.0333, 3)
+    //   indicatorColor = min(indicatorColor + 4, 255)
+    //   indicator
+    //     ..setScale(indicatorScaling)
+    //     ..setColor(color(255, 255 - indicatorColor, 0))
+    //     ..setPos(origin + pos.polarProject(80, actor.getFacingAngle(), 45..asAngleDegrees()))
+
+    if powerChannelTime > 0
+      powerChannelTime += ANIMATION_PERIOD
+      timerTag.ftext.tt
+        ..setText(powerChannelTime.toString(1), timerTagSize)
+        ..setPos(pos + ZERO2.withZ(offsetZ) + vec3(-55, -110, -terrainZ))
+
+  // <<<<<<<<<<<< DEATH >>>>>>>>>>>>
+
+  private function onDeath()
+    removeFire()
+    awardBounty()
+    arrangeFuneral()
+    exposeTragedy()
+    nullTimer() -> 
+      setState(State.IN_HEAVEN)
+
+  function awardBounty()
+    givePoints(actor.getHP())
+    if killer != null and tormentor == killer
+      print("Deja vu! " + actor.getName() + " got rekt again by " + tormentor.actor.getName())
+      SOUND_DEJA_VU.playOnPoint(pos, 2).snd..setVolume(50)
+
+  function arrangeFuneral()
+    SOUNDS_DEATH.getRandomElement().play()
+    flashEffect(Objects.humanLargeDeathExplode, pos)
+    let posMarker = pos.toVec2()
+    doAfter(1) ->
+      let eff = addEffect("Abilities\\Spells\\Undead\\Graveyard\\GraveMarker.mdx", posMarker)
+      doAfter(SHEEP_GRAVE_DURATION) ->
+        eff.destr()
+
+  function exposeTragedy()
+    switch state
+      case ALIVE
+        print("Abandonment is a sheeps worst fate...")
+      case DEATH_BY_ENEMY
+        mourn(DEATH_BY_ENEMY_MESSAGES)
+      case DEATH_BY_SUICIDE
+        mourn(DEATH_BY_SUICIDE_MESSAGES)
+      case DEATH_BY_DROWNING 
+        mourn(DEATH_BY_DROWNING_MESSAGES)
+        actor.setAnimation(UnitAnimations.Sheep.deathSwim.idx)
+      case DEATH_BY_ADVENTURE
+        mourn(DEATH_BY_ADVENTURE_MESSAGES)
+      case IN_HEAVEN
+        print("Angelic status has apparently been granted...")
+
+  function mourn(LinkedList<string> messages) 
+    print(owner.getNameColored(true) + " " + messages.getRandomElement())
+
+  override function terminate()
+    owner.setLives(0)
+    setState(State.IN_HEAVEN)
+    super.terminate()
+
+
+@compiletime function gen()
+  new ChannelAbilityPreset(ABIL_ID_JUMP, 1, true)
+    ..setTooltipNormal(1, "Jump!".color(PINK))
+    ..setTooltipNormalExtended(1, "With a bound that defies earthly limits, our heroes spring into action! Their muscles coil, energy gathering like lightning in a bottle before they unleash their remarkable talent. With a graceful leap, they defy gravity's grip, soaring through the air with the elegance of a dancer and the power of a hurricane. Whether evading danger or reaching for the stars, their jump is not just a movement—it's a statement of their indomitable spirit and boundless ambition. Get ready to witness the awe-inspiring spectacle of their aerial acrobatics, as they leapfrog over obstacles and leap into the unknown with unwavering determination!")
+    ..makeUnitSpell(0, 3.)
+    ..presetHotkey("Q")
+    ..presetButtonPosNormal(0, 2)
+    ..presetIcon(MyIcons.bTNSheepJump)
+    ..presetTargetTypes(Targettype.NONE)
+
+  new AbilityDefinitionDefend(ABIL_ID_JETPACK)
+    ..setTooltipNormal(1, "Start Jet Pack (Deluxe Edition)".color(PINK))
+    ..setTooltipTurnOff(1, "Stop Jet Pack (Deluxe Edition)".color(PINK))
+    ..setTooltipNormalExtended(1, "Cooldown: " + JET_PACK_COOLDOWN.toString() + " seconds\n\nAs twilight blankets the rolling hills, the woolly heroes of the Sheep Pack gear up for their high-flying escapades. With jet packs strapped snugly to their backs, they leap into the night sky, their fluffy forms cutting through the clouds like comets. Guided by the twinkle of stars and the gentle bleat of their comrades, they journey forth into the great unknown, where fields of dreams merge with galaxies afar. Get ready to witness the woolly wonder of the Sheep Pack as they defy gravity and shepherd their way to interstellar fame. Ewe won't believe your eyes!")
+    ..setTooltipTurnOffExtended(1, "Cooldown: " + JET_PACK_COOLDOWN.toString() + " seconds\n\nAs twilight blankets the rolling hills, the woolly heroes of the Sheep Pack gear up for their high-flying escapades. With jet packs strapped snugly to their backs, they leap into the night sky, their fluffy forms cutting through the clouds like comets. Guided by the twinkle of stars and the gentle bleat of their comrades, they journey forth into the great unknown, where fields of dreams merge with galaxies afar. Get ready to witness the woolly wonder of the Sheep Pack as they defy gravity and shepherd their way to interstellar fame. Ewe won't believe your eyes!")
+    ..setIconNormal(MyIcons.bTNSheepJetPack)
+    ..setIconTurnOff(Icons.bTNCancel)
+    ..presetButtonPosNormal(1, 2)
+    ..presetHotkey("W")
+    ..setArtCaster("")
+    ..setRequirements("")
+    ..setMovementSpeedFactor(1, 1.0)
+    ..setAttackSpeedFactor(1, 1.0)
+    ..setDamageDealt(1, 1.0)
+    ..setDeflectDamageTakenSpells(1, 1.0)
+    ..setDeflectDamageTakenPiercing(1, 1.0)
+    ..setMagicDamageReduction(1, 1.0)
+
+  new AbilityDefinitionMagicDefense(ABIL_ID_PARACHUTE)
+    ..setTooltipNormal(1, "Open Parachute".color(PINK))
+    ..setTooltipTurnOff(1, "Close Parachute".color(PINK))
+    ..setTooltipNormalExtended(1, "Cooldown: " + PARACHUTE_COOLDOWN.toString() + " seconds\n\nDrifting through the clouds...")
+    ..setTooltipTurnOffExtended(1, "Cooldown: " + PARACHUTE_COOLDOWN.toString() + " seconds\n\nDrifting through the clouds...")
+    ..setIconNormal(MyIcons.bTNSheepParachute)
+    ..setIconTurnOff(Icons.bTNCancel)
+    ..presetButtonPosNormal(2, 2)
+    ..presetHotkey("E")
+    ..setArtCaster("")
+    ..setRequirements("")
+    ..setMovementSpeedFactor(1, 1.0)
+    ..setAttackSpeedFactor(1, 1.0)
+    ..setDamageDealt(1, 1.0)
+    ..setDeflectDamageTakenSpells(1, 1.0)
+    ..setDeflectDamageTakenPiercing(1, 1.0)
+    ..setMagicDamageReduction(1, 1.0)
+
+  new ChannelAbilityPreset(ABIL_ID_TICKLE, 1, true)
+    ..setTooltipNormal(1, "Ticklez".color(PINK))
+    ..setTooltipNormalExtended(1, "Tickle tickle tickle...")
+    ..makeUnitSpell(0, 10.)
+    ..presetHotkey("R")
+    ..presetButtonPosNormal(3, 2)
+    ..presetIcon(MyIcons.bTNSheepTickle)
+    ..presetTargetTypes(Targettype.UNIT)
+    ..setCastRange(1, 70)
+    

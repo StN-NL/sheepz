@@ -1,0 +1,48 @@
+package LandMine
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import TextTagEntity
+
+
+public class LandMine extends ProjectileSheep
+  int countdown = landmine.delay.toInt()
+  int alpha = 255
+  
+  construct(SheepEntity source)
+    super(source, landmine.minRadius, Units.goblinLandMine)
+    scaleVelXY(0)
+    scaleVelZ(0)
+    setPos(vec3(pos.x + GetRandomReal(-30, 30), pos.y + GetRandomReal(-30, 30), pos.z))
+    onHit3D() target ->
+      countdown()
+
+    doPeriodicallyTimed(ANIMATION_PERIOD, 4) cb ->
+      alpha -= min(2, alpha)
+      fx.eff.setAlpha(alpha)
+
+    doAfter(5) -> 
+      if not done
+        friendlyFire = true
+
+    onEnd() -> 
+      explode()
+
+  function countdown()
+    doPeriodically(0.3) cb ->
+      fx.eff.setAlpha(225)
+      if countdown == 0
+        destroy cb
+        if not done
+          terminate()
+      else
+        SOUND_COUNTDOWN.playOnPoint(pos)
+        new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
+        countdown -= 1
+   
+  function explode()
+    flashEffect(Objects.neutralBuildingExplosion, pos)
+    source.blastArea(pos, landmine.minRadius, landmine.maxRadius, landmine.maxDamage)

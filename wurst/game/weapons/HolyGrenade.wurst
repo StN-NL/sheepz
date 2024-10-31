@@ -1,0 +1,37 @@
+package HolyGrenade
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+
+
+public class HolyGrenade extends ProjectileSheep
+  bool hallelujah = false
+  
+  construct(SheepEntity source)
+    super(source, holyGrenade.minRadius, MyModels.holyGrenade)
+    scaleVelXY(0.8)
+    fx.eff.setTimeScale(0.2)
+
+  override function update()
+    bounceOfWalls()
+    super.update()
+
+  override function onGroundHit()
+    super.onGroundHit()
+    if not bounceOfGround() and not hallelujah
+      hallelujah = true
+      SOUND_HOLY_GRENADE.playOnPoint(pos).snd.setVolume(300)
+      doAfter(2) ->
+        if not done 
+          terminate()
+
+  ondestroy
+    explode()
+
+  function explode()
+    fx.eff.setScale(2)
+    fx.eff.setTimeScale(1)
+    SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
+    source.blastArea(pos, holyGrenade.minRadius, holyGrenade.maxRadius, holyGrenade.maxDamage)

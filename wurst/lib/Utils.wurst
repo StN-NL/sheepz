@@ -1,0 +1,239 @@
+package Utils
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import GameTimer
+import HashSet
+import LinkedList
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< PLAYER     >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public function getPlayersIngame() returns LinkedList<player>
+  let pl = new LinkedList<player>
+  for ii = 0 to 23
+    let p = players[ii]
+    if p.isIngame()
+      pl.add(p)
+  nullTimer() ->
+    destroy pl
+  return pl
+
+public function isSinglePlayer() returns bool
+  return getPlayersIngame().size() == 1
+
+public function getSinglePlayer() returns player
+  return getPlayersIngame().getFirst()
+  
+public function unit.isNeutral() returns boolean
+  return this.getOwner().isNeutral()
+  
+public function player.isNeutral() returns boolean
+  return this == DUMMY_PLAYER or this == DUMMY_HOSTILE_PLAYER or this.getId() >= 22
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< MATH       >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+/** Roll the dice on a number between 0 and 1 */
+public function roll(real val) returns boolean
+  return val >= GetRandomReal(0, 1)
+
+public function getRandomAngle() returns angle
+  return GetRandomReal(0, 360).asAngleDegrees()
+
+public function vec2.getRandomPos(real range) returns vec2
+  return this.polarOffset(getRandomAngle(), GetRandomReal(0, range))
+
+public function onceEvery(real seconds) returns bool
+  let interval = (seconds / ANIMATION_PERIOD).toInt()
+  return ModuloInteger((currentTime / 3 * 100).toInt(), interval) == 0
+
+public function oneOutOf(int interval) returns bool
+  return GetRandomInt(0, interval - 1) == 0
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< UI         >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+constant HEIGHT_ICON_RESOURCE = 0.016
+constant WIDTH_ICON_RESOURCE = 0.016
+
+constant iconGold = createFrame("BACKDROP", "", GAME_UI, "", 0)
+  ..setSize(HEIGHT_ICON_RESOURCE, WIDTH_ICON_RESOURCE)
+  ..setPoint(FRAMEPOINT_TOP, GAME_UI, FRAMEPOINT_TOP, 0.07, -0.003)
+  ..setVisible(false)
+  
+constant iconLumber = createFrame("BACKDROP", "", GAME_UI, "", 0)
+  ..setSize(HEIGHT_ICON_RESOURCE, WIDTH_ICON_RESOURCE)
+  ..setPoint(FRAMEPOINT_TOP, GAME_UI, FRAMEPOINT_TOP, 0.155, -0.003)
+  ..setVisible(false)
+  
+constant iconFood = createFrame("BACKDROP", "", GAME_UI, "", 0)
+  ..setSize(HEIGHT_ICON_RESOURCE, WIDTH_ICON_RESOURCE)
+  ..setPoint(FRAMEPOINT_TOP, GAME_UI, FRAMEPOINT_TOP, 0.243, -0.003)
+  ..setVisible(false)
+  
+public function setIconGold(string icon)
+  iconGold..setTexture(icon, 0, true)..setVisible(true)
+
+public function setIconLumber(string icon)
+  iconLumber..setTexture(icon, 0, true)..setVisible(true)
+
+public function setIconFood(string icon)
+  iconFood..setTexture(icon, 0, true)..setVisible(true)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< CHANNELING >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+constant channelingUnits = new HashSet<unit>
+
+public function unit.isChanneling() returns boolean
+  return channelingUnits.has(this)
+
+init
+  EventListener.add(EVENT_PLAYER_UNIT_SPELL_CHANNEL) ->
+    channelingUnits.add(GetSpellAbilityUnit())
+
+  EventListener.add(EVENT_PLAYER_UNIT_SPELL_FINISH) ->
+    channelingUnits.remove(GetSpellAbilityUnit())
+    
+  EventListener.add(EVENT_PLAYER_UNIT_SPELL_ENDCAST) ->
+    channelingUnits.remove(GetSpellAbilityUnit())
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< GROUPS     >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+bool inRange
+unit randomUnit
+
+public function unit.unitsInRange(real range) returns boolean
+  let ul = this.getUnitsInRange(range)
+  return getSizeAndDestroy(ul)
+
+public function unit.ownerUnitsInRange(real range) returns boolean
+  let ul = this.getOwnerUnitsInRange(range)
+  return getSizeAndDestroy(ul)
+
+public function unit.alliedUnitsInRange(real range) returns boolean
+  let ul = this.getAlliedUnitsInRange(range)
+  return getSizeAndDestroy(ul)
+
+public function unit.enemyUnitsInRange(real range) returns boolean
+  let ul = this.getEnemyUnitsInRange(range)
+  return getSizeAndDestroy(ul)
+
+public function vec2.unitsInRange(real range) returns boolean
+  let ul = this.getUnitsInRange(range)
+  return getSizeAndDestroy(ul)
+
+public function vec2.ownerUnitsInRange(real range, player p) returns boolean
+  let ul = this.getOwnerUnitsInRange(range, p)
+  return getSizeAndDestroy(ul)
+
+public function vec2.alliedUnitsInRange(real range, player p) returns boolean
+  let ul = this.getAlliedUnitsInRange(range, p)
+  return getSizeAndDestroy(ul)
+
+public function vec2.enemyUnitsInRange(real range, player p) returns boolean
+  let ul = this.getEnemyUnitsInRange(range, p)
+  return getSizeAndDestroy(ul)
+
+function getSizeAndDestroy(LinkedList<unit> ul) returns boolean
+  let n = ul.size() > 0
+  destroy ul
+  return n
+
+public function unit.getRandomUnitInRange(real range) returns unit
+  let ul = this.getUnitsInRange(range)
+  return getRandomUnitAndDestroy(ul)
+
+public function unit.getRandomOwnerUnitInRange(real range) returns unit
+  let ul = this.getOwnerUnitsInRange(range)
+  return getRandomUnitAndDestroy(ul)
+
+public function unit.getRandomAlliedUnitInRange(real range) returns unit
+  let ul = this.getAlliedUnitsInRange(range)
+  return getRandomUnitAndDestroy(ul)
+
+public function unit.getRandomEnemyUnitInRange(real range) returns unit
+  let ul = this.getEnemyUnitsInRange(range)
+  return getRandomUnitAndDestroy(ul)
+
+public function vec2.getRandomUnitInRange(real range) returns unit
+  let ul = this.getUnitsInRange(range)
+  return getRandomUnitAndDestroy(ul)
+
+public function vec2.getRandomOwnerUnitInRange(real range, player p) returns unit
+  let ul = this.getOwnerUnitsInRange(range, p)
+  return getRandomUnitAndDestroy(ul)
+
+public function vec2.getRandomAlliedUnitInRange(real range, player p) returns unit
+  let ul = this.getAlliedUnitsInRange(range, p)
+  return getRandomUnitAndDestroy(ul)
+
+public function vec2.getRandomEnemyUnitInRange(real range, player p) returns unit
+  let ul = this.getEnemyUnitsInRange(range, p)
+  return getRandomUnitAndDestroy(ul)
+
+function getRandomUnitAndDestroy(LinkedList<unit> ul) returns unit
+  unit u
+  if ul.size() > 0
+    u = ul.getFirst()
+  else
+    u = null
+  destroy ul
+  return u
+
+/** Do not forget to destroy the list after use */
+public function player.getUnits() returns LinkedList<unit>
+  return ZERO2.getOwnerUnitsInRange(999999, this)
+
+/** Do not forget to destroy the list after use */
+public function unit.getUnitsInRange(real range) returns LinkedList<unit>
+  let ul = new LinkedList<unit>
+  forUnitsInRange(this.getPos(), range) u ->
+    if u != this and u.isAlive()
+      ul.add(u)
+  return ul..shuffle()
+
+/** Do not forget to destroy the list after use */
+public function unit.getOwnerUnitsInRange(real range) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> u.getOwner() != this.getOwner())
+
+/** Do not forget to destroy the list after use */
+public function unit.getAlliedUnitsInRange(real range) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> not u.isAllyOf(this))
+
+/** Do not forget to destroy the list after use */
+public function unit.getEnemyUnitsInRange(real range) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> not u.isEnemyOf(this))
+
+/** Do not forget to destroy the list after use */
+public function vec2.getUnitsInRange(real range) returns LinkedList<unit>
+  let ul = new LinkedList<unit>
+  forUnitsInRange(this, range) u ->
+    if u.isAlive()
+      ul.add(u)
+  return ul..shuffle()
+
+/** Do not forget to destroy the list after use */
+public function vec2.getOwnerUnitsInRange(real range, player p) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> u.getOwner() != p)
+
+/** Do not forget to destroy the list after use */
+public function vec2.getAlliedUnitsInRange(real range, player p) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> not u.isAllyOf(p))
+
+/** Do not forget to destroy the list after use */
+public function vec2.getEnemyUnitsInRange(real range, player p) returns LinkedList<unit>
+  let ul = this.getUnitsInRange(range)
+  return ul..removeIf(u -> not u.isEnemyOf(p))

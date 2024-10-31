@@ -1,0 +1,57 @@
+package Sheeps
+import Assets
+import ChannelAbilityPreset
+import ConfigGame
+import MyAssets
+
+public constant ABIL_ID_JUMP = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_JETPACK = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_PARACHUTE = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_TICKLE = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_DRAFT_WEAPON = compiletime(ABIL_ID_GEN.next())
+
+function UnitDefinition.sheepify()
+  this
+    ..setNormalAbilities(commaList(ABIL_ID_JUMP, ABIL_ID_JETPACK, ABIL_ID_PARACHUTE, ABIL_ID_TICKLE, ABIL_ID_DRAFT_WEAPON))
+    ..setIconGameInterface(Icons.bTNSheep)
+    ..setModelFile(Units.sheep)
+    ..setScalingValue(SHEEP_SCALING_VALUE)
+    ..setHitPointsMaximumBase(SHEEP_MAX_HP.toInt())
+    ..setHitPointsRegenerationRate(0)
+    ..setManaMaximum(100)
+    ..setManaInitialAmount(100)
+    ..setManaRegeneration(100 / ARSENAL_COOLDOWN)
+    ..setSpeedBase(SHEEP_MS_NORMAL.toInt())
+
+@compiletime function gen()
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(0), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.arthas)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(1), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.lordGarithos)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(2), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.heroPitLord)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(3), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.muradin)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(4), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.pandarenBrewmaster)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(5), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.knightNoRider)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(6), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.ladyVashj)
+
+  new UnitDefinition(UNIT_IDS_SHEEPZ.get(7), UnitIds.sheep)
+    ..sheepify()
+    ..setUnitSoundSet(Soundsets.illidan)

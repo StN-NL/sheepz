@@ -1,0 +1,326 @@
+package ConfigWeapons
+import Arsenal
+import LinkedList
+import MyAssets
+import ConfigGame
+
+public constant airStrike = compiletime(
+  new WeaponDefinition(Icons.bTNGoblinZeppelin, FiringType.INSTANT, Targettype.POINT)
+  ..setName("Air Strike")
+  ..setDescription("Nothing better than getting showered by some goblins.")
+  ..setRarity(5)
+  ..setAmount(0)
+  ..setShards(30)
+  ..setMaxDamage(30)
+  ..setMinRadius(75)
+  ..setMaxRadius(150)
+)
+
+public constant baloonicide = compiletime(
+  new WeaponDefinition(Icons.bTNSheep, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Baloonicide")
+  ..setDescription("For the greater good...")
+  ..setRarity(5)
+  ..setAmount(0)
+  ..setMaxDamage(30)
+  ..setMaxKnockBack(80)
+  ..setMinRadius(150)
+  ..setMaxRadius(300)
+)
+
+public constant baseballBat = compiletime(
+  new WeaponDefinition(Icons.bTNGrabTree, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Baseball Bat")
+  ..setDescription("We all love that homerun.")
+  ..setRarity(15)
+  ..setAmount(0)
+  ..setMaxDamage(30)
+  ..setMaxKnockBack(70)
+  ..setMaxRadius(150)
+)
+
+public constant bazooka = compiletime(
+  new WeaponDefinition(Icons.bTNHumanArtilleryUpOne, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Bazooka")
+  ..setDescription("Lock & load.")
+  ..setRarity(100)
+  ..setAmount(0)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant bladestorm = compiletime(
+  new WeaponDefinition(Icons.bTNWhirlwind, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Bladestorm")
+  ..setDescription("No need to be level 6 obviously.")
+  ..setRarity(7)
+  ..setAmount(0)
+  ..setDuration(5)
+  ..setMaxDamage(10)
+  ..setMinRadius(150)
+  ..setMaxRadius(300)
+  ..setNumberOfWaves(10)
+)
+
+public constant cloudGenerator = compiletime(
+  new WeaponDefinition(Icons.bTNCloudOfFog, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Cloud Generator")
+  ..setDescription("Generates a cloud overhead, so cute.")
+  ..setRarity(40)
+  ..setAmount(0)
+  ..setMinRadius(200)
+  ..setThickness(75)
+)
+
+public constant clusterBomb = compiletime(
+  new WeaponDefinition(MyIcons.bTNGrenade, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Cluster Bomb")
+  ..setDescription("Just like Christmas, there is enough for everybody.")
+  ..setRarity(15)
+  ..setAmount(0)
+  ..setDelay(5)
+  ..setMaxDamage(30)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+  ..setShards(6)
+  ..setShardsMaxDamage(8)
+)
+
+public constant chickenBomb = compiletime(
+  new WeaponDefinition(Icons.bTNCritterChicken, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Sticky Chicken Bomb")
+  ..setDescription("Best enjoyed fresh.")
+  ..setRarity(8)
+  ..setAmount(0)
+  ..setDelay(3)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant dynamite = compiletime(
+  new WeaponDefinition(MyIcons.bTNDynamite, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Dynamite")
+  ..setDescription("Can be used in mines, or your best friends' birthday cake.")
+  ..setRarity(50)
+  ..setAmount(0)
+  ..setDelay(3)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant flameThrower = compiletime(
+  new WeaponDefinition(Icons.bTNFireBolt, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Flame Thrower")
+  ..setDescription("Like a super soaker but for roasting sheep.")
+  ..setRarity(15)
+  ..setAmount(0)
+  ..setDuration(10)
+  ..setMaxDamage(10)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant frogBomb = compiletime(
+  new WeaponDefinition(Icons.bTNHex, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Crazy Frog Bomb")
+  ..setDescription("As if the banana bomb wasn't annoying enough.")
+  ..setRarity(4)
+  ..setAmount(0)
+  ..setShards(6)
+  ..setShardsPower(12)
+  ..setMaxDamage(65)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant fusRoDah = compiletime(
+  new WeaponDefinition(MyIcons.bTNSkyrim, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Fus Ro Dah")
+  ..setDescription("Only for those that didn't take an arrow to the knee.")
+  ..setRarity(6)
+  ..setAmount(0)
+  ..setDelay(1)
+  ..setMaxDistance(400)
+  ..setMaxKnockBack(90)
+  ..setMinRadius(175)
+)
+
+public constant grenade = compiletime(
+  new WeaponDefinition(MyIcons.bTNGrenade, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Grenade")
+  ..setDescription("Boring but effective.")
+  ..setRarity(100)
+  ..setAmount(0)
+  ..setDelay(5)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant guidedMissile = compiletime(
+  new WeaponDefinition(Icons.bTNFlare, FiringType.CHARGED, Targettype.POINT)
+  ..setName("Guided Missile")
+  ..setDescription("Auto-attackers will love this one.")
+  ..setRarity(10)
+  ..setAmount(0)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant hammerDrop = compiletime(
+  new WeaponDefinition(Icons.bTNStormBolt, FiringType.POWERFUL, Targettype.POINT)
+  ..setName("Hammer Delivery Service")
+  ..setDescription("That's it, you are gettin' the hammer!")
+  ..setRarity(1)
+  ..setAmount(0)
+  ..setMaxDamage(65)
+  ..setMinRadius(200)
+  ..setMaxRadius(400)
+)
+
+public constant holyGrenade = compiletime(
+  new WeaponDefinition(MyIcons.bTNHolyGrenade, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Holy Hand Grenade")
+  ..setDescription("No one can notice the difference. In fact, there is none.")
+  ..setRarity(4)
+  ..setAmount(0)
+  ..setMaxDamage(65)
+  ..setMinRadius(125)
+  ..setMaxRadius(400)
+)
+
+public constant landmine = compiletime(
+  new WeaponDefinition(Icons.bTNGoblinLandMine, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Landmine")
+  ..setDescription("9 out of 10 sheep forget where they buried them.")
+  ..setRarity(100)
+  ..setAmount(0)
+  ..setDelay(5)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+)
+
+public constant minigun = compiletime(
+  new WeaponDefinition(Icons.bTNFlakCannons, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Minigun")
+  ..setDescription("Best used on the tax collector.")
+  ..setRarity(8)
+  ..setAmount(0)
+  ..setMaxDamage(5)
+  ..setMinRadius(150)
+)
+
+public constant molotov = compiletime(
+  new WeaponDefinition(Icons.bTNUnstableConcoction, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Molotov Cocktail")
+  ..setDescription("Best enjoyed along side a white russian.")
+  ..setRarity(25)
+  ..setAmount(0)
+  ..setDuration(5)
+  ..setMaxDamage(10)
+  ..setMinRadius(125)
+  ..setMaxRadius(300)
+  ..setShards(20)
+)
+
+public constant rainOfChaos = compiletime(
+  new WeaponDefinition(Icons.bTNInfernalStone, FiringType.POWERFUL, Targettype.POINT)
+  ..setName("Rain of Chaos")
+  ..setDescription("Archimonde's gift to the world.")
+  ..setRarity(1)
+  ..setAmount(0)
+  ..setMaxDamage(50)
+  ..setMinRadius(125)
+  ..setMaxRadius(250)
+  ..setShards(100)
+)
+
+public constant riotShield = compiletime(
+  new WeaponDefinition(Icons.bTNDefend, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Riot Shield")
+  ..setDescription("Hodor. Hodor. HODOR!")
+  ..setRarity(20)
+  ..setAmount(0)
+  ..setDuration(10)
+)
+
+public constant shotgun = compiletime(
+  new WeaponDefinition(Icons.bTNHumanMissileUpTwo, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Shotgun")
+  ..setDescription("Make 'm count.")
+  ..setRarity(100)
+  ..setAmount(0)
+  ..setMaxDamage(25)
+  ..setMinRadius(175)
+)
+
+public constant teleport = compiletime(
+  new WeaponDefinition(Icons.bTNMassTeleport, FiringType.CHARGED, Targettype.POINT)
+  ..setName("Teleport")
+  ..setDescription("You never know where you end up with this one.")
+  ..setRarity(4)
+  ..setAmount(0)
+)
+
+public constant wordOfPower = compiletime(
+  new WeaponDefinition(Icons.bTNMonsoon, FiringType.POWERFUL, Targettype.NONE)
+  ..setName("Word of Power")
+  ..setDescription("A wizard is never late, nor is he early...")
+  ..setRarity(2)
+  ..setAmount(0)
+  ..setMaxDamage(40)
+  ..setMaxKnockBack(75)
+  ..setMinRadius(200)
+  ..setDelay(4)
+  ..setShards(18)
+)
+
+public constant wormRider = compiletime(
+  new WeaponDefinition(Icons.bTNDuneWorm, FiringType.INSTANT, Targettype.NONE)
+  ..setName("Worm Rider")
+  ..setDescription("When used too often it can lead to spice addiction.")
+  ..setRarity(2)
+  ..setAmount(0)
+  ..setDelay(9)
+  ..setDuration(30)
+  ..setMinRadius(150)
+  ..setMaxDamage(40)
+)
+
+public constant weaponList = asList(
+  airStrike,
+  baloonicide,
+  baseballBat,
+  bazooka,
+  bladestorm,
+  chickenBomb,
+  cloudGenerator,
+  clusterBomb,
+  dynamite,
+  flameThrower,
+  frogBomb,
+  fusRoDah,
+  grenade,
+  guidedMissile,
+  hammerDrop,
+  holyGrenade,
+  landmine,
+  minigun,
+  molotov,
+  rainOfChaos,
+  riotShield,
+  shotgun,
+  teleport,
+  wordOfPower,
+  wormRider
+)
+
+public function player.addStartingWeapons()
+  this.addLumber(ARSENAL_DRAFT_START)
+  for weapon in weaponList
+    this.addWeapon(weapon, weapon.amount)

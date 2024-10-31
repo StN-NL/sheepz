@@ -1,0 +1,138 @@
+package DraftWeapon
+import Arsenal
+import ClosureEvents
+import ClosureFrames
+import ClosureTimers
+import ConfigWeapons
+import HashMap
+import Sheeps
+import ConfigGame
+import Utils
+import MySounds
+
+constant WEAPON_CARD_SLOTS = 3
+
+// <<<<<<<<<< <<<<<<<<<< --- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< API >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< --- >>>>>>>>>> >>>>>>>>>>
+
+public function initWeaponDraft()
+  EventListener.onCast(ABIL_ID_DRAFT_WEAPON) u ->
+    u.getOwner().draftWeapon()
+
+  for p in getPlayersIngame()
+    setIconLumber(Icons.bTNCrate)
+    p.draftPeriodically()
+
+function player.draftPeriodically()
+  this.addLumber(1)
+  doAfter(ARSENAL_DRAFT_INTERVAL) -> 
+    this.draftPeriodically()
+
+public function player.draftWeapon()
+  WeaponSelector.get(this).draft()
+
+// <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< WEAPON POOL >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
+
+public class WeaponSelector
+  private static constant map = new HashMap<player, thistype>
+
+  framehandle frameBox
+  
+  WeaponCard array[WEAPON_CARD_SLOTS] weaponCards
+  
+  player owner
+
+  construct(player owner)
+    this.owner = owner
+
+    frameBox = createFrame("BACKDROP", "", GAME_UI, "EscMenuBackdrop", 0)
+      ..setSize(0.5, 0.29)
+      ..setAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.35)
+      ..setVisible(false)
+
+    for ii = 0 to WEAPON_CARD_SLOTS - 1
+      weaponCards[ii] = new WeaponCard(frameBox, owner, ii)
+
+  protected static function get(player owner) returns thistype
+    if not map.has(owner)
+      map.put(owner, new WeaponSelector(owner))
+    
+    return map.get(owner)
+  
+  function draft()
+    if owner.getLumber() > 0
+      owner.addLumber(-1)
+      var count = 0
+      for def in getUniqueRandomWeapons(weaponList, WEAPON_CARD_SLOTS)
+        weaponCards[count].update(def)
+        count++
+      
+      frameBox.setVisible(owner, true)
+
+// <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< WEAPON CARD >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
+
+public class WeaponCard
+  private framehandle frameBox
+  private framehandle frameCard
+  private framehandle frameIcon
+  private framehandle frameName
+  private framehandle frameDescription
+  private framehandle frameSelect
+
+  private player owner
+  private WeaponDefinition def
+
+  construct(framehandle frameBox, player owner, int n)
+    this.frameBox = frameBox
+    this.owner = owner
+
+    frameCard = createFrame("BACKDROP", "", frameBox, "QuestButtonBaseTemplate", 0)
+      ..setSize(0.147, 0.20)
+      ..setPoint(FRAMEPOINT_CENTER, frameBox, FRAMEPOINT_CENTER, 0.147 * (n - 1), 0.017)
+      
+    frameIcon = createFrame("BACKDROP", "", frameCard, "", 0)
+      ..setSize(0.04, 0.04)
+      ..setPoint(FRAMEPOINT_TOP, frameCard, FRAMEPOINT_TOP, 0.0, -0.03)
+
+    frameName = createFrame("TEXT", "", frameCard, "", 0)
+      ..setPoint(FRAMEPOINT_CENTER, frameCard, FRAMEPOINT_CENTER, 0., 0.007)
+      ..setScale(1.4)
+      ..setTextColor(COLOR_GOLD)
+
+    frameDescription = createFrame("TEXT", "", frameCard, "", 0)
+      ..setPoint(FRAMEPOINT_TOP, frameCard, FRAMEPOINT_TOP, 0.0, -0.10)
+      ..setTextAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+      ..setSize(0.12, 0.08)
+      ..setScale(1)
+
+    frameSelect = createFrame("GLUETEXTBUTTON", "", frameCard, "ScriptDialogButton", 0)
+      ..setSize(0.09, 0.04)
+      ..setText("Select")
+      ..setPoint(FRAMEPOINT_BOTTOM, frameCard, FRAMEPOINT_BOTTOM, 0.005, -0.04)
+      ..onClick(() -> select(def))
+
+  protected function update(WeaponDefinition def)
+    this.def = def
+    frameIcon.setTexture(def.icon, 0, true)
+    frameName.setText(def.name)
+    frameDescription.setText(def.description)
+
+  protected function select(WeaponDefinition def)
+    SOUND_BUTTON_CLICK.playForPlayer(owner).snd.setVolume(50)
+    frameBox.setVisible(owner, false)
+    owner.addWeapon(def, 1)
+
+@compiletime function gen()
+  new ChannelAbilityPreset(ABIL_ID_DRAFT_WEAPON, 1, true)
+    ..setTooltipNormal(1, "Weapon draft".color(PINK))
+    ..setTooltipNormalExtended(1, "Exciting! Grab and run!")
+    ..makeUnitSpell(0, 1.)
+    ..presetHotkey("F")
+    ..presetButtonPosNormal(3, 1)
+    ..presetIcon(Icons.bTNCrate)
+    ..presetTargetTypes(Targettype.NONE)

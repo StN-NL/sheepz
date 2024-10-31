@@ -1,0 +1,37 @@
+package FlameThrower
+import Assets
+import ClosureTimers
+import ConfigGame
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+
+
+public function SheepEntity.flameThrower()
+  doPeriodicallyTimed(0.2, flameThrower.duration) cb ->
+    new FlameThrowerProjectile(this)
+    
+    
+public class FlameThrowerProjectile extends ProjectileSheep
+  real duration = flameThrower.duration
+  
+  construct(SheepEntity source)
+    super(source, flameThrower.minRadius, Abilities.redDragonMissile)
+    fx.eff.setScale(0.5)
+    SOUND_FLAMETHROWER.getRandomElement().playOnPoint(pos)
+
+    onHit3D() e ->
+      if not done and distance > 30 and e.isSheep()
+        let target = e.toSheep()
+        source.fireBlast(target, flameThrower.maxDamage)
+        terminate()
+          
+  override function onGroundHit()
+    super.onGroundHit()
+    if not done
+      terminate()
+
+  override function setPhysics()
+    setSpeed(2 * PROJECTILE_BASE_POWER)
+    vel.z = PROJECTILE_FACTOR_Z * PROJECTILE_BASE_POWER

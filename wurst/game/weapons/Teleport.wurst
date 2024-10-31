@@ -1,0 +1,15 @@
+package Teleport
+import Arsenal
+import Assets
+import ClosureTimers
+import SheepEntity
+
+
+public function SheepEntity.teleport(vec2 target)
+  this.immobalize(true)
+  flashEffect(Abilities.massTeleportTarget, this.getPos())
+  let delay = 4 - 2 * this.owner.getFiringPower(2)
+  doAfter(delay) ->
+    flashEffect(Abilities.massTeleportTo, target)
+    this.setXY(target.withTerrainZ())
+    this.immobalize(false)

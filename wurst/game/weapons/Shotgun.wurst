@@ -1,0 +1,32 @@
+package Shotgun
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+
+
+public class ShotgunProjectile extends ProjectileSheep
+  
+  construct(SheepEntity source)
+    super(source, shotgun.minRadius, Abilities.rifleImpact)
+    flashEffect(MyModels.shotgun, source.actor, SpecialAttachmentPoints.rightHand)
+    SOUND_SHOTGUN_SHOT.playOnPoint(pos).snd.setVolume(30)
+    doAfter(0.5) ->
+      if not done
+        terminate()
+
+    onHit3D() target ->
+      source.blast(pos, target, shotgun.maxDamage)
+      if not done
+        terminate()
+
+  override function setPhysics()
+    gravity = 0
+    pos.z += 30
+    setSpeed(40)
+
+  override function onGroundHit()
+    if not done
+      terminate()

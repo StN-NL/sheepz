@@ -1,0 +1,35 @@
+package Globals
+import ClosureTimers
+import ConfigGame
+import Entity
+import Utils
+
+public function getRandomX() returns real
+  GetRandomReal(MAP_MIN.x, MAP_MAX.x)
+  return GetRandomReal(MAP_MIN.x, MAP_MAX.x)
+
+public function getRandomY() returns real
+  return GetRandomReal(MAP_MIN.y, MAP_MAX.y)
+
+public function getRandomPos() returns vec2
+  return vec2(getRandomX(), getRandomY())
+
+public function getRandomPosOnLand() returns vec2
+  let pos = getRandomPos()
+  if pos.isTerrainDeepWater()
+    return getRandomPosOnLand()
+  else
+    return pos
+
+public function Entity.toHeaven() returns vec3
+  let pos = getRandomPos().withZ(HEAVEN.z)
+  this.setPos(pos)
+  return pos
+
+init
+  nullTimer() ->
+    if isSinglePlayer()
+      // MAP_MIN = vec2(-200, -200)
+      // MAP_MAX = vec2(200, 200)
+      SHEEP_MS_NORMAL = 522.
+      ARSENAL_COOLDOWN = 0.1

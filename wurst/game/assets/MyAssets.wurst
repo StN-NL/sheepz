@@ -1,0 +1,40 @@
+package MyAssets
+import ObjectIdGenerator
+import public MyMessages
+import public MySounds
+import LinkedList
+
+public class MyIcons
+  static constant bTNDynamite = "ReplaceableTextures\\CommandButtons\\BTNDynamite.blp"
+  static constant bTNJetPack = "ReplaceableTextures\\CommandButtons\\BTNJetPack.blp"
+  static constant bTNGrenade = "ReplaceableTextures\\CommandButtons\\bTNGrenade.blp"
+  static constant bTNHolyGrenade = "ReplaceableTextures\\CommandButtons\\bTNHolyGrenade.blp"
+  static constant bTNParachute = "ReplaceableTextures\\CommandButtons\\BTNParachute.blp"
+  static constant bTNSkyrim = "ReplaceableTextures\\CommandButtons\\BTNSkyrim.blp"
+  static constant bTNFeather = "ReplaceableTextures\\CommandButtons\\BTNFeather.blp"
+  static constant bTNSheepJump = "ReplaceableTextures\\CommandButtons\\BTNSheepJump.blp"
+  static constant bTNSheepJetPack = "ReplaceableTextures\\CommandButtons\\BTNSheepJetPack.blp"
+  static constant bTNSheepParachute = "ReplaceableTextures\\CommandButtons\\BTNSheepParachute.blp"
+  static constant bTNSheepTickle = "ReplaceableTextures\\CommandButtons\\BTNSheepTickle.blp"
+
+public class MyModels
+  static constant bladestorm = "Models\\Bladestorm.mdx"
+  static constant baseballBat = "Models\\BaseballBat.mdx"
+  static constant dynamite = "Models\\Dynamite.mdx"
+  static constant grenade = "Models\\Grenade.mdx"
+  static constant holyGrenade = "Models\\HolyGrenade.mdx"
+  static constant leeroyGun = "Models\\LeeroyGun.mdx"
+  static constant parachute = "Models\\Parachute.mdx"
+  static constant riotShield = "Models\\RiotShield.mdx"
+  static constant shotgun = "Models\\Shotgun.mdx"
+
+public constant UNIT_IDS_SHEEPZ = asList(
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next()),
+  compiletime(UNIT_ID_GEN.next())
+)

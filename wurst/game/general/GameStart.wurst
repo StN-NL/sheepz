@@ -1,0 +1,57 @@
+package GameStart
+import ChatCommands
+import ClosureTimers
+import DraftWeapon
+import EntityManagement
+import GameEnd
+import GameMenu
+import MultiBoard
+import Players
+import Quests
+import SheepEntity
+import Utils
+import Weapons
+import ConfigWeapons
+
+// fix desync issues
+// fix fus ro da range
+// bug endgame scoring
+
+
+init
+  doAfter(0.025) ->
+    FogMaskEnableOff()
+    FogEnableOff()
+    initWeapons()
+    addListenersChat()
+    addQuests()
+    startEntityLoop()
+    new MenuSetup() -> 
+      printWelcome()
+      initMultiboard()
+      initWeaponDraft()
+      spawnSheep()
+      enableGameEndCondition()
+
+
+function printWelcome()
+  print("Welcome to |cffff0095Sheepz|r, where candy is free and weapons come cheap!", 5)
+  print("\nFor more information, visit the quest log.", 5)
+
+
+function spawnSheep()
+  for p in getPlayersIngame()
+    doAfter(GetRandomReal(0, 1)) ->
+      new SheepEntity(p)
+      doAfter(2) -> 
+        p.addStartingWeapons()
+    
+    if isSinglePlayer()
+      for ii = 1 to 5
+        doAfter(GetRandomReal(0, 5)) -> 
+          new SheepEntity(players[ii])
+
+  onPlayerLeave() p ->
+    p.setLives(0)
+    if p.getSheep() != null
+      p.getSheep().terminate()

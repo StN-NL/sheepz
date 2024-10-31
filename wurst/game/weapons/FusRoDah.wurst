@@ -1,0 +1,37 @@
+package FusRoDah
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import SoundUtils
+
+
+public function SheepEntity.fusRoDah()
+  new SoundDefinition(MySounds.fusRoDah).playOnPoint(this.pos)
+  doAfter(fusRoDah.delay) ->
+    new FusRoDahProjectile(this)
+
+
+public class FusRoDahProjectile extends ProjectileSheep
+  let velocity = 1333.
+  
+  construct(SheepEntity source)
+    super(source, fusRoDah.minRadius, Abilities.shockwaveMissile)
+    setPermanent()
+    doAfter(fusRoDah.maxDistance / velocity) ->
+      if not done
+        terminate()
+
+    onHit3D() target ->
+      source.blast(pos, target, 0, (4 + firingPower) / 6 * fusRoDah.maxKnockBack, 0.5)
+
+  override function setPhysics()
+    gravity = 0
+    pos.z += 30
+    setSpeed(ANIMATION_PERIOD * velocity)
+
+  override function onGroundHit()
+    if not done
+      terminate()

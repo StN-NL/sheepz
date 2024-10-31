@@ -1,0 +1,49 @@
+package GuidedMissile
+import Abilities
+import ConfigWeapons
+import ProjectileSheep
+import SheepEntity
+import Utils
+
+
+public class GuidedMissile extends ProjectileSheep
+  vec2 target
+  bool guided = false
+  
+  construct(SheepEntity source, vec2 target)
+    super(source, guidedMissile.minRadius, Abilities.mortarMissile)
+    this.target = target
+    silent = true
+    scaleVelXY(0.7)
+    onHit3D() target ->
+      if not done and distance > 30
+        terminate()
+    
+    onEnd() -> 
+      explode()
+      
+  override function onGroundHit()
+    super.onGroundHit()
+    if not done
+      terminate()
+
+  override function update()
+    alignYawAndPitch()
+    useGuidingSystem()
+    super.update()
+
+  function useGuidingSystem()
+    // vel.x += (target.x - pos.x) / 2000
+    // vel.y += (target.y - pos.y) / 2000
+    // vel.x = max(min(vel.x, 15), -15)
+    // vel.y = max(min(vel.x, 15), -15)
+    let velX = max(min((target.x - pos.x) / 20, 15), -15)
+    let velY = max(min((target.y - pos.y) / 20, 15), -15)
+    setVel(vec3(velX, velY, vel.z))
+
+    if onceEvery(0.2)
+      flashEffect(Abilities.flakTarget, pos)
+      
+  function explode()
+    flashEffect(Abilities.mortarMissile, pos, 2)
+    source.blastArea(pos, guidedMissile.minRadius, guidedMissile.maxRadius, guidedMissile.maxDamage)

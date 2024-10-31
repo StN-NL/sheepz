@@ -1,0 +1,114 @@
+package GameEnd
+import ClosureTimers
+import ConfigGame
+import MultiBoard
+import SheepEntity
+import TimerUtils
+import Utils
+import FramehandleNames
+
+var gameOver = false
+
+public function enableGameEndCondition()
+  if GAME_MODE == GameMode.TIMED
+    startGameEndTimer()
+  else
+    periodicallyCheckGameEnd()
+
+public function startGameEndTimer()
+  let gameEndTimer = getTimer()
+  let gameEndTimerDialog = gameEndTimer.createTimerDialog()
+  gameEndTimerDialog.setTitle("Game End")
+  gameEndTimerDialog.display(true)
+  let gameDuration = 60 * GAME_DURATION
+  gameEndTimer.start(gameDuration, function DoNothing)
+  doAfter(gameDuration) -> 
+    gameOver = true
+    getWinner().declareVictor()
+
+public function periodicallyCheckGameEnd()
+  doPeriodically(1.0) cb ->
+    if not gameOver and not isSinglePlayer()
+      if getAlivePlayers() <= 1
+        gameOver = true
+        addEndGamePoints()
+        getWinner().declareVictor()
+
+function getAlivePlayers() returns int
+  var alivePlayers = 0
+  for p in getPlayersIngame()
+    if p.isAlive()
+      alivePlayers += 1
+  return alivePlayers
+
+function player.isAlive() returns bool
+  return this.getLives() > 0 or this.getSheep().isAlive()
+
+function addEndGamePoints()
+  let p = getSurvivingPlayer()
+  if p != null
+    p.addPoints(p.getLives() * SHEEP_MAX_HP.toInt())
+    p.addPoints(p.getSheep().actor.getHP().toInt())
+
+function getSurvivingPlayer() returns player
+  player survivor = null
+  for p in getPlayersIngame()
+    if p.isAlive()
+      survivor = p
+  return survivor
+
+function getWinner() returns player
+  var maxPoints = -1
+  player winner = null
+  for p in getPlayersIngame()
+    let points = p.getPoints()
+    if points > maxPoints
+      maxPoints = points
+      winner = p
+
+  return winner
+
+function player.declareVictor()
+  let name = this.getNameColored(true)
+  let points = this.getPoints()
+
+  let roll = GetRandomInt(0, 2)
+  if roll == 0
+    this.announceWinner(
+      points,
+      "Where Hitler made demographic distinctions...",
+      "For " + name + " everyone is equal. Brutal!"
+    )
+  else if roll == 1
+    this.announceWinner(
+      points,
+      "Ceasar used to enslave his opponents...",
+      name + " just dumps them in the ocean. Brutal!"
+    )
+  else if roll == 2
+    this.announceWinner(
+      points,
+      name + " was orphaned at a young age...",
+      "and now we know why. Brutal!"
+    )
+
+function player.announceWinner(int points, string text1, string text2)
+  announce(0.5, "The game was won with " + points.toString() + " points!")
+  doAfter(2) ->
+    announce(0.45, text1)
+    doAfter(2) -> 
+      announce(0.4, text2)
+      doAfter(2) ->
+        for p in getPlayersIngame()
+          if p == this
+            CustomVictoryBJ(p, true, true)
+          else
+            CustomDefeatBJ(p, "Meh")
+
+function announce(real height, string text)
+  createFrame(FramehandleTypeNames.text, "", GAME_UI, "", 0)
+  ..setAbsPoint(FRAMEPOINT_CENTER, 0.4, height)
+  ..setScale(3.5)
+  ..setText(text)
+  ..setTextColor(COLOR_GOLD)
+  

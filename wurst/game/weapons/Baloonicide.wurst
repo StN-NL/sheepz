@@ -1,0 +1,36 @@
+package Baloonicide
+import Arsenal  
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import ConfigGame
+import MyAssets
+import SheepEntity
+import SoundUtils
+
+public var BAL_MAX_CHANNEL_TIME = 5.
+public var BAL_BONUS_SCALE = 5.
+
+public function SheepEntity.swell()
+  SOUND_WIDE_PUTIN.playOnPoint(this.getPos()).snd.setVolume(60)
+  doPeriodically(ANIMATION_PERIOD) cb ->
+    let dt = this.owner.getChannelTime()
+    if dt > 0. and dt < BAL_MAX_CHANNEL_TIME and this.isAlive()
+      this.addScale(ANIMATION_PERIOD * BAL_BONUS_SCALE / BAL_MAX_CHANNEL_TIME)
+    else
+      destroy cb
+
+
+public function SheepEntity.baloonicide()
+  this.setScale(SHEEP_SCALING_VALUE)
+  let pos = this.getPos()
+  SOUND_BALOONICIDE.playOnPoint(pos)
+  addEffect(Units.abominationExplosion, pos)
+    ..setScale(2)
+    ..setTime(0.3)
+    ..setTimeScale(0.4)
+    ..destr()
+  this.setState(State.DEATH_BY_SUICIDE)
+  let damage = this.owner.getFiringPower(BAL_MAX_CHANNEL_TIME) / BAL_MAX_CHANNEL_TIME * baloonicide.maxDamage
+  let knockback = this.owner.getFiringPower(BAL_MAX_CHANNEL_TIME) / BAL_MAX_CHANNEL_TIME * baloonicide.maxKnockBack
+  this.blastArea(pos, baloonicide.minRadius, baloonicide.maxRadius, damage, knockback)

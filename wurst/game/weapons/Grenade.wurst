@@ -1,0 +1,42 @@
+package Grenade
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import TextTagEntity
+
+
+public class Grenade extends ProjectileSheep
+  int countdown = grenade.delay.toInt()
+  
+  construct(SheepEntity source)
+    super(source, grenade.minRadius, MyModels.grenade)
+    scaleVelXY(0.8)
+    fx.eff.setTimeScale(0.2)
+    doPeriodically(1.0) cb ->
+      if countdown == 0
+        destroy cb
+        if not done
+          terminate()
+      else
+        SOUND_COUNTDOWN.playOnPoint(pos)
+        new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
+        countdown -= 1
+      
+    onEnd() -> 
+      explode()
+
+  override function update()
+    bounceOfWalls()
+    super.update()
+
+  override function onGroundHit()
+    super.onGroundHit()
+    bounceOfGround()
+
+  function explode()
+    fx.eff.setScale(1.6)
+    fx.eff.setTimeScale(1)
+    SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
+    source.blastArea(pos, grenade.minRadius, grenade.maxRadius, grenade.maxDamage)

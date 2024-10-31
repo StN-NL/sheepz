@@ -1,0 +1,60 @@
+package WordOfPower
+import Arsenal
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import Entity
+import HashSet
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import SoundUtils
+
+
+public function SheepEntity.youShallNotPass()
+  this.immobalize(true)
+  let pos = this.getPos()
+  new SoundDefinition(MySounds.youShallNotPass).playOnPoint(pos)
+  let eff = addEffect(Abilities.monsoonRain, pos)
+
+  doAfter(wordOfPower.delay) ->
+    eff.destr()
+
+
+public function SheepEntity.wordOfpower()
+  this.immobalize(false)
+  if this.owner.getFiringPower() < wordOfPower.delay
+    print("Hold at least " + wordOfPower.delay.toString(0) + " seconds!")
+  else
+    let sharedHitGroup = new HashSet<UnitEntity>
+    for ii = 1 to wordOfPower.shards
+      let xyA = (360 / wordOfPower.shards * ii).asAngleDegrees()
+      new WordOfPowerProjectile(this, xyA, sharedHitGroup)
+  
+  
+public class WordOfPowerProjectile extends ProjectileSheep
+  HashSet<UnitEntity> sharedHitGroup
+  
+  construct(SheepEntity source, angle xyA, HashSet<UnitEntity> sharedHitGroup)
+    super(source, wordOfPower.minRadius, Abilities.crushingWaveMissile)
+    this.sharedHitGroup = sharedHitGroup
+    setXYAngle(xyA)
+    setPhysics()
+    setPermanent()
+    doAfter(1.0) ->
+      if not done
+        terminate()
+
+    onHit3D() target ->
+      if not sharedHitGroup.has(target)
+        sharedHitGroup.add(target)
+        source.blast(pos, target, wordOfPower.maxDamage, wordOfPower.maxKnockBack, 0.7)
+
+  override function setPhysics()
+    gravity = 0
+    pos.z += 30
+    setSpeed(40)
+
+  override function onGroundHit()
+    if not done
+      terminate()

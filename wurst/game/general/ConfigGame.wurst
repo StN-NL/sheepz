@@ -1,0 +1,71 @@
+package ConfigGame
+
+public enum GameMode
+  TIMED
+  SURVIVAL
+
+public enum MapSelection
+  TROPICAL_ISLAND
+
+// <<<<<<< GENERAL >>>>>>>>>>>>
+public var GAME_MODE = GameMode.TIMED
+public var MAP_SELECTION = MapSelection.TROPICAL_ISLAND
+public var GAME_DURATION = 10.
+public var MAX_PLAYERS = 8
+public var WATER_LEVEL = 200.
+public var HEAVEN = vec3(0, 0, 2000)
+public var MAP_MAX = vec2(-5000, 12280)
+public var MAP_MIN = vec2(-12280, 5000)
+
+// <<<<<<< COLORS >>>>>>>>>>>>
+public var PINK = color(255, 0, 149)
+public var BLUE = color(22, 0, 225)
+public var PURPLE = color(209, 0, 224)
+public var RED = color(227, 0, 0)
+public var YELLOW = color(227, 220, 0)
+public var GREEN = color(33, 220, 0)
+public var LEGENDARY = color(255,128,0)
+public var EPIC = color(163,53,238)
+public var RARE = color(0,112,221)
+public var UNCOMMON = color(30,255,0)
+public var COMMON = color(255,255,255)
+
+// <<<<<<< ARSENAL >>>>>>>>>>>>
+public var ARSENAL_COOLDOWN = 1.
+public var ARSENAL_LIMIT = 8
+public var ARSENAL_MAX_STACKS = 100
+public var ARSENAL_DRAFT_START = 5
+public var ARSENAL_DRAFT_INTERVAL = 10.
+
+// <<<<<<< SHEEP >>>>>>>>>>>>
+public var SHEEP_MAX_LIVES = 3
+public var SHEEP_MAX_HP = 200.
+public var SHEEP_SCALING_VALUE = 2.
+public var SHEEP_MS_NORMAL = 200.
+public var SHEEP_MS_DEEP_WATER = 100.
+public var SHEEP_MS_FLYING = 0.
+public var SHEEP_MS_JET_PACK = 150.
+public var SHEEP_GRAVE_DURATION = 60.
+public var DELTA_OXYGEN = 1.
+public var JUMP_MAX_HEIGHT = 1000.
+public var JET_PACK_MAX_HEIGHT = 1000.
+public var JET_PACK_COOLDOWN = 30.
+public var PARACHUTE_COOLDOWN = 10.
+public var TICKLE_KNOCK_BACK = 40.
+
+// <<<<<<< FALL_DAMAGE >>>>>>>>>>>>
+public var FALL_DAMAGE_MIN_VEL_Z = 25.
+public var FALL_DAMAGE_RADIUS = 150.
+public var FALL_DAMAGE_DAMAGE_FACTOR = 2.
+public var FALL_DAMAGE_KNOCKBACK_FACTOR = 5.
+
+// <<<<<<< MISC >>>>>>>>>>>>
+public var KNOCKBACK_FACTOR_XY = 1.
+public var KNOCKBACK_FACTOR_Z = 1.
+
+// <<<<<<< PROJECTILE >>>>>>>>>>>>
+public var PROJECTILE_AIR_FRICTION = 1.
+public var PROJECTILE_DEFAULT_SCALE = 1.2
+public var PROJECTILE_BASE_POWER = 8.
+public var PROJECTILE_POWER_FACTOR = 13.
+public var PROJECTILE_FACTOR_Z = 1.5

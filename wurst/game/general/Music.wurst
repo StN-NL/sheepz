@@ -1,0 +1,29 @@
+package Music
+import ClosureTimers
+import MyAssets
+import SoundUtils
+import Utils
+
+
+public function initMusic()
+  ClearMapMusic()
+  StopMusic(false)
+  // SetMapMusic("StaleSocks.mp3", false, 0)
+
+  if not isSinglePlayer()
+    // playWormsMusic()
+    MUSIC_AXEL_F.play().snd.setVolume(100)
+
+
+function playWormsMusic()
+  let intro = MUSIC_SHORT_INTRO.play()
+  doAfter(1) -> 
+    startMusicAfterIntro(intro.snd)
+
+
+function startMusicAfterIntro(sound intro)
+  if not intro.isPlaying()
+    MUSIC_STALE_SOCKS.play()
+  else
+    doAfter(1) -> 
+      startMusicAfterIntro(intro)

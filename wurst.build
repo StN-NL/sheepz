@@ -1,0 +1,68 @@
+---
+projectName: Sheepz
+dependencies:
+- https://github.com/wurstscript/wurstStdlib2
+- https://github.com/Frotty/Frentity
+buildMapData:
+  name: '|cffff0095Sheepz 0.1.1|r'
+  fileName: Sheepz 0.1.1
+  author: stn
+  scenarioData:
+    description: Duke it out with the other sheeps. WurstScript powered!
+    suggestedPlayers: The more the merrier
+    loadingScreen:
+      model: LoadingScreen.mdx
+      background: Generic
+      title: '|cffffd000Based on a true story|r'
+      subTitle: '|cffff0095Sheepz|r'
+      text: "1983. In a parallel universe where the Nazi's conquered the world, genetic\
+        \ manipulation of common lifestock has become a sign of masculinity. A communist\
+        \ sheep revolution has the Nazi overlords sent to the dark side of the moon.\
+        \ This leaves one final question. Who is the most equal of them all?"
+  optionsFlags:
+    forcesFixed: true
+    maskedAreasPartiallyVisible: true
+    showWavesOnCliffShores: true
+    showWavesOnRollingShores: true
+    useItemClassificationSystem: true
+  players:
+  - id: 0
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 1
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 2
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 3
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 4
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 5
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 6
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false
+  - id: 7
+    name: DefaultPlayer
+    race: HUMAN
+    controller: USER
+    fixedStartLoc: false

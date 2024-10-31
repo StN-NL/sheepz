@@ -1,0 +1,596 @@
+package Arsenal
+import public ChannelAbilityPreset
+import ClosureEvents
+import ClosureKeyPresses
+import ClosureTimers
+import FramehandleNames
+import GameTimer
+import HashMap
+import InstantDummyCaster
+import MapBounds
+import ConfigGame
+import ClosureForGroups
+import LinkedList
+import SheepEntity
+
+public enum FiringType
+  INSTANT
+  CHARGED
+  POWERFUL
+  
+public enum Rarity
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+
+constant thefinger = compiletime(
+  new WeaponDefinition(Icons.bTNAcorn, FiringType.INSTANT, Targettype.NONE)
+  ..setName("The Finger")
+  ..setDescription("Take that!")
+)
+
+// <<<<<<<<<< <<<<<<<<<< --- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< API >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< --- >>>>>>>>>> >>>>>>>>>>
+
+public function player.getArsenal() returns Arsenal
+  return Arsenal.get(this)
+
+
+public function player.addWeapon(WeaponDefinition def, int n) returns WeaponDefinition
+  let weapon = def.getInstance(this)
+  for ii = 1 to n
+    this.getArsenal().add(weapon)
+
+  return def
+
+public function player.addRandomWeapon(LinkedList<WeaponDefinition> weaponList) returns WeaponDefinition
+  return this.addWeapon(getRandomWeapon(weaponList), 1)
+
+
+public function getRandomWeapon(LinkedList<WeaponDefinition> weaponList) returns WeaponDefinition
+  var randomWeapon = thefinger
+  var lowBound = 0
+  let highBound = weaponList.foldl<int>(0, (i, q) -> q + i.rarity) - 1
+  let randomInt = GetRandomInt(lowBound, highBound)
+  for weapon in weaponList
+    lowBound += weapon.rarity
+    if lowBound > randomInt
+      randomWeapon = weapon
+      break
+
+  return randomWeapon
+
+
+public function getUniqueRandomWeapons(LinkedList<WeaponDefinition> weaponList, int size) returns LinkedList<WeaponDefinition>
+  let list = new LinkedList<WeaponDefinition>
+  while list.size() < size
+    let def = getRandomWeapon(weaponList)
+    if not list.has(def)
+      list.add(def)
+      
+  nullTimer(() -> destroy list)
+  return list
+
+
+public function player.getFiringPower() returns real
+  return this.getArsenal().getFiringPower(REAL_MAX)
+
+
+public function player.getFiringPower(real maximum) returns real
+  return this.getArsenal().getFiringPower(maximum)
+
+
+public function player.getChannelTime() returns real
+  return this.getArsenal().getChannelTime()
+
+// <<<<<<<<<< <<<<<<<<<< ----- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< OTHER >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ----- >>>>>>>>>> >>>>>>>>>>
+
+tuple hotkey(string name, oskeytype key)
+
+constant DUMMY_ARSENAL_UNIT_ID = compiletime(UNIT_ID_GEN.next())
+
+hotkey array hotkeys = [
+  hotkey("1", OSKEY_1),
+  hotkey("2", OSKEY_2),
+  hotkey("3", OSKEY_3),
+  hotkey("4", OSKEY_4),
+  hotkey("5", OSKEY_5),
+  hotkey("6", OSKEY_6),
+  hotkey("7", OSKEY_7),
+  hotkey("8", OSKEY_8)
+]
+
+interface OnCastListener
+  function run(SheepEntity caster)
+
+interface OnChannelListener
+  function run(SheepEntity caster)
+
+interface OnPointCastListener
+  function run(SheepEntity caster, vec2 target)
+
+interface OnUnitCastListener
+  function run(SheepEntity caster, unit target)
+
+function rarityType(string txt, color c) returns string
+  return txt.color(c)
+
+function firingType(string txt, color c) returns string
+  return "\nFiring: " + txt.color(c)
+
+function targetType(string txt, color c) returns string
+  return "\nTarget: " + txt.color(c)
+
+public function txtFiringInstant() returns string
+  return firingType("Instant", BLUE)
+
+public function txtFiringCharged() returns string
+  return firingType("Charged", PURPLE)
+
+public function txtFiringPowerful() returns string
+  return firingType("Powerful", RED)
+
+public function txtTargetNone() returns string
+  return targetType("None", YELLOW)
+
+public function txtTargetPoint() returns string
+  return targetType("Point", GREEN)
+
+public function string.colorRarity(int rarity) returns string
+  if rarity <= 2
+    return rarityType(this, LEGENDARY)
+  else if rarity <= 5
+    return rarityType(this, EPIC)
+  else if rarity <= 10
+    return rarityType(this, RARE)
+  else if rarity <= 25
+    return rarityType(this, UNCOMMON)
+  else
+    return rarityType(this, COMMON)
+
+// <<<<<<<<<< <<<<<<<<<< ------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ARSENAL >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ------- >>>>>>>>>> >>>>>>>>>>
+
+class Arsenal
+  private static var isListening = false
+  private static constant map = new IterableMap<player, thistype>
+
+  private constant inventory = new LinkedList<Weapon>
+  private constant selection = new LinkedList<unit>
+  private player owner
+  private unit dummy
+  private bool isCasting
+  private bool onCooldown
+  private real keyPressStart
+  private real keyPressDuration
+
+  private construct(player owner)
+    this.owner = owner
+    
+    dummy = createUnit(owner, DUMMY_ARSENAL_UNIT_ID, boundMax, angle(0))
+      ..setPathing(false)
+      ..addAbility(HEIGHT_ENABLER)
+      ..removeAbility(HEIGHT_ENABLER)
+      ..addAbility(DUMMY_ROOT_ABIL_ID)
+      ..removeAbility(DUMMY_ROOT_ABIL_ID)
+
+  protected static function get(player owner) returns thistype
+    if not isListening
+      isListening = true
+      addListeners()
+
+    if not map.has(owner)
+      map.put(owner, new Arsenal(owner))
+    
+    return map.get(owner)
+
+  protected function add(Weapon weapon)
+    weapon.addStack()
+    if not inventory.has(weapon)
+      inventory.add(weapon)
+
+    indexWeapons()
+
+  protected function remove(Weapon weapon)
+    weapon.removeStack()
+    if weapon.stacks == 0
+      inventory.remove(weapon)
+      weapon.hide()
+
+    indexWeapons()
+      
+  private function indexWeapons()
+    var index = 0
+    for weapon in inventory
+      if index < ARSENAL_LIMIT
+        weapon.setIndex(index)
+        index++
+
+  protected function getChannelTime() returns real
+    return keyPressStart == 0. ? 0. : getElapsedGameTime() - keyPressStart
+
+  protected function getFiringPower(real maximum) returns real
+    return min(keyPressDuration, maximum)
+
+  private static function addListeners()
+    getFrame(FramehandleDefaultNames.infoPanelIconLabel, 2).setAbsPoint(FRAMEPOINT_TOPLEFT, 0.0, -0.1)
+    getFrame(FramehandleDefaultNames.infoPanelIconBackdrop, 2).setAbsPoint(FRAMEPOINT_TOPLEFT, 0.0, -0.1)
+
+    EventListener.add(EVENT_PLAYER_MOUSE_DOWN) ->
+      EventData.getTriggerPlayer().getArsenal().restoreSelection()
+  
+    for weaponId = 0 to ARSENAL_LIMIT - 1
+      onKeyPress(hotkeys[weaponId].key) ->
+        EventData.getTriggerPlayer().getArsenal().onKeysPress(weaponId)
+
+      onKeyRelease(hotkeys[weaponId].key) ->
+        EventData.getTriggerPlayer().getArsenal().onKeysRelease(weaponId)
+
+  private function onKeysPress(int weaponId)
+    let weapon = inventory.get(weaponId)
+    let sheep = owner.getSheep()
+    if sheep.isAlive() and inventory.has(weapon)
+      if not isCasting and not onCooldown and keyPressStart == 0.0
+        weapon.def.onStartChannel(sheep)
+        sheep.showPowerIndicator()
+        keyPressStart = getElapsedGameTime()
+
+  private function onKeysRelease(int weaponId)
+    if keyPressStart != 0.0
+      let weapon = inventory.get(weaponId)
+      let sheep = owner.getSheep()
+      sheep.hidePowerIndicator()
+      keyPressDuration = getElapsedGameTime() - keyPressStart
+      keyPressStart = 0.0
+      if sheep.isAlive()
+        fireWeapon(weapon)
+  
+  private function fireWeapon(Weapon weapon)
+    startCooldown()
+    cacheSelection()
+    selectWeapon(weapon)
+    forceCastSpell()
+
+  private function startCooldown()
+    isCasting = true
+    onCooldown = true
+    owner.getSheep().actor.setMana(0)
+
+  private function cacheSelection()
+    selection.clear()
+    forUnitsSelected(owner, u -> selection.add(u))
+
+  private function selectWeapon(Weapon weapon)
+    owner.selectSingle(dummy)
+    dummy.addAbility(weapon.def.abilId)
+  
+  private function forceCastSpell()
+    doPeriodicallyCounted(0.01, 20) cb -> 
+      if isCasting
+        ForceUIKeyBJ(owner, "Q")
+
+  protected function restoreSelection()
+    if isCasting
+      isCasting = false
+      owner.clearSelection()
+      selection.forEach() u ->
+        owner.select(u)
+
+      doAfter(ARSENAL_COOLDOWN) ->   
+        onCooldown = false
+
+
+// <<<<<<<<<< <<<<<<<<<< ----------------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< WEAPON DEFINITION >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ----------------- >>>>>>>>>> >>>>>>>>>>
+
+public class WeaponDefinition
+  private OnChannelListener listener  
+  private string realname
+
+  protected int abilId
+
+  string icon
+  FiringType ftype
+  Targettype ttype
+  var name = "Unknown"
+  var description = "Nondescript"
+  var rarity = 100
+  var amount = 0
+  var duration = 0.
+  var delay = 0.
+  var maxDistance = 0.
+  var maxDamage = 0.
+  var maxKnockBack = 0.
+  var minRadius = 0.
+  var maxRadius = 0.
+  var numberOfWaves = 0
+  var thickness = 0.
+  var shards = 0
+  var shardsPower = 0.
+  var shardsMaxDamage = 0.
+
+  private constant map = new IterableMap<player, Weapon>
+
+  construct(string icon, FiringType ftype, Targettype ttype)
+    create(icon, ftype, ttype, 0.)
+
+  construct(string icon, FiringType ftype, Targettype ttype, real areaEffect)
+    create(icon, ftype, ttype, areaEffect)
+
+  private function create(string icon, FiringType ftype, Targettype ttype, real areaEffect)
+    if compiletime
+      this.ftype = ftype
+      this.ttype = ttype
+      this.icon = icon
+      abilId = ABIL_ID_GEN.next()
+
+      new ChannelAbilityPreset(abilId, 1, true)
+        ..makeUnitSpell(0, 1.)
+        ..setCastRange(1, 1000000)
+        ..presetHotkey("Q")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(0)
+        ..presetIcon(icon)
+        ..presetTargetTypes(ttype)
+        ..presetOption(Option.TARGETIMAGE, areaEffect > 0.)
+        ..presetAreaofEffect(lvl -> areaEffect)
+
+  function setName(string name)
+    this.realname = name
+    this.name = realname.colorRarity(rarity)
+
+  function setDescription(string description)
+    this.description = description
+    addFiringTypeDescription()
+    addTargetTypeDescription()
+
+  private function addFiringTypeDescription()
+    switch ftype
+      case INSTANT
+        this.description += txtFiringInstant()
+      case CHARGED
+        this.description += txtFiringCharged()
+      case POWERFUL
+        this.description += txtFiringCharged()
+
+  private function addTargetTypeDescription()
+    switch ttype
+      case POINT
+        this.description += txtTargetPoint()
+      default
+        this.description += txtTargetNone()
+
+  function setRarity(int rarity)
+    this.rarity = rarity
+    this.name = realname.colorRarity(rarity)
+
+  function setAmount(int amount)
+    this.amount = amount
+
+  function setDuration(real duration)
+    this.duration = duration
+
+  function setDelay(real delay)
+    this.delay = delay
+
+  function setMaxDistance(real maxDistance)
+    this.maxDistance = maxDistance
+
+  function setMaxDamage(real maxDamage)
+    this.maxDamage = maxDamage
+
+  function setMaxKnockBack(real maxKnockBack)
+    this.maxKnockBack = maxKnockBack
+
+  function setMinRadius(real minRadius)
+    this.minRadius = minRadius
+
+  function setMaxRadius(real maxRadius)
+    this.maxRadius = maxRadius
+
+  function setNumberOfWaves(int numberOfWaves)
+    this.numberOfWaves = numberOfWaves
+
+  function setThickness(real thickness)
+    this.thickness = thickness
+
+  function setShards(int shards)
+    this.shards = shards
+
+  function setShardsPower(real shardsPower)
+    this.shardsPower = shardsPower
+
+  function setShardsMaxDamage(real shardsMaxDamage)
+    this.shardsMaxDamage = shardsMaxDamage
+
+  function hasDuration() returns boolean
+    return duration != 0
+
+  function hasDelay() returns boolean
+    return delay != 0
+
+  function hasMaxDistance() returns boolean
+    return maxDistance != 0
+
+  function hasMaxDamage() returns boolean
+    return maxDamage != 0
+
+  function hasMaxKnockBack() returns boolean
+    return maxKnockBack != 0
+
+  function hasMinRadius() returns boolean
+    return minRadius != 0
+
+  function hasMaxRadius() returns boolean
+    return maxRadius != 0
+
+  function hasNumberOfWaves() returns boolean
+    return numberOfWaves != 0
+
+  function hasThickness() returns boolean
+    return thickness != 0
+
+  function hasShards() returns boolean
+    return shards != 0
+
+  function hasShardsPower() returns boolean
+    return shardsPower != 0
+
+  function hasShardsMaxDamage() returns boolean
+    return shardsMaxDamage != 0
+
+  function getInstance(player owner) returns Weapon
+    if not map.has(owner)
+      map.put(owner, new Weapon(this, owner))
+
+    return map.get(owner)
+
+  function onChannel(OnChannelListener listener)
+    this.listener = listener
+
+  protected function onStartChannel(SheepEntity sheep)
+    if listener != null
+      listener.run(sheep)
+
+  function onCast(OnCastListener listener)
+    EventListener.onCast(abilId) caster ->
+      let sheep = caster.getOwner().getSheep()
+      listener.run(sheep)
+      cleanUp(caster)
+
+  function onPointCast(OnPointCastListener listener)
+    EventListener.onPointCast(abilId) (caster, target) ->
+      let sheep = caster.getOwner().getSheep()
+      listener.run(sheep, target)
+      cleanUp(caster)
+        
+  function onTargetCast(OnUnitCastListener listener)
+    EventListener.onTargetCast(abilId) (caster, target) ->
+      let sheep = caster.getOwner().getSheep()
+      listener.run(sheep, target)
+      cleanUp(caster)
+
+  private function cleanUp(unit caster)
+    let owner = caster.getOwner()
+    let arsenal = owner.getArsenal()
+    let weapon = getInstance(owner)
+    caster.removeAbility(abilId)
+    arsenal.remove(weapon)
+    arsenal.restoreSelection()
+
+  ondestroy
+    if listener != null
+      destroy listener
+        
+// <<<<<<<<<< <<<<<<<<<< ------ >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< WEAPON >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ------ >>>>>>>>>> >>>>>>>>>>
+
+class Weapon
+  private framehandle frameButton
+  private framehandle frameIcon
+  // private framehandle frameToolTip
+  private framehandle frameStacks
+  private framehandle frameHotkey
+  
+  private player owner
+  private int index
+  
+  protected WeaponDefinition def
+  
+  int stacks
+
+  construct(WeaponDefinition def, player owner)
+    this.def = def
+    this.owner = owner
+
+    frameButton = createFrame(FramehandleTypeNames.gluetextbutton, "", GAME_UI, "ScoreScreenTabButtonTemplate", 0)
+      ..setLevel(9)
+      ..setSize(0.04, 0.04)
+      ..setVisible(false)
+    
+    frameIcon = createFrame(FramehandleTypeNames.backdrop, "", frameButton, "", 0)
+      ..setAllPoints(frameButton)
+      ..setTexture(def.icon, 0, true)
+
+    // frameToolTip = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
+    //   ..setPoint(FRAMEPOINT_TOPRIGHT, frameButton, FRAMEPOINT_TOPRIGHT, vec2(-0.002, -0.002))
+    //   ..setEnabled(false)
+    //   ..setText("Nothing will Happen when you click this Button.")
+
+    frameStacks = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
+      ..setPoint(FRAMEPOINT_TOPRIGHT, frameIcon, FRAMEPOINT_TOPRIGHT, vec2(-0.002, -0.002))
+      ..disable()
+      ..setScale(1.5)
+
+    frameHotkey = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
+      ..setPoint(FRAMEPOINT_BOTTOMLEFT, frameIcon, FRAMEPOINT_BOTTOMLEFT, vec2(0.002, 0.002))
+      ..disable()
+      ..setScale(1.5)
+
+    // frameButton.setTooltip(frameToolTip)
+
+  protected function setIndex(int index)
+    this.index = index
+    show()
+
+  protected function addStack()
+    if stacks < ARSENAL_MAX_STACKS
+      stacks++
+    
+  protected function removeStack()
+    if stacks > 0
+      stacks--
+
+  protected function show()
+    if stacks > 0
+      let x = 0.315 + 0.04 * ModuloInteger(index, 4)
+      let y = 0.062 - 0.04 * (index / 4).toInt()
+      frameButton.setAbsPoint(FRAMEPOINT_BOTTOMLEFT, x, y)
+      frameStacks.setText(stacks.toString().color(COLOR_WHITE))
+      frameHotkey.setText(hotkeys[index].name.color(PLAYER_COLORS[0]))
+      frameButton.setVisible(owner, true)
+    
+  protected function hide()
+    frameButton.setVisible(owner, false)
+
+// <<<<<<<<<< <<<<<<<<<< ------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< COMPILE >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ------- >>>>>>>>>> >>>>>>>>>>
+
+@compiletime function gen()
+  new UnitDefinition(DUMMY_ARSENAL_UNIT_ID, 'ewsp')
+    ..setName("Da Book")
+    ..setMovementType(MovementType.Fly)
+    ..setUpgradesUsed("")
+    ..setCollisionSize(0.0)
+    ..setStructuresBuilt("")
+    ..setRace(Race.Commoner)
+    ..setFoodCost(0)
+    ..setArmorType(ArmorType.Divine)
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNtemp.blp")
+    ..setSpeedBase(522)
+    ..setModelFile("dummy.mdl")
+    ..setAnimationBlendTimeseconds(0.0)
+    ..setAnimationCastBackswing(0.0)
+    ..setMaximumPitchAngledegrees(0.0)
+    ..setMaximumRollAngledegrees(0.0)
+    ..setTurnRate(3)
+    ..setArtSpecial("")
+    ..setProjectileImpactZ(0.0)
+    ..setProjectileLaunchZ(0.0)
+    ..setUnitSoundSet("")
+    ..setNameEditorSuffix("(Basics)")
+    ..setUnitClassification("_")
+    ..setPropulsionWindowdegrees(1.0)
+    ..setTooltipBasic("")
+    ..setNormalAbilities(commaList(AbilityIds.invulnerable))
+    ..setCollisionSize(0)
+    ..setHitPointsMaximumBase(1000000)

@@ -1,0 +1,40 @@
+package RainOfChaos
+import Arsenal
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import SheepEntity
+import TextTagEntity
+import Utils
+import MySounds
+
+constant MSG_FAIL = "Power is all that is needed. In the end, it is all that there is."
+constant MSG_SUCCESS = "This world and all that you hold dear exist only to burn!"
+
+
+function textRainOfChaos(vec3 pos, string text)
+  let tte = new TextTagEntity(pos, vec3(0, 0, 3), text, 13, 2, colorA(35, 207, 0, 255))
+  tte.gravity = 0
+
+
+public function SheepEntity.rainOfChaos(vec2 target)   
+  if this.owner.getFiringPower() < 2
+    textRainOfChaos(this.getPos(), MSG_FAIL)
+  else
+    textRainOfChaos(this.getPos(), MSG_SUCCESS)
+    SOUND_ARCHIMONDE_LAUGH.play()
+    doAfter(3) -> 
+      this.rain(target)
+
+function SheepEntity.rain(vec2 target)
+  for _ = 1 to rainOfChaos.shards
+    doAfter(GetRandomReal(0, 8)) ->
+      let offset = vec2(GetRandomReal(-1200, 1200), GetRandomReal(-1200, 1200))
+      let pos = (target + offset).withTerrainZ()
+      addEffect(Units.infernalBirth, pos)
+        ..setScale(0.8)
+        ..setYaw(getRandomAngle())
+        ..setTimeScale(0.5)
+        ..destr()
+      doAfter(1.6) ->
+        this.blastArea(pos, rainOfChaos.minRadius, rainOfChaos.maxRadius, rainOfChaos.maxDamage)

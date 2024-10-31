@@ -1,0 +1,96 @@
+package ProjectileSheep
+import Arsenal
+import Assets
+import ConfigGame
+import Heightmap
+import MySounds
+import PhysicsEntity
+import Projectile3
+import RiotShield
+import SheepEntity
+import SoundUtils
+
+public class ProjectileSheep extends Projectile3
+  use PhysicsModule
+
+  real firingPower
+  SheepEntity source
+  bool isDeepWater = false
+  real conservationBounce = 0.5
+  SoundDefinition soundBounce = SOUND_BOUNCE_METAL
+
+  construct(SheepEntity source, real radius, string fxpath)
+    super(source.pos, radius, source.owner, source.actor.getFacingAngle(), fxpath)
+    this.source = source
+    fx.eff.setScale(PROJECTILE_DEFAULT_SCALE)
+    firingPower = owner.getFiringPower(2)
+    setPhysics()
+
+  function setPhysics()
+    let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER
+    setSpeed(power)
+    vel.z = PROJECTILE_FACTOR_Z * power
+  
+  override function update()
+    updateAirFriction()
+    checkFriendlyFire()
+    physicsUpdate(this)
+    super.update()
+
+  function updateAirFriction()
+    scaleVel(1 - 0.005 * PROJECTILE_AIR_FRICTION)
+
+  private function checkFriendlyFire()
+    if not friendlyFire and isAwayFromSource()
+      friendlyFire = true
+
+  private function isAwayFromSource() returns bool
+    return source.pos.distanceTo2d(pos) > radius + 100
+
+  override function hit3(UnitEntity target)
+    if target.hasRiotShield()
+      scaleVel(-1)
+    else
+      super.hit3(target)
+
+  override function onGroundHit()
+    if pos.toVec2().isTerrainDeepWater()
+      onEnterDeepWater()
+
+  override function onEscapeGround()
+    if isDeepWater
+      onExitDeepWater()
+
+  function onEnterDeepWater()
+    isDeepWater = true
+    SOUNDS_WATER_ENTER.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+
+  function onExitDeepWater()
+    isDeepWater = false
+    SOUNDS_WATER_EXIT.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+  
+  function alignYawAndPitch()
+    let yaw = Atan2(vel.y, vel.x).asAngleRadians()
+    let pitch = Atan2(-vel.z, vel.toVec2().length()).asAngleRadians()
+    setXYAngle(yaw)
+    setZAngle(pitch)
+
+  function bounceOfGround() returns bool
+    if vel.z.abs() > 3
+      scaleVelZ(-conservationBounce)
+      scaleVelXY(conservationBounce)
+      fx.eff.setTimeScale(0.1)
+      soundBounce.playOnPoint(pos)
+      return true
+    else
+      fx.eff.setTimeScale(0.0)
+      return false
+      
+  function bounceOfWalls()
+    let h0 = pos.getHeightMap()
+    let h = (pos + vel).getHeightMap()
+    if h > h0 and h > pos.z
+      scaleVelXY(-1)
+      soundBounce.playOnPoint(pos)

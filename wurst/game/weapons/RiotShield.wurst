@@ -1,0 +1,64 @@
+package RiotShield
+import Fx2Entity
+import ConfigWeapons
+import HashMap
+import MyAssets
+
+
+public function UnitEntity.riotShield()
+  this.getRiotShield().duration += riotShield.duration
+
+
+public function UnitEntity.getRiotShield() returns RiotShield
+  return RiotShield.get(this)
+
+
+public function UnitEntity.hasRiotShield() returns bool
+  return this.getRiotShield().duration > 0.
+
+
+class RiotShield extends Fx2Entity
+  private static constant map = new HashMap<UnitEntity, thistype>
+
+  UnitEntity e
+  vec3 origin = vec3(-15, 0, 0)
+  real duration = 0.
+
+  construct(UnitEntity e)
+    super(e.owner, e.pos, angle(0), "")
+    this.e = e
+    removeEffect()
+
+  protected static function get(UnitEntity e) returns thistype
+    if not map.has(e)
+      map.put(e, new RiotShield(e))
+      
+    return map.get(e)
+
+  override function update()
+    if fx.eff == null and duration <= 0
+      DoNothing()
+    else if fx.eff == null
+      createEffect()
+    else if duration > 0
+      duration -= ANIMATION_PERIOD
+      updateEffect()
+    else
+      SOUND_RIOT_SHIELD.playOnPoint(e.pos)
+      removeEffect()
+
+  private function createEffect()
+    SOUND_RIOT_SHIELD.playOnPoint(e.pos)
+    setFx(MyModels.riotShield)
+    fx.eff.setScale(2.5)
+      
+  private function updateEffect()
+    let facing = e.actor.getFacingAngle()
+    setPos(origin + e.getPos().offset2d(facing, 80))
+    fx.eff.setYaw(facing - 90..asAngleDegrees())
+
+  private function removeEffect()
+    fx.eff.setAlpha(0)
+    fx.eff.destr()
+    fx.eff = null
+    

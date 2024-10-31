@@ -1,0 +1,551 @@
+package CreepIds
+import UnitIds
+import LinkedList
+
+public enum Biome
+  ASHENVALE
+  BARRENS
+  CITYSCAPE
+  DALARAN
+  FELWOOD
+  ICECROWN
+  LORDAERON_SUMMER
+  LORDAERON_FALL
+  LORDAERON_WINTER
+  NORTHREND
+  OUTLAND
+  SUNKEN_RUINS
+  VILLAGE
+
+public function getRandomCreep() returns int
+  return getRandomBiome().getRandomCreep()
+
+public function getRandomBiome() returns Biome
+  return GetRandomInt(0, 13) castTo Biome
+
+public function Biome.getRandomCreep() returns int
+  return this.list().getRandomElement()
+
+public function Biome.list() returns LinkedList<int>
+  switch this
+    case ASHENVALE
+      return CreepIds.ashenvale
+    case BARRENS
+      return CreepIds.barrens
+    case CITYSCAPE
+      return CreepIds.cityscape
+    case DALARAN
+      return CreepIds.dalaran
+    case FELWOOD
+      return CreepIds.felwood
+    case ICECROWN
+      return CreepIds.icecrown
+    case LORDAERON_SUMMER
+      return CreepIds.lordaeronSummer
+    case LORDAERON_FALL
+      return CreepIds.lordaeronFall
+    case LORDAERON_WINTER
+      return CreepIds.lordaeronWinter
+    case NORTHREND
+      return CreepIds.northrend
+    case OUTLAND
+      return CreepIds.outland
+    case SUNKEN_RUINS
+      return CreepIds.sunkenRuins
+    case VILLAGE
+      return CreepIds.village
+
+public function Biome.getName() returns string
+  switch this
+    case ASHENVALE
+      return "|c00006400Ashenvale|r"
+    case BARRENS
+      return "|c00fEBA0EBarrens|r"
+    case CITYSCAPE
+      return "|c007d7d7dCityscape|r"
+    case DALARAN
+      return "|c00540081Dalaran|r"
+    case FELWOOD
+      return "|c0096FF96Felwood|r"
+    case ICECROWN
+      return "|c000000FFIcecrown Glacier|r"
+    case LORDAERON_SUMMER
+      return "|c00FF0000Lordaeron Summer|r"
+    case LORDAERON_FALL
+      return "|c00640000Lordearon Fall|r"
+    case LORDAERON_WINTER
+      return "|c006969FFLordearon Winter|r"
+    case NORTHREND
+      return "|c00000064Northrend|r"
+    case OUTLAND
+      return "|c004E2A04Outland|r"
+    case SUNKEN_RUINS
+      return "|cfff7a58bSunken Ruins|r"
+    case VILLAGE
+      return "|cffbfff81Village|r"
+    
+public class CreepIds
+  static constant ashenvale = new LinkedList<int>
+    ..add(UnitIds.darktroll)
+    ..add(UnitIds.darktrollberserker)
+    ..add(UnitIds.darktrolltrapper)
+    ..add(UnitIds.darktrollwarlord)
+    ..add(UnitIds.darktrollshadowpriest)
+    ..add(UnitIds.darktrollhighpriest)
+    ..add(UnitIds.furbolg)
+    ..add(UnitIds.furbolgchampion)
+    ..add(UnitIds.furbolgshaman)
+    ..add(UnitIds.furbolgeldershaman)
+    ..add(UnitIds.furbolgtracker)
+    ..add(UnitIds.furbolgancient)
+    ..add(UnitIds.greendragonwhelp)
+    ..add(UnitIds.greendrake)
+    ..add(UnitIds.greendragon)
+    ..add(UnitIds.lightninglizard)
+    ..add(UnitIds.thunderlizard)
+    ..add(UnitIds.stormwyrm)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.satyr)
+    ..add(UnitIds.satyrsoulstealer)
+    ..add(UnitIds.satyrhellcaller)
+    ..add(UnitIds.satyrtrickster)
+    ..add(UnitIds.satyrshadowdancer)
+    ..add(UnitIds.spider)
+    ..add(UnitIds.giantspider)
+    ..add(UnitIds.spittingspider)
+    ..add(UnitIds.broodmother)
+    ..add(UnitIds.timberwolf)
+    ..add(UnitIds.giantwolf)
+    ..add(UnitIds.direwolf)
+
+  static constant barrens = new LinkedList<int>
+    ..add(UnitIds.bronzedragonwhelp)
+    ..add(UnitIds.bronzedrake)
+    ..add(UnitIds.bronzedragon)
+    ..add(UnitIds.centaurdrudge)
+    ..add(UnitIds.centauroutrunner)
+    ..add(UnitIds.centaurarcher)
+    ..add(UnitIds.centaurimpaler)
+    ..add(UnitIds.centaursorceror)
+    ..add(UnitIds.centaurkhan)
+    ..add(UnitIds.harpyrogue)
+    ..add(UnitIds.harpywitch)
+    ..add(UnitIds.harpyhag)
+    ..add(UnitIds.harpyqueen)
+    ..add(UnitIds.lightninglizard)
+    ..add(UnitIds.thunderlizard)
+    ..add(UnitIds.stormwyrm)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.owlbear)
+    ..add(UnitIds.enragedowlbear)
+    ..add(UnitIds.berserkowlbear)
+    ..add(UnitIds.quillboar)
+    ..add(UnitIds.quillboarhunter)
+    ..add(UnitIds.razormanescout)
+    ..add(UnitIds.razormanebrute)
+    ..add(UnitIds.razormanemedicineman)
+    ..add(UnitIds.razormanechieftain)
+    ..add(UnitIds.salamanderhatchling)
+    ..add(UnitIds.salamander)
+    ..add(UnitIds.spiritpig)
+
+  static constant cityscape = new LinkedList<int>
+    ..add(UnitIds.bandit)
+    ..add(UnitIds.rogue)
+    ..add(UnitIds.enforcer)
+    ..add(UnitIds.brigand)
+    ..add(UnitIds.assassin)
+    ..add(UnitIds.banditlord)
+    ..add(UnitIds.burningarcher)
+    ..add(UnitIds.fallenpriest)
+    ..add(UnitIds.deceiver)
+    ..add(UnitIds.heretic)
+    ..add(UnitIds.foresttroll)
+    ..add(UnitIds.foresttrolltrapper)
+    ..add(UnitIds.foresttrollberserker)
+    ..add(UnitIds.foresttrollking)
+    ..add(UnitIds.foresttrollshadowpriest)
+    ..add(UnitIds.foresttrollhighpriest)
+    ..add(UnitIds.kobold)
+    ..add(UnitIds.kobolttunneler)
+    ..add(UnitIds.koboldtaskmaster)
+    ..add(UnitIds.koboldgeomancer)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.battlegolem)
+    ..add(UnitIds.wargolem)
+    ..add(UnitIds.siegegolem)
+    ..add(UnitIds.apprenticewizard)
+    ..add(UnitIds.roguewizard)
+    ..add(UnitIds.renegadewizard)
+    ..add(UnitIds.darkwizard)
+
+  static constant dalaran = new LinkedList<int>
+    ..add(UnitIds.bandit)
+    ..add(UnitIds.rogue)
+    ..add(UnitIds.enforcer)
+    ..add(UnitIds.brigand)
+    ..add(UnitIds.assassin)
+    ..add(UnitIds.banditlord)
+    ..add(UnitIds.enragedelemental)
+    ..add(UnitIds.bereserkelemental)
+    ..add(UnitIds.giantskeleton)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.battlegolem)
+    ..add(UnitIds.wargolem)
+    ..add(UnitIds.siegegolem)
+    ..add(UnitIds.kobold)
+    ..add(UnitIds.kobolttunneler)
+    ..add(UnitIds.koboldtaskmaster)
+    ..add(UnitIds.koboldgeomancer)
+    ..add(UnitIds.apprenticewizard)
+    ..add(UnitIds.roguewizard)
+    ..add(UnitIds.renegadewizard)
+    ..add(UnitIds.darkwizard)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+
+  static constant felwood = new LinkedList<int>
+    ..add(UnitIds.corruptedent)
+    ..add(UnitIds.poisonent)
+    ..add(UnitIds.plagueent)
+    ..add(UnitIds.darktroll)
+    ..add(UnitIds.darktrollberserker)
+    ..add(UnitIds.darktrolltrapper)
+    ..add(UnitIds.darktrollwarlord)
+    ..add(UnitIds.darktrollshadowpriest)
+    ..add(UnitIds.darktrollhighpriest)
+    ..add(UnitIds.doomguard)
+    ..add(UnitIds.purplefelstalker)
+    ..add(UnitIds.felstalker)
+    ..add(UnitIds.felravager)
+    ..add(UnitIds.furbolg)
+    ..add(UnitIds.furbolgchampion)
+    ..add(UnitIds.furbolgshaman)
+    ..add(UnitIds.furbolgeldershaman)
+    ..add(UnitIds.furbolgtracker)
+    ..add(UnitIds.furbolgancient)
+    ..add(UnitIds.greendragonwhelp)
+    ..add(UnitIds.greendrake)
+    ..add(UnitIds.greendragon)
+    ..add(UnitIds.infernal)
+    ..add(UnitIds.lightninglizard)
+    ..add(UnitIds.thunderlizard)
+    ..add(UnitIds.stormwyrm)
+    ..add(UnitIds.murlocplaguebearer)
+    ..add(UnitIds.murlocflesheater)
+    ..add(UnitIds.murlocmutant)
+    ..add(UnitIds.satyr)
+    ..add(UnitIds.satyrsoulstealer)
+    ..add(UnitIds.satyrhellcaller)
+    ..add(UnitIds.satyrtrickster)
+    ..add(UnitIds.satyrshadowdancer)
+    ..add(UnitIds.sludgeminion)
+    ..add(UnitIds.sludgeflinger)
+    ..add(UnitIds.sludgemonstrosity)
+    ..add(UnitIds.spider)
+    ..add(UnitIds.giantspider)
+    ..add(UnitIds.spittingspider)
+    ..add(UnitIds.broodmother)
+
+  static constant icecrown = new LinkedList<int>
+    ..add(UnitIds.crystalarachnathid)
+    ..add(UnitIds.barbedarachnathid)
+    ..add(UnitIds.warriorarachnathid)
+    ..add(UnitIds.earthborerarachnathid)
+    ..add(UnitIds.overlordarachnathid)
+    ..add(UnitIds.azuredragonwhelp)
+    ..add(UnitIds.azuredrake)
+    ..add(UnitIds.azuredragon)
+    ..add(UnitIds.bluedragonspawnmeddler)
+    ..add(UnitIds.bluedragonspawnapprentice)
+    ..add(UnitIds.bluedragonspawnwarrior)
+    ..add(UnitIds.bluedragonspawnsorceror)
+    ..add(UnitIds.bluedragonspawnoverseer)
+    ..add(UnitIds.facelessonetrickster)
+    ..add(UnitIds.facelessoneterror)
+    ..add(UnitIds.facelessonedeathbringer)
+    ..add(UnitIds.icetroll)
+    ..add(UnitIds.icetrolltrapper)
+    ..add(UnitIds.icetrollberserker)
+    ..add(UnitIds.icetrollwarlord)
+    ..add(UnitIds.icetrollshadowpriest)
+    ..add(UnitIds.icetrollhighpriest)
+    ..add(UnitIds.mammoth)
+    ..add(UnitIds.icetuskmammoth)
+    ..add(UnitIds.diremammoth)
+    ..add(UnitIds.spiderling)
+    ..add(UnitIds.nerubianwarrior)
+    ..add(UnitIds.nerubianseer)
+    ..add(UnitIds.nerubianqueen)
+    ..add(UnitIds.nerubianwebspinner)
+    ..add(UnitIds.nerubianspiderlord)
+    ..add(UnitIds.polarbear)
+    ..add(UnitIds.giantpolarbear)
+    ..add(UnitIds.polarfurbolg)
+    ..add(UnitIds.polarfurbolgchampion)
+    ..add(UnitIds.polarfurbolgshaman)
+    ..add(UnitIds.polarfurbolgeldershaman)
+    ..add(UnitIds.polarfurbolgtracker)
+    ..add(UnitIds.polarfurbolgursawarrior)
+    ..add(UnitIds.magnataurwarrior)
+    ..add(UnitIds.magnataurreaver)
+    ..add(UnitIds.magnataurdestroyer)
+    ..add(UnitIds.tuskarrfighter)
+    ..add(UnitIds.tuskarrspearman)
+    ..add(UnitIds.tuskarrhealer)
+    ..add(UnitIds.tuskarrwarrior)
+    ..add(UnitIds.tuskarrtrapper)
+    ..add(UnitIds.tuskarrsorceror)
+    ..add(UnitIds.tuskarrchieftain)
+    ..add(UnitIds.unbrokendarkhunter)
+    ..add(UnitIds.unbrokenrager)
+    ..add(UnitIds.unbrokendarkweaver)
+
+  static constant lordaeronSummer = new LinkedList<int>
+    ..add(UnitIds.gnoll1)
+    ..add(UnitIds.gnollassassin)
+    ..add(UnitIds.gnollpoacher)
+    ..add(UnitIds.gnollbrute)
+    ..add(UnitIds.gnoll3)
+    ..add(UnitIds.gnollking)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.ogre1)
+    ..add(UnitIds.ogremagi)
+    ..add(UnitIds.ogre2)
+    ..add(UnitIds.ogrelord)
+    ..add(UnitIds.foresttroll)
+    ..add(UnitIds.foresttrolltrapper)
+    ..add(UnitIds.foresttrollberserker)
+    ..add(UnitIds.foresttrollking)
+    ..add(UnitIds.foresttrollshadowpriest)
+    ..add(UnitIds.foresttrollhighpriest)
+    ..add(UnitIds.reddragonwhelp)
+    ..add(UnitIds.reddrake)
+    ..add(UnitIds.reddragon)
+
+  static constant lordaeronFall = new LinkedList<int>
+    ..add(UnitIds.gnoll1)
+    ..add(UnitIds.gnollassassin)
+    ..add(UnitIds.gnollpoacher)
+    ..add(UnitIds.gnollbrute)
+    ..add(UnitIds.gnoll3)
+    ..add(UnitIds.gnollking)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.ogre1)
+    ..add(UnitIds.ogremagi)
+    ..add(UnitIds.ogre2)
+    ..add(UnitIds.ogrelord)
+    ..add(UnitIds.foresttroll)
+    ..add(UnitIds.foresttrolltrapper)
+    ..add(UnitIds.foresttrollberserker)
+    ..add(UnitIds.foresttrollking)
+    ..add(UnitIds.foresttrollshadowpriest)
+    ..add(UnitIds.foresttrollhighpriest)
+    ..add(UnitIds.blackdragonwhelp)
+    ..add(UnitIds.blackdrake)
+    ..add(UnitIds.blackdragon)
+
+  static constant lordaeronWinter = new LinkedList<int>
+    ..add(UnitIds.gnoll1)
+    ..add(UnitIds.gnollassassin)
+    ..add(UnitIds.gnollpoacher)
+    ..add(UnitIds.gnollbrute)
+    ..add(UnitIds.gnoll3)
+    ..add(UnitIds.gnollking)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.ogre1)
+    ..add(UnitIds.ogremagi)
+    ..add(UnitIds.ogre2)
+    ..add(UnitIds.ogrelord)
+    ..add(UnitIds.azuredragonwhelp)
+    ..add(UnitIds.azuredrake)
+    ..add(UnitIds.azuredragon)
+    ..add(UnitIds.icetroll)
+    ..add(UnitIds.icetrolltrapper)
+    ..add(UnitIds.icetrollberserker)
+    ..add(UnitIds.icetrollwarlord)
+    ..add(UnitIds.icetrollshadowpriest)
+    ..add(UnitIds.icetrollhighpriest)
+
+  static constant northrend = new LinkedList<int>
+    ..add(UnitIds.azuredragonwhelp)
+    ..add(UnitIds.azuredrake)
+    ..add(UnitIds.azuredragon)
+    ..add(UnitIds.whitewolf)
+    ..add(UnitIds.giantwhitewolf)
+    ..add(UnitIds.ghost)
+    ..add(UnitIds.wraith)
+    ..add(UnitIds.frostrevenant)
+    ..add(UnitIds.icerevenant)
+    ..add(UnitIds.icetroll)
+    ..add(UnitIds.icetrolltrapper)
+    ..add(UnitIds.icetrollberserker)
+    ..add(UnitIds.icetrollwarlord)
+    ..add(UnitIds.icetrollshadowpriest)
+    ..add(UnitIds.icetrollhighpriest)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.spiderling)
+    ..add(UnitIds.nerubianwarrior)
+    ..add(UnitIds.nerubianseer)
+    ..add(UnitIds.nerubianqueen)
+    ..add(UnitIds.nerubianwebspinner)
+    ..add(UnitIds.nerubianspiderlord)
+    ..add(UnitIds.furbolgpanda)
+    ..add(UnitIds.polarbear)
+    ..add(UnitIds.giantpolarbear)
+    ..add(UnitIds.polarfurbolg)
+    ..add(UnitIds.polarfurbolgchampion)
+    ..add(UnitIds.polarfurbolgshaman)
+    ..add(UnitIds.polarfurbolgeldershaman)
+    ..add(UnitIds.polarfurbolgtracker)
+    ..add(UnitIds.polarfurbolgursawarrior)
+    ..add(UnitIds.skeletalarcher)
+    ..add(UnitIds.skeletalmarksman)
+    ..add(UnitIds.wendigo1)
+    ..add(UnitIds.elderwendigo)
+    ..add(UnitIds.ancientwendigo)
+    ..add(UnitIds.wendigoshaman)
+    
+  static constant outland = new LinkedList<int>
+    ..add(UnitIds.doomguard)
+    ..add(UnitIds.draeneiguardian)
+    ..add(UnitIds.draeneiprotector)
+    ..add(UnitIds.draeneiwatcher)
+    ..add(UnitIds.draeneidarkslayer)
+    ..add(UnitIds.draeneidisciple)
+    ..add(UnitIds.draeneiharbinger)
+    ..add(UnitIds.draeneiseer)
+    ..add(UnitIds.eredarsorceror)
+    ..add(UnitIds.eredardiabolist)
+    ..add(UnitIds.eredarwarlock)
+    ..add(UnitIds.felguard)
+    ..add(UnitIds.bloodfiend)
+    ..add(UnitIds.overlord)
+    ..add(UnitIds.purplefelstalker)
+    ..add(UnitIds.felstalker)
+    ..add(UnitIds.felravager)
+    ..add(UnitIds.infernalcontraption)
+    ..add(UnitIds.infernalmachine)
+    ..add(UnitIds.infernaljuggernaut)
+    ..add(UnitIds.netherdragonhatchling)
+    ..add(UnitIds.netherdrake)
+    ..add(UnitIds.netherdragon)
+    ..add(UnitIds.succubus)
+    ..add(UnitIds.viletormentor)
+    ..add(UnitIds.viletemptress)
+    ..add(UnitIds.maidenofpain)
+    ..add(UnitIds.queenofsuffering)
+    ..add(UnitIds.lesservoidwalker)
+    ..add(UnitIds.voidwalker)
+    ..add(UnitIds.greatervoidwalker)
+    ..add(UnitIds.eldervoidwalker)
+
+  static constant sunkenRuins = new LinkedList<int>
+    ..add(UnitIds.hydrahatchling)
+    ..add(UnitIds.hydra)
+    ..add(UnitIds.elderhydra)
+    ..add(UnitIds.ancienthydra)
+    ..add(UnitIds.junglestalker)
+    ..add(UnitIds.elderjunglestalker)
+    ..add(UnitIds.enrangedjunglestalker)
+    ..add(UnitIds.lobstrokkprawn)
+    ..add(UnitIds.lobstrokktidecaller)
+    ..add(UnitIds.lobstrokkpooldweller)
+    ..add(UnitIds.lobstrokkdeepseer)
+    ..add(UnitIds.lobstrokksnapper)
+    ..add(UnitIds.lobstrokktidallord)
+    ..add(UnitIds.murgulcliffrunner)
+    ..add(UnitIds.murgulbloodgill)
+    ..add(UnitIds.murgultidewarrior)
+    ..add(UnitIds.murgulsnarecaster)
+    ..add(UnitIds.murgulreaver)
+    ..add(UnitIds.murgulshadowcaster)
+    ..add(UnitIds.reefelemental)
+    ..add(UnitIds.seaelemental)
+    ..add(UnitIds.seagiant)
+    ..add(UnitIds.seagianthunter)
+    ..add(UnitIds.seagiantbehemoth)
+    ..add(UnitIds.seaturtlehatchling)
+    ..add(UnitIds.seaturtle)
+    ..add(UnitIds.giantseaturtle)
+    ..add(UnitIds.gargantuanseaturtle)
+    ..add(UnitIds.dragonturtle)
+    ..add(UnitIds.revenantofthetides)
+    ..add(UnitIds.revenantoftheseas)
+    ..add(UnitIds.revenantofthedepths)
+    ..add(UnitIds.deeplordrevenant)
+    ..add(UnitIds.skeletalorc)
+    ..add(UnitIds.skeletalorcgrunt)
+    ..add(UnitIds.skeletalorcchampion)
+    ..add(UnitIds.spidercrab)
+    ..add(UnitIds.spidercrab2)
+    ..add(UnitIds.spidercrab3)
+    ..add(UnitIds.stormreaverapprentice)
+    ..add(UnitIds.stormreaverhermit)
+    ..add(UnitIds.stormreavernecrolyte)
+    ..add(UnitIds.stormreaverwarlock)
+
+  static constant village = new LinkedList<int>
+    ..add(UnitIds.bandit)
+    ..add(UnitIds.rogue)
+    ..add(UnitIds.enforcer)
+    ..add(UnitIds.brigand)
+    ..add(UnitIds.assassin)
+    ..add(UnitIds.banditlord)
+    ..add(UnitIds.reddragonwhelp)
+    ..add(UnitIds.reddrake)
+    ..add(UnitIds.reddragon)
+    ..add(UnitIds.foresttroll)
+    ..add(UnitIds.foresttrolltrapper)
+    ..add(UnitIds.foresttrollberserker)
+    ..add(UnitIds.foresttrollking)
+    ..add(UnitIds.foresttrollshadowpriest)
+    ..add(UnitIds.foresttrollhighpriest)
+    ..add(UnitIds.skeletonwarrior)
+    ..add(UnitIds.mudgolem)
+    ..add(UnitIds.rockgolem)
+    ..add(UnitIds.granitegolem)
+    ..add(UnitIds.kobold)
+    ..add(UnitIds.kobolttunneler)
+    ..add(UnitIds.koboldtaskmaster)
+    ..add(UnitIds.koboldgeomancer)
+    ..add(UnitIds.apprenticewizard)
+    ..add(UnitIds.roguewizard)
+    ..add(UnitIds.renegadewizard)
+    ..add(UnitIds.darkwizard)
+    ..add(UnitIds.murloctiderunner)
+    ..add(UnitIds.murlochuntsman)
+    ..add(UnitIds.murlocnightcrawler)
+    ..add(UnitIds.sasquatch)
+    ..add(UnitIds.eldersasquatch)
+    ..add(UnitIds.sasquatchoracle)
+    ..add(UnitIds.ancientsasquatch)

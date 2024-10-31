@@ -1,0 +1,61 @@
+package AirStrike
+import Assets
+import ConfigWeapons
+import Fx2Entity
+import MySounds
+import ProjectileSheep
+import SheepEntity
+
+
+public class AirStrike extends Fx2Entity
+
+  SheepEntity source
+  var distanceY = 0.
+  var nextMissile = 200.
+
+  construct(SheepEntity source, vec2 target)
+    super(source.owner, source.pos, 90..fromDeg(), Units.goblinZeppelin)
+    this.source = source
+    silent = true
+    setPos(vec3(target.x, target.y - 1000, 800))
+    SOUNDS_AIR_STRIKE.getRandomElement().playOnPoint(pos)
+    fx.eff.setScale(1.4)
+    setVel(vec3(0, 200 * ANIMATION_PERIOD, 0))
+    gravity = 0.
+  
+  override function update()
+    super.update()
+    distanceY += vel.y
+    if nextMissile < distanceY and distanceY < 1700
+      nextMissile += 1500 / airStrike.shards
+      new AirStrikeProjectile(source, pos)
+
+    if distanceY > 2000
+      terminate()
+
+
+public class AirStrikeProjectile extends ProjectileSheep
+  
+  construct(SheepEntity source, vec3 pos)
+    super(source, airStrike.minRadius, Abilities.tinkerRocketMissile)
+    setPos(pos)
+    onHit3D() target ->
+      if not done
+        terminate()
+    
+    onEnd() -> 
+      explode()
+
+  override function setPhysics()
+    setVel(vec3(GetRandomReal(-5, 5), GetRandomReal(2, 10), 0))
+      
+  override function onGroundHit()
+    if not done
+      terminate()
+
+  override function update()
+    alignYawAndPitch()
+    super.update()
+   
+  function explode()
+    source.blastArea(pos, airStrike.minRadius, airStrike.maxRadius, airStrike.maxDamage)

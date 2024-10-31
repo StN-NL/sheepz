@@ -1,0 +1,53 @@
+package Dynamite
+// import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import TextTagEntity
+
+
+public class Dynamite extends ProjectileSheep
+  int countdown = dynamite.delay.toInt()
+  // effect wick
+  // vec3 wickPos
+  
+  construct(SheepEntity source)
+    super(source, dynamite.minRadius, MyModels.dynamite)
+    gravity = 0
+    setVel(vec3(0, 0, 0))
+    setXY(vec3(pos.x + GetRandomReal(-30, 30), pos.y + GetRandomReal(-30, 30), pos.z + 10))
+    // wickPos = getPos() + vec3(0, 0, 150)
+    // wick = addEffect(Abilities.serpentWardMissile, wickPos)
+    //   ..setPitch(90..asAngleDegrees())
+    fx.eff.setTime(0)
+    fx.eff.setTimeScale(0)
+    fx.eff.setYaw(90..asAngleDegrees())
+    countdown()
+    onEnd() -> 
+      explode()
+
+  function countdown()
+    doPeriodically(0.7) cb ->
+      fx.eff.setAlpha(225)
+      if countdown == 0
+        destroy cb
+        if not done
+          terminate()
+      else
+        SOUND_COUNTDOWN.playOnPoint(pos)
+        new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
+        countdown -= 1
+
+  // override function update()
+  //   super.update()
+  //   wickPos += vec3(0, 0, -1)
+  //   wick.setPos(wickPos)
+   
+  function explode()
+    // wick.destr()
+    fx.eff.setTimeScale(1)
+    fx.eff.setScale(3)
+    // flashEffect(Objects.neutralBuildingExplosion, pos)
+    source.blastArea(pos, dynamite.minRadius, dynamite.maxRadius, dynamite.maxDamage)

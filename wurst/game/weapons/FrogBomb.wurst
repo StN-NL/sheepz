@@ -1,0 +1,63 @@
+package FrogBomb
+import Assets
+import ClosureTimers
+import ConfigGame
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import Utils
+
+
+public class FrogBomb extends ProjectileSheep
+  bool triggered = false
+
+  construct(SheepEntity source)
+    super(source, frogBomb.minRadius, Units.frog)
+    silent = true
+    conservationBounce = 0.8
+    soundBounce = SOUND_FROG
+    scaleVelXY(0.8)
+    fx.eff.setTimeScale(0.2)
+
+  override function update()
+    alignYawAndPitch()
+    bounceOfWalls()
+    super.update()
+
+  override function onGroundHit()
+    super.onGroundHit()
+    if not bounceOfGround() and not triggered
+      triggered = true
+      explode()
+
+  function explode()
+    SOUND_CRAZY_FROG_RING.playOnPoint(pos)
+    doAfter(1) ->
+      for _ = 1 to frogBomb.shards
+        new FrogBombShard(source, pos)
+      
+      boom()
+
+  function boom()
+    SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
+    flashEffect(Objects.toonBoom, pos, 3)
+    source.blastArea(pos, frogBomb.minRadius, frogBomb.maxRadius, frogBomb.maxDamage)
+    terminate()
+
+public class FrogBombShard extends FrogBomb
+
+  construct(SheepEntity source, vec3 pos)
+    super(source)
+    setPos(pos)
+
+  override function setPhysics()
+    setXYAngle(getRandomAngle())
+    let power = GetRandomReal(0.5, 1.5) * frogBomb.shardsPower
+    setSpeed(power)
+    vel.z = PROJECTILE_FACTOR_Z * power
+
+  override function explode()
+    SOUND_CRAZY_FROG_RING.playOnPoint(pos)
+    doAfter(1) ->
+      boom()

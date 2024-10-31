@@ -1,0 +1,63 @@
+package ChickenBomb
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import MyAssets
+import ProjectileSheep
+import SheepEntity
+import TextTagEntity
+
+
+public class ChickenBomb extends ProjectileSheep
+  let baseAttachmentPoint = vec3(0, 0, 50)
+  int countdown = chickenBomb.delay.toInt()
+  unit buddy = null
+  
+  construct(SheepEntity source)
+    super(source, chickenBomb.minRadius, Units.easterChicken1)
+    soundBounce = SOUND_CHICKEN.getRandomElement()
+    scaleVelXY(0.8)
+
+    onHit3D() target ->
+      if buddy == null
+        buddy = target.actor
+        arm()
+      
+    onEnd() -> 
+      explode()
+
+  function arm()
+    SOUND_CHICKEN.getRandomElement().playOnPoint(pos)
+    doPeriodically(1.0) cb ->
+      if countdown == 0
+        destroy cb
+        if not done
+          terminate()
+      else
+        SOUND_CHICKEN.getRandomElement().playOnPoint(pos)
+        SOUND_COUNTDOWN.playOnPoint(pos)
+        new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
+        countdown -= 1
+
+      // if countdown == 1
+      //   SOUND_CHICKEN_NUGGETS.playOnPoint(pos)
+
+  override function update()
+    bounceOfWalls()
+    super.update()
+    if buddy != null
+      setPos(getAttachmentPoint())
+
+  function getAttachmentPoint() returns vec3
+    return buddy.getPos3Real() + baseAttachmentPoint
+
+  override function onGroundHit()
+    bounceOfGround()
+    super.onGroundHit()
+
+  function explode()
+    fx.eff.setScale(1.6)
+    fx.eff.setTimeScale(1)
+    SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
+    flashEffect(Objects.toonBoom, pos, 3)
+    source.blastArea(pos, chickenBomb.minRadius, chickenBomb.maxRadius, chickenBomb.maxDamage)
