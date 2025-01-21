@@ -1,8 +1,8 @@
 package Molotov
 import Abilities
 import ConfigWeapons
-import MyEntity
-import ProjectileSheep
+import MyUnitEntity
+import MyProjectile
 import SheepEntity
 import Utils
 import ConfigGame
@@ -11,7 +11,7 @@ import ClosureTimers
 import Heightmap
 
 
-public class MolotovCocktail extends ProjectileSheep
+public class MolotovCocktail extends MyProjectile
   
   construct(SheepEntity source)
     super(source, molotov.minRadius, Abilities.brewmasterMissile1)
@@ -20,7 +20,7 @@ public class MolotovCocktail extends ProjectileSheep
         terminate()
     
     onEnd() -> 
-      if not isDeepWater
+      if not isUnderWater
         explode()
       
   override function onGroundHit()
@@ -33,19 +33,20 @@ public class MolotovCocktail extends ProjectileSheep
     super.update()
    
   function explode()
-    flashEffect(Abilities.fireBallMissile, pos, 2.5)
-    source.blastArea(pos, molotov.minRadius, molotov.maxRadius, molotov.maxDamage)
+    let explosionPos = getPos()
+    flashEffect(Abilities.fireBallMissile, explosionPos, 2.5)
+    source.blastArea(explosionPos, molotov.minRadius, molotov.maxRadius, molotov.maxDamage)
     for _ = 1 to molotov.shards
       new MolotovShard(source, pos)
 
     doPeriodicallyTimed(0.5, molotov.duration) (CallbackCounted cb) ->
-      forUnitsInRange(pos.toVec2(), molotov.maxRadius) u ->
-        if u.isSheep() and u.getPos3Real().z < pos.getHeightMap() + 100
+      forUnitsInRange(explosionPos.toVec2(), molotov.maxRadius) u ->
+        if u.isSheep() and u.getPos3Real().z < explosionPos.getHeightMap() + 100
           let target = u.getSheep()
-          source.fireBlast(target, molotov.maxDamage, pos)
+          source.fireBlast(target, molotov.maxDamage, explosionPos)
       
 
-public class MolotovShard extends ProjectileSheep
+public class MolotovShard extends MyProjectile
 
   construct(SheepEntity source, vec3 pos)
     super(source, molotov.minRadius, Abilities.flameStrikeEmbers)

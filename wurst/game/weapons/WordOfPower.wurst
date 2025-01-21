@@ -6,12 +6,13 @@ import ConfigWeapons
 import Entity
 import HashSet
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import SoundUtils
 
 
 public function SheepEntity.youShallNotPass()
+  this.owner.print(("Hold at least " + wordOfPower.delay.toString(0) + " seconds!").color(COLOR_GOLD))
   this.immobalize(true)
   let pos = this.getPos()
   new SoundDefinition(MySounds.youShallNotPass).playOnPoint(pos)
@@ -23,16 +24,14 @@ public function SheepEntity.youShallNotPass()
 
 public function SheepEntity.wordOfpower()
   this.immobalize(false)
-  if this.owner.getFiringPower() < wordOfPower.delay
-    print("Hold at least " + wordOfPower.delay.toString(0) + " seconds!")
-  else
+  if this.owner.getFiringPower() >= wordOfPower.delay
     let sharedHitGroup = new HashSet<UnitEntity>
     for ii = 1 to wordOfPower.shards
       let xyA = (360 / wordOfPower.shards * ii).asAngleDegrees()
       new WordOfPowerProjectile(this, xyA, sharedHitGroup)
   
   
-public class WordOfPowerProjectile extends ProjectileSheep
+public class WordOfPowerProjectile extends MyProjectile
   HashSet<UnitEntity> sharedHitGroup
   
   construct(SheepEntity source, angle xyA, HashSet<UnitEntity> sharedHitGroup)

@@ -2,12 +2,12 @@ package Grenade
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import TextTagEntity
 
 
-public class Grenade extends ProjectileSheep
+public class Grenade extends MyProjectile
   int countdown = grenade.delay.toInt()
   
   construct(SheepEntity source)

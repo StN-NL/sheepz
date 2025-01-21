@@ -1,12 +1,18 @@
 package Weapons
 import Arsenal
+import Assets
+import ClosureTimers
+import ConfigGame
 import ConfigWeapons
+import SheepEntity
 // Weapons
 import AirStrike
+import Ascension
 import Baloonicide
 import BaseballBat
 import Bazooka
 import Bladestorm
+import BoomerHammer
 import ChickenBomb
 import CloudGenerator
 import ClusterBomb
@@ -19,31 +25,60 @@ import GuidedMissile
 import HammerDrop
 import HolyGrenade
 import LandMine
+import Leap
 import Minigun
 import Molotov
 import RainOfChaos
 import RiotShield
 import Shotgun
 import Teleport
+import VillagerKid
+import Web
 import WordOfPower
 import WormRider
+
+
+public function SheepEntity.charge()
+  let rightHand = addEffect(Abilities.bloodLustTarget, this.actor, SpecialAttachmentPoints.rightHand)
+  let leftHand = addEffect(Abilities.bloodLustTarget, this.actor, SpecialAttachmentPoints.leftHand)
+  this.addScale(0.2)
+  this.addMoveSpeed(CHARGE_MS_BONUS)
+  doPeriodically(ANIMATION_PERIOD) cb ->
+    let dt = this.owner.getChannelTime()
+    if dt == 0. or dt > CHARGE_MAX_CHANNEL_TIME
+      rightHand.destr()
+      leftHand.destr()
+      this.addScale(-0.2)
+      this.addMoveSpeed(-CHARGE_MS_BONUS)
+      destroy cb
 
 
 public function initWeapons()
   addListenersOnChannel()
   addListenersOnCast()
 
+
 function addListenersOnChannel()
+  baloonicide.onChannel(sheep -> sheep.charge())
+  baseballBat.onChannel(sheep -> sheep.charge())
+  bladestorm.onChannel(sheep -> sheep.charge())
+  fusRoDah.onChannel(sheep -> sheep.charge())
+  riotShield.onChannel(sheep -> sheep.charge())
+
+  ascension.onChannel(sheep -> sheep.ascension())
   baloonicide.onChannel(sheep -> sheep.swell())
   wordOfPower.onChannel(sheep -> sheep.youShallNotPass())
+
       
 function addListenersOnCast()
   airStrike.onPointCast((sheep, target) -> new AirStrike(sheep, target))
+  ascension.onPointCast((sheep, target) -> sheep.rejection(target))
   baloonicide.onCast(sheep -> sheep.baloonicide())
   baseballBat.onCast(sheep -> sheep.bat())
   bazooka.onCast(sheep -> new BazookaProjectile(sheep))
   bladestorm.onCast(sheep -> sheep.bladestorm())
-  chickenBomb.onCast((sheep -> new ChickenBomb(sheep)))
+  boomerHammer.onCast(sheep -> new BoomerHammer(sheep))
+  chickenBomb.onCast(sheep -> new ChickenBomb(sheep))
   cloudGenerator.onCast(sheep -> new Cloud(sheep))
   clusterBomb.onCast(sheep -> new ClusterBomb(sheep))
   dynamite.onCast(sheep -> new Dynamite(sheep))
@@ -55,11 +90,14 @@ function addListenersOnCast()
   hammerDrop.onPointCast((sheep, target) -> new HammerDrop(sheep, target))
   holyGrenade.onCast(sheep -> new HolyGrenade(sheep))
   landmine.onCast(sheep -> new LandMine(sheep))
+  leap.onCast(sheep -> sheep.leap())
   minigun.onCast(sheep -> sheep.minigun())
   molotov.onCast(sheep -> new MolotovCocktail(sheep))
-  riotShield.onCast(sheep -> sheep.riotShield())
   rainOfChaos.onPointCast((sheep, target) -> sheep.rainOfChaos(target))
+  riotShield.onCast(sheep -> sheep.riotShield())
   shotgun.onCast(sheep -> new ShotgunProjectile(sheep))
   teleport.onPointCast((sheep, target) -> sheep.teleport(target))
+  villagerKid.onCast(sheep -> new VillagerKid(sheep))
+  web.onCast(sheep -> new WebProjectile(sheep))
   wordOfPower.onCast(sheep -> sheep.wordOfpower())
   wormRider.onCast(sheep -> sheep.wormRider())

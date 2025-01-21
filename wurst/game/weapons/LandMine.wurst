@@ -3,12 +3,12 @@ import Assets
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import TextTagEntity
 
 
-public class LandMine extends ProjectileSheep
+public class LandMine extends MyProjectile
   int countdown = landmine.delay.toInt()
   int alpha = 255
   

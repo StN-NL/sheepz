@@ -3,7 +3,7 @@ import Assets
 import ConfigWeapons
 import Fx2Entity
 import MySounds
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
@@ -34,7 +34,7 @@ public class AirStrike extends Fx2Entity
       terminate()
 
 
-public class AirStrikeProjectile extends ProjectileSheep
+public class AirStrikeProjectile extends MyProjectile
   
   construct(SheepEntity source, vec3 pos)
     super(source, airStrike.minRadius, Abilities.tinkerRocketMissile)

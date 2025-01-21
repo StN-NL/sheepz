@@ -12,6 +12,7 @@ public var BAL_MAX_CHANNEL_TIME = 5.
 public var BAL_BONUS_SCALE = 5.
 
 public function SheepEntity.swell()
+  this.addMoveSpeed(40)
   SOUND_WIDE_PUTIN.playOnPoint(this.getPos()).snd.setVolume(60)
   doPeriodically(ANIMATION_PERIOD) cb ->
     let dt = this.owner.getChannelTime()
@@ -22,6 +23,7 @@ public function SheepEntity.swell()
 
 
 public function SheepEntity.baloonicide()
+  this.addMoveSpeed(-40)
   this.setScale(SHEEP_SCALING_VALUE)
   let pos = this.getPos()
   SOUND_BALOONICIDE.playOnPoint(pos)

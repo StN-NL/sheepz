@@ -2,11 +2,11 @@ package HolyGrenade
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
-public class HolyGrenade extends ProjectileSheep
+public class HolyGrenade extends MyProjectile
   bool hallelujah = false
   
   construct(SheepEntity source)
@@ -31,7 +31,7 @@ public class HolyGrenade extends ProjectileSheep
     explode()
 
   function explode()
-    fx.eff.setScale(2)
+    fx.eff.setScale(3)
     fx.eff.setTimeScale(1)
     SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
     source.blastArea(pos, holyGrenade.minRadius, holyGrenade.maxRadius, holyGrenade.maxDamage)

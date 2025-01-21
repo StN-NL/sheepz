@@ -1,0 +1,160 @@
+package MyProjectile
+import Arsenal
+import Assets
+import ClosureForGroups
+import ConfigGame
+import HashSet
+import Heightmap
+import MyUnitEntity
+import MySounds
+import PhysicsEntity
+import Projectile
+import SheepEntity
+import SoundUtils
+
+public interface OnHit3Listener
+  function run(MyUnitEntity target)
+
+public class MyProjectile extends Projectile
+  use PhysicsModule
+  
+  private constant hitGroup3 = new HashSet<MyUnitEntity>
+  
+  private OnHit3Listener onHit3 = null
+  var friendlyFire = false
+  var maxHits = 1
+  
+  real distance = 0.
+
+  real firingPower
+  SheepEntity source
+  bool isUnderWater = false
+  real conservationBounce = 0.5
+  SoundDefinition soundBounce = SOUND_BOUNCE_METAL
+
+  construct(SheepEntity source, real radius, string fxpath)
+    super(source.pos, radius, source.owner, source.actor.getFacingAngle(), fxpath)
+    gravity = defaultGravity
+    this.source = source
+    fx.eff.setScale(PROJECTILE_DEFAULT_SCALE)
+    firingPower = owner.getFiringPower(2)
+    setPhysics()
+
+  function setPermanent()
+    this.maxHits = INT_MAX
+
+  function scaleVelXY(real scaling)
+    vel.x = scaling * vel.x
+    vel.y = scaling * vel.y
+
+  function scaleVelZ(real scaling)
+    vel.z = scaling * vel.z
+
+  function onHit3D(OnHit3Listener listener)
+    this.onHit3 = listener
+    
+  function checkHit3(unit u)
+    let target = u.getMyUnitEntity()
+    if pos.distanceTo(target.pos) < radius
+      if not hitGroup3.has(target)
+        if target.owner != owner or friendlyFire
+          hit3(target)
+
+  function removeHitUnit(MyUnitEntity e)
+    if not e.done
+      hitGroup3.remove(e)
+
+  function setPhysics()
+    let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER
+    setSpeed(power)
+    vel.z = PROJECTILE_FACTOR_Z * power
+  
+  override function update()
+    if not done
+      distance += vel.length()
+      updateAirFriction()
+      checkFriendlyFire()
+      enforceDeepWater()
+
+    if not done
+      physicsUpdate(this)
+    if not done
+      checkCollision()
+    if not done
+      super.update()
+
+  function updateAirFriction()
+    scaleVel(1 - 0.005 * PROJECTILE_AIR_FRICTION)
+
+  private function checkFriendlyFire()
+    if not friendlyFire and isAwayFromSource()
+      friendlyFire = true
+
+  private function isAwayFromSource() returns bool
+    return source.pos.distanceTo2d(pos) > radius + 100
+
+  function enforceDeepWater()
+    if isUnderWater
+      if pos.z > terrainZ or pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY)
+        isUnderWater = false
+        onExitDeepWater()
+    else
+      if pos.z < terrainZ and not pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY)
+        isUnderWater = true
+        onEnterDeepWater()
+
+  function onEnterDeepWater()
+    SOUNDS_WATER_ENTER.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+
+  function onExitDeepWater()
+    SOUNDS_WATER_EXIT.getRandomElement().playOnPoint(pos)
+    flashEffect(Abilities.crushingWaveDamage, pos)
+
+  private function checkCollision()
+    if onHit3 != null
+      forUnitsInRange(pos.toVec2(), radius) u ->
+        if not done and hitGroup3.size() < maxHits
+          checkHit3(u)
+
+  private function hit3(MyUnitEntity target)
+    if target.hasShield()
+      scaleVel(-1)
+    else
+      hitGroup3.add(target)
+      onHit3.run(target)
+
+  function wasHit(MyUnitEntity e) returns bool
+    return hitGroup3.has(e)
+
+  function wasHit(unit u) returns bool
+    return hitGroup3.has(u.getMyUnitEntity())
+  
+  function alignYawAndPitch()
+    let yaw = Atan2(vel.y, vel.x).asAngleRadians()
+    let pitch = Atan2(-vel.z, vel.toVec2().length()).asAngleRadians()
+    setXYAngle(yaw)
+    setZAngle(pitch)
+
+  function bounceOfGround() returns bool
+    if vel.z.abs() > 6
+      scaleVelZ(-conservationBounce)
+      scaleVelXY(conservationBounce)
+      fx.eff.setTimeScale(0.1)
+      soundBounce.playOnPoint(pos)
+      return true
+    else
+      fx.eff.setTimeScale(0.0)
+      return false
+      
+  function bounceOfWalls()
+    let z0 = pos.getHeightMap()
+    let z1 = (pos + vel).getHeightMap()
+    if z1 > z0 and z1 > pos.z + 20
+      scaleVelXY(-1)
+      soundBounce.playOnPoint(pos)
+
+  ondestroy
+    destroy hitGroup3
+    if onHit3 != null
+      destroy onHit3

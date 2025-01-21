@@ -13,7 +13,6 @@ public function SheepEntity.bat()
 
 class BaseballBat extends Fx2Entity
   SheepEntity source
-  vec3 origin = vec3(-15, 0, 30)
   angle yaw = angle(3 * bj_PI / 2)
   real lifetime = 0.
 
@@ -23,12 +22,12 @@ class BaseballBat extends Fx2Entity
     silent = true
     fx.eff.setScale(2)
     let facing = source.actor.getFacingAngle()
-    let posBat = origin + source.getPos().offset2d(facing, 30)
+    let posBat = source.origin + vec3(0, 0, baseballBat.maxRadius / 6) + source.getPos().offset2d(facing, baseballBat.maxRadius / 3)
     punch(posBat)
 
   override function update()
     let facing = source.actor.getFacingAngle()
-    let posBat = origin + source.getPos().offset2d(facing, 30)
+    let posBat = source.origin + vec3(0, 0, baseballBat.maxRadius / 6) + source.getPos().offset2d(facing, baseballBat.maxRadius / 3)
     yaw += angle(bj_PI / 20)
     fx.eff.setYaw(facing + yaw)
     setPos(posBat)
@@ -38,7 +37,7 @@ class BaseballBat extends Fx2Entity
       terminate()
 
   function punch(vec3 posBat)
-    SOUND_BASEBALL_BAT.playOnPoint(posBat)
+    SOUND_PUNCH.playOnPoint(posBat)
     doAfter(0.5) ->
       forUnitsInRange(posBat.toVec2(), radius) u ->
         let target = u.getEntity()

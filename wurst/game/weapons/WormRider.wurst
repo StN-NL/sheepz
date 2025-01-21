@@ -5,8 +5,8 @@ import Fx2Entity
 import ConfigWeapons
 import HashMap
 import MyAssets
+import MyProjectile
 import SheepEntity
-import Projectile3
 import Utils
 
 
@@ -20,7 +20,7 @@ public function SheepEntity.getWormRider() returns WormRider
   return WormRider.get(this)
 
 
-class WormRider extends Projectile3
+class WormRider extends MyProjectile
   private static constant map = new HashMap<SheepEntity, thistype>
 
   SheepEntity e
@@ -28,7 +28,7 @@ class WormRider extends Projectile3
   real duration = 0.
 
   construct(SheepEntity e)
-    super(e.pos, wormRider.minRadius, e.owner, angle(0), "")
+    super(e, wormRider.minRadius, "")
     this.e = e
     setPermanent()
     removeEffectPlain()
@@ -58,18 +58,16 @@ class WormRider extends Projectile3
     else
       removeEffect()
 
-    if e.pos.toVec2().isTerrainDeepWater() and duration > ANIMATION_PERIOD
+    if e.pos.z < e.terrainZ and not e.pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY) and duration > ANIMATION_PERIOD
       duration = ANIMATION_PERIOD
 
   private function createEffect()
-    e.setName(owner.getName() + " Muad'Dib")
+    e.setHeroName(owner.getName() + " Muad'Dib")
     SOUND_LISAN_AL_GAIB.playOnPoint(e.pos)
     e.offsetModel(100)
     setFx(Units.duneWorm1)
     fx.eff.setScale(5)
     fx.eff.playAnimation(ANIM_TYPE_WALK, 0.2)
-    // doAfter(1) -> 
-    //   SOUND_DUNE_WOMAN_2.playOnPoint(e.pos).snd.setVolume(60)
       
   private function updateEffect()
     let facing = e.actor.getFacingAngle()
@@ -80,7 +78,7 @@ class WormRider extends Projectile3
       flashEffect(Objects.impaleTargetDust, pos)
 
   private function removeEffect()
-    e.resetName()
+    e.resetHeroName()
     e.offsetModel(-100)
     removeEffectPlain()
 

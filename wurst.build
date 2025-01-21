@@ -4,8 +4,8 @@ dependencies:
 - https://github.com/wurstscript/wurstStdlib2
 - https://github.com/Frotty/Frentity
 buildMapData:
-  name: '|cffff0095Sheepz 0.1.1|r'
-  fileName: Sheepz 0.1.1
+  name: '|cffff0095Sheepz 0.1.8|r'
+  fileName: Sheepz 0.1.8
   author: stn
   scenarioData:
     description: Duke it out with the other sheeps. WurstScript powered!

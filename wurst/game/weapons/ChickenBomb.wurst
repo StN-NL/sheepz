@@ -3,19 +3,19 @@ import Assets
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import TextTagEntity
 
 
-public class ChickenBomb extends ProjectileSheep
+public class ChickenBomb extends MyProjectile
   let baseAttachmentPoint = vec3(0, 0, 50)
   int countdown = chickenBomb.delay.toInt()
   unit buddy = null
   
   construct(SheepEntity source)
     super(source, chickenBomb.minRadius, Units.easterChicken1)
-    soundBounce = SOUND_CHICKEN.getRandomElement()
+    soundBounce = SOUNDS_CHICKEN.getRandomElement()
     scaleVelXY(0.8)
 
     onHit3D() target ->
@@ -27,14 +27,14 @@ public class ChickenBomb extends ProjectileSheep
       explode()
 
   function arm()
-    SOUND_CHICKEN.getRandomElement().playOnPoint(pos)
+    SOUNDS_CHICKEN.getRandomElement().playOnPoint(pos)
     doPeriodically(1.0) cb ->
       if countdown == 0
         destroy cb
         if not done
           terminate()
       else
-        SOUND_CHICKEN.getRandomElement().playOnPoint(pos)
+        SOUNDS_CHICKEN.getRandomElement().playOnPoint(pos)
         SOUND_COUNTDOWN.playOnPoint(pos)
         new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
         countdown -= 1

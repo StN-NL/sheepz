@@ -5,11 +5,11 @@ import ClosureTimers
 import ConfigWeapons
 import Entity
 import MySounds
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
-public class Cloud extends ProjectileSheep
+public class Cloud extends MyProjectile
 
   construct(SheepEntity source)
     super(source, cloudGenerator.minRadius, Abilities.cloudOfFog)

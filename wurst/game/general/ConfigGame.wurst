@@ -1,21 +1,26 @@
 package ConfigGame
 
+public constant GRID_L = 512.
+
 public enum GameMode
   TIMED
   SURVIVAL
 
 public enum MapSelection
   TROPICAL_ISLAND
+  THE_ARENA
 
 // <<<<<<< GENERAL >>>>>>>>>>>>
+public var IS_ANARCHY = false
 public var GAME_MODE = GameMode.TIMED
 public var MAP_SELECTION = MapSelection.TROPICAL_ISLAND
 public var GAME_DURATION = 10.
 public var MAX_PLAYERS = 8
-public var WATER_LEVEL = 200.
-public var HEAVEN = vec3(0, 0, 2000)
-public var MAP_MAX = vec2(-5000, 12280)
-public var MAP_MIN = vec2(-12280, 5000)
+public var CENTER = vec2(0, 0)
+public var MAP_BOTTOMLEFT = vec2(-16*512., -16*512.)
+public var MAP_TOPRIGHT = vec2(16*512., 16*512.)
+public var MAP_TOPLEFT = vec2(-16*512., 16*512.)
+public var MAP_BOTTOMRIGHT = vec2(16*512., -16*512.)
 
 // <<<<<<< COLORS >>>>>>>>>>>>
 public var PINK = color(255, 0, 149)
@@ -28,7 +33,7 @@ public var LEGENDARY = color(255,128,0)
 public var EPIC = color(163,53,238)
 public var RARE = color(0,112,221)
 public var UNCOMMON = color(30,255,0)
-public var COMMON = color(255,255,255)
+public var COMMON = color(188, 188, 188)
 
 // <<<<<<< ARSENAL >>>>>>>>>>>>
 public var ARSENAL_COOLDOWN = 1.
@@ -41,25 +46,29 @@ public var ARSENAL_DRAFT_INTERVAL = 10.
 public var SHEEP_MAX_LIVES = 3
 public var SHEEP_MAX_HP = 200.
 public var SHEEP_SCALING_VALUE = 2.
-public var SHEEP_MS_NORMAL = 200.
-public var SHEEP_MS_DEEP_WATER = 100.
-public var SHEEP_MS_FLYING = 0.
-public var SHEEP_MS_JET_PACK = 150.
+public var SHEEP_MS_NORMAL = 100.
+public var SHEEP_MS_DEEP_WATER = 60.
+public var SHEEP_MS_FLYING = 50.
+public var SHEEP_MS_JET_PACK = 100.
 public var SHEEP_GRAVE_DURATION = 60.
 public var DELTA_OXYGEN = 1.
 public var JUMP_MAX_HEIGHT = 1000.
 public var JET_PACK_MAX_HEIGHT = 1000.
+public var JET_PACK_DURATION = 3.
 public var JET_PACK_COOLDOWN = 30.
 public var PARACHUTE_COOLDOWN = 10.
 public var TICKLE_KNOCK_BACK = 40.
+public var CHARGE_MAX_CHANNEL_TIME = 2.
+public var CHARGE_MS_BONUS = 100.
 
 // <<<<<<< FALL_DAMAGE >>>>>>>>>>>>
 public var FALL_DAMAGE_MIN_VEL_Z = 25.
-public var FALL_DAMAGE_RADIUS = 150.
-public var FALL_DAMAGE_DAMAGE_FACTOR = 2.
+public var FALL_DAMAGE_RADIUS = 400.
+public var FALL_DAMAGE_DAMAGE_FACTOR = 5.
 public var FALL_DAMAGE_KNOCKBACK_FACTOR = 5.
 
 // <<<<<<< MISC >>>>>>>>>>>>
+public var UNIT_AIR_FRICTION = 2.
 public var KNOCKBACK_FACTOR_XY = 1.
 public var KNOCKBACK_FACTOR_Z = 1.
 
@@ -69,3 +78,9 @@ public var PROJECTILE_DEFAULT_SCALE = 1.2
 public var PROJECTILE_BASE_POWER = 8.
 public var PROJECTILE_POWER_FACTOR = 13.
 public var PROJECTILE_FACTOR_Z = 1.5
+
+// <<<<<<< RARITY LEVELS >>>>>>>>>>>>
+public var RARITY_UNCOMMON = 25
+public var RARITY_RARE = 10
+public var RARITY_EPIC = 5
+public var RARITY_LEGENDARY = 2

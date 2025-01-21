@@ -1,17 +1,19 @@
 package Arsenal
 import public ChannelAbilityPreset
 import ClosureEvents
+import ClosureForGroups
 import ClosureKeyPresses
 import ClosureTimers
+import ConfigGame
 import FramehandleNames
 import GameTimer
 import HashMap
 import InstantDummyCaster
-import MapBounds
-import ConfigGame
-import ClosureForGroups
 import LinkedList
+import MapBounds
 import SheepEntity
+
+constant CONSOLE_UI = getFrame("ConsoleUIBackdrop", 0)
 
 public enum FiringType
   INSTANT
@@ -142,13 +144,13 @@ public function txtTargetPoint() returns string
   return targetType("Point", GREEN)
 
 public function string.colorRarity(int rarity) returns string
-  if rarity <= 2
+  if rarity <= RARITY_LEGENDARY
     return rarityType(this, LEGENDARY)
-  else if rarity <= 5
+  else if rarity <= RARITY_EPIC
     return rarityType(this, EPIC)
-  else if rarity <= 10
+  else if rarity <= RARITY_RARE
     return rarityType(this, RARE)
-  else if rarity <= 25
+  else if rarity <= RARITY_UNCOMMON
     return rarityType(this, UNCOMMON)
   else
     return rarityType(this, COMMON)
@@ -274,6 +276,8 @@ class Arsenal
     doPeriodicallyCounted(0.01, 20) cb -> 
       if isCasting
         ForceUIKeyBJ(owner, "Q")
+      else
+        destroy cb
 
   protected function restoreSelection()
     if isCasting
@@ -301,6 +305,7 @@ public class WeaponDefinition
   Targettype ttype
   var name = "Unknown"
   var description = "Nondescript"
+  var tooltip = "Unknown"
   var rarity = 100
   var amount = 0
   var duration = 0.
@@ -344,12 +349,20 @@ public class WeaponDefinition
 
   function setName(string name)
     this.realname = name
-    this.name = realname.colorRarity(rarity)
+    updateName()
 
   function setDescription(string description)
     this.description = description
     addFiringTypeDescription()
     addTargetTypeDescription()
+    updateTooltip()
+
+  private function updateName()
+    this.name = realname.colorRarity(rarity)
+    updateTooltip()
+
+  private function updateTooltip()
+    this.tooltip = this.name + "\n" + this.description
 
   private function addFiringTypeDescription()
     switch ftype
@@ -358,7 +371,7 @@ public class WeaponDefinition
       case CHARGED
         this.description += txtFiringCharged()
       case POWERFUL
-        this.description += txtFiringCharged()
+        this.description += txtFiringPowerful()
 
   private function addTargetTypeDescription()
     switch ttype
@@ -369,7 +382,7 @@ public class WeaponDefinition
 
   function setRarity(int rarity)
     this.rarity = rarity
-    this.name = realname.colorRarity(rarity)
+    updateName()
 
   function setAmount(int amount)
     this.amount = amount
@@ -496,7 +509,8 @@ public class WeaponDefinition
 class Weapon
   private framehandle frameButton
   private framehandle frameIcon
-  // private framehandle frameToolTip
+  private framehandle frameToolTipBackground
+  private framehandle frameToolTipText
   private framehandle frameStacks
   private framehandle frameHotkey
   
@@ -511,31 +525,37 @@ class Weapon
     this.def = def
     this.owner = owner
 
-    frameButton = createFrame(FramehandleTypeNames.gluetextbutton, "", GAME_UI, "ScoreScreenTabButtonTemplate", 0)
-      ..setLevel(9)
-      ..setSize(0.04, 0.04)
-      ..setVisible(false)
+    frameButton = createFrame(FramehandleTypeNames.gluetextbutton, "", CONSOLE_UI, "ScoreScreenTabButtonTemplate", 0)
+    ..setLevel(9)
+    ..setSize(0.04, 0.04)
+    ..setVisible(false)
     
     frameIcon = createFrame(FramehandleTypeNames.backdrop, "", frameButton, "", 0)
-      ..setAllPoints(frameButton)
-      ..setTexture(def.icon, 0, true)
+    ..setAllPoints(frameButton)
+    ..setTexture(def.icon, 0, true)
 
-    // frameToolTip = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
-    //   ..setPoint(FRAMEPOINT_TOPRIGHT, frameButton, FRAMEPOINT_TOPRIGHT, vec2(-0.002, -0.002))
-    //   ..setEnabled(false)
-    //   ..setText("Nothing will Happen when you click this Button.")
+    frameToolTipBackground = BlzCreateFrame(FramehandleNames.questButtonBaseTemplate, GAME_UI, 0, 0)
+    ..setSize(0.2, 0.06)
+    ..setPoint(FRAMEPOINT_BOTTOM, frameButton, FRAMEPOINT_TOP)
+
+    frameToolTipText = BlzCreateFrameByType(FramehandleTypeNames.text, "MyScriptDialogButtonTooltip", frameToolTipBackground, "", 0)
+    ..setSize(0.18, 0.05)
+    ..setPoint(FRAMEPOINT_TOP, frameToolTipBackground, FRAMEPOINT_TOP, 0, -0.01)
+    ..setText(def.tooltip)
+    ..disable()
+
+    frameButton
+    ..setTooltip(frameToolTipBackground)
 
     frameStacks = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
-      ..setPoint(FRAMEPOINT_TOPRIGHT, frameIcon, FRAMEPOINT_TOPRIGHT, vec2(-0.002, -0.002))
-      ..disable()
-      ..setScale(1.5)
+    ..setPoint(FRAMEPOINT_TOPRIGHT, frameIcon, FRAMEPOINT_TOPRIGHT, -0.002, -0.002)
+    ..disable()
+    ..setScale(1.5)
 
     frameHotkey = createFrame(FramehandleTypeNames.text, "", frameButton, "", 0)
-      ..setPoint(FRAMEPOINT_BOTTOMLEFT, frameIcon, FRAMEPOINT_BOTTOMLEFT, vec2(0.002, 0.002))
-      ..disable()
-      ..setScale(1.5)
-
-    // frameButton.setTooltip(frameToolTip)
+    ..setPoint(FRAMEPOINT_BOTTOMLEFT, frameIcon, FRAMEPOINT_BOTTOMLEFT, 0.002, 0.002)
+    ..disable()
+    ..setScale(1.5)
 
   protected function setIndex(int index)
     this.index = index
@@ -551,8 +571,8 @@ class Weapon
 
   protected function show()
     if stacks > 0
-      let x = 0.315 + 0.04 * ModuloInteger(index, 4)
-      let y = 0.062 - 0.04 * (index / 4).toInt()
+      let x = 0.24 + 0.04 * index
+      let y = 0.145
       frameButton.setAbsPoint(FRAMEPOINT_BOTTOMLEFT, x, y)
       frameStacks.setText(stacks.toString().color(COLOR_WHITE))
       frameHotkey.setText(hotkeys[index].name.color(PLAYER_COLORS[0]))
@@ -567,7 +587,7 @@ class Weapon
 
 @compiletime function gen()
   new UnitDefinition(DUMMY_ARSENAL_UNIT_ID, 'ewsp')
-    ..setName("Da Book")
+    ..setName("Arsenal")
     ..setMovementType(MovementType.Fly)
     ..setUpgradesUsed("")
     ..setCollisionSize(0.0)

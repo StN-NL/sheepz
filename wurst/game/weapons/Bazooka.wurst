@@ -1,11 +1,11 @@
 package Bazooka
 import Abilities
 import ConfigWeapons
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
-public class BazookaProjectile extends ProjectileSheep
+public class BazookaProjectile extends MyProjectile
   
   construct(SheepEntity source)
     super(source, bazooka.minRadius, Abilities.cannonTowerMissile)

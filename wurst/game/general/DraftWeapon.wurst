@@ -3,12 +3,11 @@ import Arsenal
 import ClosureEvents
 import ClosureFrames
 import ClosureTimers
+import ConfigGame
 import ConfigWeapons
 import HashMap
-import Sheeps
-import ConfigGame
+import MyAssets
 import Utils
-import MySounds
 
 constant WEAPON_CARD_SLOTS = 3
 
@@ -25,6 +24,7 @@ public function initWeaponDraft()
     p.draftPeriodically()
 
 function player.draftPeriodically()
+  // this pattern allows for the draft interval to change
   this.addLumber(1)
   doAfter(ARSENAL_DRAFT_INTERVAL) -> 
     this.draftPeriodically()
@@ -126,13 +126,3 @@ public class WeaponCard
     SOUND_BUTTON_CLICK.playForPlayer(owner).snd.setVolume(50)
     frameBox.setVisible(owner, false)
     owner.addWeapon(def, 1)
-
-@compiletime function gen()
-  new ChannelAbilityPreset(ABIL_ID_DRAFT_WEAPON, 1, true)
-    ..setTooltipNormal(1, "Weapon draft".color(PINK))
-    ..setTooltipNormalExtended(1, "Exciting! Grab and run!")
-    ..makeUnitSpell(0, 1.)
-    ..presetHotkey("F")
-    ..presetButtonPosNormal(3, 1)
-    ..presetIcon(Icons.bTNCrate)
-    ..presetTargetTypes(Targettype.NONE)

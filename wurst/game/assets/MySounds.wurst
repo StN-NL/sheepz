@@ -12,6 +12,7 @@ public class MySounds
   static constant chickenNuggets = "Sounds\\ChickenNuggets.mp3"
   static constant crazyFrogRing = "Sounds\\CrazyFrogRing.mp3"
   static constant dejaVu = "Sounds\\DejaVu.mp3"
+  static constant dryFart = "Sounds\\DryFart.mp3"
   static constant duneWoman1 = "Sounds\\DuneWoman1.mp3"
   static constant duneWoman2 = "Sounds\\DuneWoman2.mp3"
   static constant fusRoDah = "Sounds\\FusRoDah.mp3"
@@ -44,13 +45,13 @@ public constant MUSIC_AXEL_F = new SoundDefinition(MyMusic.axelF, true)
 public constant SOUND_AIRHORN = new SoundDefinition(MySounds.airhorn)
 public constant SOUND_ARCHIMONDE_LAUGH = new SoundDefinition(Sounds.n01Archimonde30)
 public constant SOUND_BALOONICIDE = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1)
-public constant SOUND_BASEBALL_BAT = new SoundDefinition(MySounds.punch)
 public constant SOUND_BOUNCE_METAL = new SoundDefinition(Sounds.metalLightChopMetal1)
 public constant SOUND_BUTTON_CLICK = new SoundDefinition(Sounds.bigButtonClick)
 public constant SOUND_CHICKEN_NUGGETS = new SoundDefinition(MySounds.chickenNuggets)
 public constant SOUND_COUNTDOWN = new SoundDefinition(Sounds.battleNetTick)
 public constant SOUND_CRAZY_FROG_RING = new SoundDefinition(MySounds.crazyFrogRing)
 public constant SOUND_DEJA_VU = new SoundDefinition(MySounds.dejaVu)
+public constant SOUND_DRY_FART = new SoundDefinition(MySounds.dryFart)
 public constant SOUND_DROP_SUPPLIES = new SoundDefinition(Sounds.goblinSapperPissed6)
 public constant SOUND_DUNE_WOMAN_1 = new SoundDefinition(MySounds.duneWoman1)
 public constant SOUND_DUNE_WOMAN_2 = new SoundDefinition(MySounds.duneWoman2)
@@ -66,6 +67,7 @@ public constant SOUND_MWAHAHAHA = new SoundDefinition(MySounds.mwahahaha)
 public constant SOUND_NEED_HEALING = new SoundDefinition(MySounds.needHealing)
 public constant SOUND_NOOO = new SoundDefinition(MySounds.nooo)
 public constant SOUND_PICKUP_SUPPLIES = new SoundDefinition(Sounds.ammoDumpWhat1)
+public constant SOUND_PUNCH = new SoundDefinition(MySounds.punch)
 public constant SOUND_RIOT_SHIELD = new SoundDefinition(Sounds.defendCaster1)
 public constant SOUND_SHEEP_1 = new SoundDefinition(Sounds.sheep1)
 public constant SOUND_SHEEP_2 = new SoundDefinition(Sounds.sheep2)
@@ -128,15 +130,23 @@ public constant SOUNDS_AIR_STRIKE = asList(
   new SoundDefinition(Sounds.goblinZeppelinYes4)
 )
 
-public constant SOUND_CHICKEN = asList(
+public constant SOUNDS_CHICKEN = asList(
   new SoundDefinition(Sounds.chickenWhat1),
   new SoundDefinition(Sounds.chickenWhat11)
 )
 
-public constant SOUND_FLAMETHROWER = asList(
+public constant SOUNDS_FLAMETHROWER = asList(
   new SoundDefinition(Sounds.fireBallMissileLaunch1),
   new SoundDefinition(Sounds.fireBallMissileLaunch2),
   new SoundDefinition(Sounds.fireBallMissileLaunch3)
+)
+
+public constant SOUNDS_VILLAGER_KID = asList(
+  new SoundDefinition(Sounds.villagerCWhat1),
+  new SoundDefinition(Sounds.villagerCWhat2),
+  new SoundDefinition(Sounds.villagerCWhat3),
+  new SoundDefinition(Sounds.villagerCWhat4),
+  new SoundDefinition(Sounds.villagerCWhat5)
 )
 
 public constant SOUNDS_WOR_HIT = asList(

@@ -1,0 +1,138 @@
+package Miscellaneous
+import Assets
+import Board
+import ClosureEvents
+import ConfigGame
+import LinkedList
+import MyAssets
+import Quest
+import SoundUtils
+import Utils
+
+public constant SLOGAN = "Welcome to |cffff0095Sheepz|r, where candy is free and weapons come cheap!"
+
+DynamicCellValue<int> array[24] LIVES
+DynamicCellValue<int> array[24] POINTS
+
+public function player.getLives() returns int
+  return LIVES[this.getId()].value
+
+public function player.getPoints() returns int
+  return POINTS[this.getId()].value
+
+public function player.setLives(int value)
+  LIVES[this.getId()].updateValue(value)
+
+public function player.setPoints(int value)
+  POINTS[this.getId()].updateValue(value)
+
+public function player.addLives(int value)
+  this.setLives(this.getLives() + value)
+
+public function player.addPoints(int value)
+  this.setPoints(this.getPoints() + value)
+
+public function initMultiboard()
+  let board = new Board("Sheepz (Deluxe Edition)".color(PINK), 0.2)
+  
+  let columns = asList(
+    new BoardColumn("Player".color(COLOR_GOLD), 0.4),
+    new BoardColumn("Points".color(COLOR_GOLD), 0.3)
+  )
+  if GAME_MODE == GameMode.SURVIVAL
+    columns.add(new BoardColumn("Lives".color(COLOR_GOLD), 0.3))
+
+  board.columns(columns)
+
+  for ii = 0 to MAX_PLAYERS - 1
+    let p = players[ii]
+    if getPlayersIngame().has(p) or isSinglePlayer()
+      POINTS[ii] = dynamicCell<int>(0, i -> i.toString())
+      LIVES[ii] = dynamicCell<int>(SHEEP_MAX_LIVES, i -> i.toString())
+      board.addRow()
+        ..addCell(p.getName())
+        ..addDynamic(POINTS[ii])
+        ..addDynamic(LIVES[ii])
+
+  board.show()
+
+
+public function addListenersChat()
+  EventListener.add(EVENT_PLAYER_CHAT_FILTER) ->
+    if EventData.getChatMessage() == "1"
+      SOUND_NOOO.play().snd.setVolume(70)
+    else if EventData.getChatMessage() == "2"
+      SOUND_LAUGH.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "3"
+      SOUND_MWAHAHAHA.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "4"
+      SOUND_YEET.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "5"
+      SOUND_WOLOLO.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "6"
+      SOUND_ILL_BE_BACK.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "7"
+      SOUND_SPARTA.play().snd.setVolume(70)
+    else if EventData.getChatMessage() == "8"
+      SOUND_NEED_HEALING.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "9"
+      SOUND_GOLD_PLEASE.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "10"
+      SOUND_AIRHORN.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "11"
+      SOUND_WHOS_YOUR_DADDY.play().snd.setVolume(30)
+    else if EventData.getChatMessage() == "12"
+      SOUND_YOU_ARE_AN_IDIOT.play().snd.setVolume(40)
+    else if EventData.getChatMessage() == "13"
+      SOUND_SMEAGOL.play()
+    else if EventData.getChatMessage() == "14"
+      SOUND_DUNE_WOMAN_2.play().snd.setVolume(60)
+    else if EventData.getChatMessage() == "15"
+      SOUND_CHICKEN_NUGGETS.play().snd.setVolume(80)
+    else if EventData.getChatMessage() == "16"
+      SOUND_GREAT_CRIME.play().snd.setVolume(40)
+
+
+public function addQuests()
+  new Quest(true)
+  ..setTitle("Welcome!")
+  ..setIcon(Icons.bTNSheep)
+  ..setDescription( 
+    SLOGAN + "\n\n" + 
+    "Collect weapons and obliterate the competition."
+  )
+
+  new Quest(true)
+  ..setTitle("Weapons")
+  ..setIcon(MyIcons.bTNDynamite)
+  ..setDescription(
+    "Weapons come in many varieties, are controlled using the numerical keys |cffffcc001-8|r." + "\n\n" +
+    "Get access to new weapons by using your |cffff0095Weapon draft|r (|cffffcc00T|r) ability!" + "\n\n" + 
+    "Instant".color(BLUE) + " - these weapons fire instantly when releasing the key." + "\n" +
+    "Charged".color(PURPLE) + " - holding down the key will increase the power of the weapon." + "\n" +
+    "Powerful".color(RED) + " - these weapons need to be charged at least a certain amount of seconds to take effect." + "\n\n" +
+    "None".color(YELLOW) + " - these weapons do not require a target but aiming can be smart." + "\n" +
+    "Point".color(GREEN) + " - these weapons require a target."
+  )
+
+  new Quest(true)
+  ..setTitle("Lore")
+  ..setIcon(Icons.bTNSpellBookBLS)
+  ..setDescription( 
+    "1983. In a parallel universe where the Nazi's conquered the world, genetic manipulation of common lifestock has become a sign of masculinity. " +
+    "A communist sheep revolution has the Nazi overlords sent to the dark side of the moon. This leaves one final question. Who is the most equal of them all?"
+  )
+  
+  new Quest(false)
+  ..setTitle("Credits")
+  ..setIcon(Icons.bTNInnerFire)
+  ..setDescription( 
+    "Lead testing: SuperPear, HolyHenk\n".color(LEGENDARY) +
+    "Testing: MzHyde, PhrasPerNL\n".color(EPIC) +
+    "\n" +
+    "Worms Model Pack: Lord-T-Rex\n".color(UNCOMMON) +
+    "Parachute: Fingolfin\n".color(UNCOMMON) +
+    "Riot Shield: Tr!KzZ\n".color(UNCOMMON) +
+    "Baseball Bat: Kitabatake\n".color(UNCOMMON) +
+    "Bladestorm: Waldbaer & Donut 3.5\n".color(UNCOMMON)
+  )

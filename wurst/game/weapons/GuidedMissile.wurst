@@ -1,12 +1,12 @@
 package GuidedMissile
 import Abilities
 import ConfigWeapons
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import Utils
 
 
-public class GuidedMissile extends ProjectileSheep
+public class GuidedMissile extends MyProjectile
   vec2 target
   bool guided = false
   

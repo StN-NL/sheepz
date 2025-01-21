@@ -3,12 +3,12 @@ package Dynamite
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import TextTagEntity
 
 
-public class Dynamite extends ProjectileSheep
+public class Dynamite extends MyProjectile
   int countdown = dynamite.delay.toInt()
   // effect wick
   // vec3 wickPos

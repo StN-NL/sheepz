@@ -4,13 +4,13 @@ import ClosureTimers
 import ConfigWeapons
 import Fx2Entity
 import Heightmap
-import MyEntity
-import ProjectileSheep
+import MyUnitEntity
+import MyProjectile
 import SheepEntity
 import Utils
 
 
-public class HammerDrop extends ProjectileSheep
+public class HammerDrop extends MyProjectile
   var isHammerLanded = false
   HammeredHorse horse
   

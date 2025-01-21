@@ -4,12 +4,12 @@ import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import Utils
 
 
-public class FrogBomb extends ProjectileSheep
+public class FrogBomb extends MyProjectile
   bool triggered = false
 
   construct(SheepEntity source)

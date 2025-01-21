@@ -1,0 +1,42 @@
+package BoomerHammer
+import Assets
+import ClosureTimers
+import ConfigGame
+import ConfigWeapons
+import MyProjectile
+import SheepEntity
+
+
+public class BoomerHammer extends MyProjectile
+  
+  construct(SheepEntity source)
+    super(source, boomerHammer.minRadius, Abilities.stormBoltMissile)
+    silent = true
+    
+    onHit3D() target ->
+      source.blast(pos, target, boomerHammer.maxDamage, boomerHammer.maxKnockBack)
+      flashEffect(Abilities.stormBoltMissile, target.actor, AttachmentPoints.chest)
+      doAfter(1) ->
+        if not done
+          removeHitUnit(target)
+
+  override function setPhysics()
+    super.setPhysics()
+    setPermanent()
+    gravity = 0
+    addVel(vec3(0, 0, -vel.z))
+    
+  override function update()
+    alignYawAndPitch()
+    boomerang()
+    super.update()
+
+  function boomerang()
+    let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER
+    setPos(getPos().toVec2().withZ(max(source.pos.z, terrainZ + 50) + 20))
+    setVel(power * (vel + getPos().normalizedPointerTo(source.getPos())).norm())
+    let minDistance = distance > 2 * boomerHammer.minRadius
+    let hasReturned = pos.distanceTo(source.pos) < boomerHammer.minRadius
+    if minDistance and hasReturned
+      terminate()
+  

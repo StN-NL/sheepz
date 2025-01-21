@@ -1,0 +1,20 @@
+package Leap
+import Arsenal
+import Assets
+import ConfigGame
+import ConfigWeapons
+import SheepEntity
+
+
+public function SheepEntity.leap()
+  let pos = this.getPos()
+  if pos.z < this.terrainZ + 10
+    this.setPos(vec3(pos.x, pos.y, this.terrainZ + 10))
+
+  flashEffect(Abilities.roarCaster, pos)  
+  let firingPower = this.owner.getFiringPower(2)
+  let direction = this.actor.getFacingAngle().direction()
+  let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER * leap.maxDistance / 1000
+  this.addVel(power * vec3(direction.x, direction.y, 1.5 * PROJECTILE_FACTOR_Z))
+  this.skipFallDamage()
+  

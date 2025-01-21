@@ -3,7 +3,7 @@ import Assets
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
@@ -12,7 +12,7 @@ public function SheepEntity.minigun()
     new MinigunProjectile(this)
     
     
-public class MinigunProjectile extends ProjectileSheep
+public class MinigunProjectile extends MyProjectile
   
   construct(SheepEntity source)
     super(source, minigun.minRadius, Abilities.flyingMachineMissile)

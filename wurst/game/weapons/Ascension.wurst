@@ -1,0 +1,28 @@
+package Ascension
+import Arsenal
+import Assets
+import ClosureTimers
+import ConfigWeapons
+import SheepEntity
+
+
+public function SheepEntity.ascension()
+  this.owner.print(("Hold at least " + ascension.delay.toString(0) + " seconds!").color(COLOR_GOLD))
+  this.immobalize(true)
+  let eff = addEffect(Abilities.resurrectcaster, this.getPos())
+    ..setTimeScale(0.3)
+  
+  doAfter(ascension.delay) -> 
+    eff.destr()
+    this.immobalize(false)
+
+
+public function SheepEntity.rejection(vec2 target)
+  print(this.owner.getNameColored(true) + " is not worthy!".color(COLOR_GOLD))
+  flashEffect(Abilities.resurrecttarget, target)
+  if this.owner.getFiringPower() >= ascension.delay
+    this.setPos(target.withTerrainZ(2000))
+    this.skipFallDamage()
+    this.addScale(3)
+    doPeriodicallyCounted(0.1, 30) cb -> 
+      this.addScale(-0.1)

@@ -1,0 +1,78 @@
+package VillagerKid
+import Assets
+import ClosureForGroups
+import ClosureTimers
+import ConfigWeapons
+import LinkedList
+import MyAssets
+import MyProjectile
+import SheepEntity
+import Utils
+
+constant villagerKidModels = asList(Units.villagerKid1, Units.villagerKid11)
+
+public class VillagerKid extends MyProjectile
+  bool isPlayingTime
+  unit favouriteToy
+  real minToyDistance
+  
+  construct(SheepEntity source)
+    super(source, guidedMissile.minRadius, villagerKidModels.getRandomElement())
+    soundBounce = SOUND_DRY_FART
+    silent = true
+    setPermanent()
+    doAfter(villagerKid.duration) ->
+      if not done
+        terminate()
+
+    onEnd() -> 
+      SOUND_DRY_FART.playOnPoint(pos)
+      flashEffect(Abilities.faerieDragon_Invis, pos)
+
+    onHit3D() target ->
+      SOUND_PUNCH.playOnPoint(pos)
+      source.blast(pos, target, villagerKid.maxDamage, villagerKid.maxKnockBack, 0.5)
+
+  override function onGroundHit()
+    super.onGroundHit()
+    bounceOfGround()
+    isPlayingTime = true
+  
+  override function bounceOfGround() returns bool
+    let eff = addEffect(Abilities.plagueCloudCaster, pos)
+    doAfter(2) -> 
+      eff.destr()
+      
+    if vel.z.abs() < 40
+      vel.z = vel.z.sign() * 40.
+      
+    return super.bounceOfGround()
+
+  override function update()
+    goChasingSheep()
+    alignYawAndPitch()
+    super.update()
+
+  function goChasingSheep()
+    if isPlayingTime
+      findFavouriteToy()
+      
+      if favouriteToy != null
+        let velXY = 5 * (10 * vel.toVec2() + getPos().toVec2().normalizedPointerTo(favouriteToy.getPos())).norm()
+        setVel(velXY.withZ(vel.z))
+      else
+        setVel(ZERO3)
+
+      if onceEvery(2.0)
+        SOUNDS_VILLAGER_KID.getRandomElement().playOnPoint(pos)
+
+  function findFavouriteToy() returns unit
+    favouriteToy = null
+    minToyDistance = REAL_MAX
+    forUnitsAll() u ->
+      let toyDistance = u.getPos().distanceTo(pos.toVec2())
+      if toyDistance < minToyDistance and not wasHit(u) and not u.getOwner() == owner
+        minToyDistance = toyDistance
+        favouriteToy = u
+
+    return favouriteToy

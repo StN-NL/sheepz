@@ -1,11 +1,11 @@
 package GameEnd
 import ClosureTimers
 import ConfigGame
-import MultiBoard
+import FramehandleNames
+import Miscellaneous
 import SheepEntity
 import TimerUtils
 import Utils
-import FramehandleNames
 
 var gameOver = false
 
@@ -31,7 +31,7 @@ public function periodicallyCheckGameEnd()
     if not gameOver and not isSinglePlayer()
       if getAlivePlayers() <= 1
         gameOver = true
-        addEndGamePoints()
+        addEndGamePointsSurvival()
         getWinner().declareVictor()
 
 function getAlivePlayers() returns int
@@ -44,11 +44,12 @@ function getAlivePlayers() returns int
 function player.isAlive() returns bool
   return this.getLives() > 0 or this.getSheep().isAlive()
 
-function addEndGamePoints()
-  let p = getSurvivingPlayer()
-  if p != null
-    p.addPoints(p.getLives() * SHEEP_MAX_HP.toInt())
-    p.addPoints(p.getSheep().actor.getHP().toInt())
+function addEndGamePointsSurvival()
+  if GAME_MODE == GameMode.SURVIVAL
+    let p = getSurvivingPlayer()
+    if p != null
+      p.addPoints(p.getLives() * SHEEP_MAX_HP.toInt())
+      p.addPoints(p.getSheep().actor.getHP().toInt())
 
 function getSurvivingPlayer() returns player
   player survivor = null
@@ -76,7 +77,7 @@ function player.declareVictor()
   if roll == 0
     this.announceWinner(
       points,
-      "Where Hitler made demographic distinctions...",
+      "Where Genghis Khan let them live on a good day...",
       "For " + name + " everyone is equal. Brutal!"
     )
   else if roll == 1
@@ -103,7 +104,7 @@ function player.announceWinner(int points, string text1, string text2)
           if p == this
             CustomVictoryBJ(p, true, true)
           else
-            CustomDefeatBJ(p, "Meh")
+            CustomDefeatBJ(p, "Ovis tua purdore mortua est. Pudeat! Pudeat!")
 
 function announce(real height, string text)
   createFrame(FramehandleTypeNames.text, "", GAME_UI, "", 0)

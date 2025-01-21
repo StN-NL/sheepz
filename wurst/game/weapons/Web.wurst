@@ -1,0 +1,41 @@
+package Web
+import Assets
+import ClosureForGroups
+import ClosureTimers
+import ConfigWeapons
+import MyProjectile
+import SheepEntity
+
+
+public class WebProjectile extends MyProjectile
+  
+  construct(SheepEntity source)
+    super(source, web.minRadius, Abilities.webmissile)
+    onHit3D() target ->
+      if not done and distance > 30
+        terminate()
+    
+    onEnd() -> 
+      explode()
+      
+  override function onGroundHit()
+    super.onGroundHit()
+    if not done
+      terminate()
+
+  override function update()
+    alignYawAndPitch()
+    super.update()
+   
+  function explode()
+    forUnitsInRange(pos.toVec2(), web.maxRadius) u ->
+      if u.isSheep()
+        let sheep = u.getSheep()
+        sheep.immobalize(true)
+        let eff = addEffect(Abilities.webTarget, u, AttachmentPoints.overhead)
+          ..setScale(1)
+
+        doAfter(web.duration) ->
+
+          sheep.immobalize(false)
+          eff.destr()

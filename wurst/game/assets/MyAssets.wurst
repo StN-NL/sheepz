@@ -4,6 +4,10 @@ import public MyMessages
 import public MySounds
 import LinkedList
 
+public class Minimaps
+  static constant tropicalIsland = "Minimaps\\TropicalIsland.blp"
+  static constant theArena = "Minimaps\\TheArena.blp"
+
 public class MyIcons
   static constant bTNDynamite = "ReplaceableTextures\\CommandButtons\\BTNDynamite.blp"
   static constant bTNJetPack = "ReplaceableTextures\\CommandButtons\\BTNJetPack.blp"
@@ -28,13 +32,20 @@ public class MyModels
   static constant riotShield = "Models\\RiotShield.mdx"
   static constant shotgun = "Models\\Shotgun.mdx"
 
-public constant UNIT_IDS_SHEEPZ = asList(
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next()),
-  compiletime(UNIT_ID_GEN.next())
+public constant HERO_IDS_SHEEPZ = asList(
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next()),
+  compiletime(HERO_ID_GEN.next())
 )
+
+public constant ABIL_ID_JUMP = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_JETPACK = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_PARACHUTE = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_TICKLE = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_DRAFT_WEAPON = compiletime(ABIL_ID_GEN.next())
+public constant ABIL_ID_BRAGGING_RIGHTS = compiletime(ABIL_ID_GEN.next())

@@ -1,25 +1,22 @@
 package GameStart
-import ChatCommands
+import ConfigWeapons
 import ClosureTimers
 import DraftWeapon
 import EntityManagement
 import GameEnd
-import GameMenu
-import MultiBoard
+import MenuFrame
+import Miscellaneous
+import MyAssets
 import Players
-import Quests
 import SheepEntity
 import Utils
 import Weapons
-import ConfigWeapons
 
-// fix desync issues
-// fix fus ro da range
-// bug endgame scoring
-
+constant GAME_START_DELAY = 1.
 
 init
   doAfter(0.025) ->
+    updateMap(-8, 8, 12, 12, Minimaps.tropicalIsland)
     FogMaskEnableOff()
     FogEnableOff()
     initWeapons()
@@ -30,28 +27,39 @@ init
       printWelcome()
       initMultiboard()
       initWeaponDraft()
-      spawnSheep()
       enableGameEndCondition()
+      setupPlayers()
+      addLeaveListener()
 
 
 function printWelcome()
-  print("Welcome to |cffff0095Sheepz|r, where candy is free and weapons come cheap!", 5)
+  print(SLOGAN, 5)
   print("\nFor more information, visit the quest log.", 5)
 
 
-function spawnSheep()
+function setupPlayers()
   for p in getPlayersIngame()
-    doAfter(GetRandomReal(0, 1)) ->
-      new SheepEntity(p)
-      doAfter(2) -> 
-        p.addStartingWeapons()
+    setupPlayer(p)
     
-    if isSinglePlayer()
-      for ii = 1 to 5
-        doAfter(GetRandomReal(0, 5)) -> 
-          new SheepEntity(players[ii])
+  if isSinglePlayer()
+    targetPractice()
 
+
+function setupPlayer(player p)
+  doAfter(GetRandomReal(0, GAME_START_DELAY)) -> 
+    new SheepEntity(p)
+
+    doAfter(GAME_START_DELAY) -> 
+      p.addStartingWeapons()
+
+
+function targetPractice()
+  for ii = 1 to 5
+    doAfter(GetRandomReal(0, GAME_START_DELAY)) -> 
+      new SheepEntity(players[ii])
+
+
+function addLeaveListener()
   onPlayerLeave() p ->
-    p.setLives(0)
     if p.getSheep() != null
       p.getSheep().terminate()

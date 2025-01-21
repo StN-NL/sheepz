@@ -4,13 +4,13 @@ import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 import TextTagEntity
 import Utils
 
 
-public class ClusterBomb extends ProjectileSheep
+public class ClusterBomb extends MyProjectile
   bool triggered = false
   int countdown = clusterBomb.delay.toInt()
 
@@ -55,7 +55,7 @@ public class ClusterBomb extends ProjectileSheep
     source.blastArea(pos, clusterBomb.minRadius, clusterBomb.minRadius, clusterBomb.maxDamage)
 
 
-public class ClusterBombShard extends ProjectileSheep
+public class ClusterBombShard extends MyProjectile
 
   construct(SheepEntity source, vec3 pos)
     super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)

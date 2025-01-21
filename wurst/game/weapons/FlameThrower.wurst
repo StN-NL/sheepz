@@ -4,7 +4,7 @@ import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
@@ -13,13 +13,13 @@ public function SheepEntity.flameThrower()
     new FlameThrowerProjectile(this)
     
     
-public class FlameThrowerProjectile extends ProjectileSheep
+public class FlameThrowerProjectile extends MyProjectile
   real duration = flameThrower.duration
   
   construct(SheepEntity source)
     super(source, flameThrower.minRadius, Abilities.redDragonMissile)
     fx.eff.setScale(0.5)
-    SOUND_FLAMETHROWER.getRandomElement().playOnPoint(pos)
+    SOUNDS_FLAMETHROWER.getRandomElement().playOnPoint(pos)
 
     onHit3D() e ->
       if not done and distance > 30 and e.isSheep()

@@ -3,11 +3,11 @@ import Assets
 import ClosureTimers
 import ConfigWeapons
 import MyAssets
-import ProjectileSheep
+import MyProjectile
 import SheepEntity
 
 
-public class ShotgunProjectile extends ProjectileSheep
+public class ShotgunProjectile extends MyProjectile
   
   construct(SheepEntity source)
     super(source, shotgun.minRadius, Abilities.rifleImpact)

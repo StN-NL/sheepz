@@ -1,8 +1,8 @@
 package ConfigWeapons
 import Arsenal
+import ConfigGame
 import LinkedList
 import MyAssets
-import ConfigGame
 
 public constant airStrike = compiletime(
   new WeaponDefinition(Icons.bTNGoblinZeppelin, FiringType.INSTANT, Targettype.POINT)
@@ -14,6 +14,15 @@ public constant airStrike = compiletime(
   ..setMaxDamage(30)
   ..setMinRadius(75)
   ..setMaxRadius(150)
+)
+
+public constant ascension = compiletime(
+  new WeaponDefinition(Icons.bTNResurrection, FiringType.POWERFUL, Targettype.POINT)
+  ..setName("Ascension")
+  ..setDescription("Audience has been granted.")
+  ..setRarity(2)
+  ..setAmount(0)
+  ..setDelay(3)
 )
 
 public constant baloonicide = compiletime(
@@ -36,7 +45,7 @@ public constant baseballBat = compiletime(
   ..setAmount(0)
   ..setMaxDamage(30)
   ..setMaxKnockBack(70)
-  ..setMaxRadius(150)
+  ..setMaxRadius(200)
 )
 
 public constant bazooka = compiletime(
@@ -61,6 +70,17 @@ public constant bladestorm = compiletime(
   ..setMinRadius(150)
   ..setMaxRadius(300)
   ..setNumberOfWaves(10)
+)
+
+public constant boomerHammer = compiletime(
+  new WeaponDefinition(Icons.bTNStormBolt, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Boomer Hammer")
+  ..setDescription("It's not personal, just effective.")
+  ..setRarity(100)
+  ..setAmount(0)
+  ..setMaxDamage(25)
+  ..setMaxKnockBack(40)
+  ..setMinRadius(125)
 )
 
 public constant cloudGenerator = compiletime(
@@ -107,8 +127,8 @@ public constant dynamite = compiletime(
   ..setAmount(0)
   ..setDelay(3)
   ..setMaxDamage(50)
-  ..setMinRadius(125)
-  ..setMaxRadius(250)
+  ..setMinRadius(175)
+  ..setMaxRadius(350)
 )
 
 public constant flameThrower = compiletime(
@@ -145,7 +165,7 @@ public constant fusRoDah = compiletime(
   ..setDelay(1)
   ..setMaxDistance(400)
   ..setMaxKnockBack(90)
-  ..setMinRadius(175)
+  ..setMinRadius(200)
 )
 
 public constant grenade = compiletime(
@@ -154,7 +174,7 @@ public constant grenade = compiletime(
   ..setDescription("Boring but effective.")
   ..setRarity(100)
   ..setAmount(0)
-  ..setDelay(5)
+  ..setDelay(3)
   ..setMaxDamage(50)
   ..setMinRadius(125)
   ..setMaxRadius(250)
@@ -172,7 +192,7 @@ public constant guidedMissile = compiletime(
 )
 
 public constant hammerDrop = compiletime(
-  new WeaponDefinition(Icons.bTNStormBolt, FiringType.POWERFUL, Targettype.POINT)
+  new WeaponDefinition(Icons.bTNStormHammer, FiringType.POWERFUL, Targettype.POINT)
   ..setName("Hammer Delivery Service")
   ..setDescription("That's it, you are gettin' the hammer!")
   ..setRarity(1)
@@ -203,6 +223,15 @@ public constant landmine = compiletime(
   ..setMaxDamage(50)
   ..setMinRadius(125)
   ..setMaxRadius(250)
+)
+
+public constant leap = compiletime(
+  new WeaponDefinition(Icons.bTNBattleRoar, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Leap")
+  ..setDescription("Rawr.")
+  ..setRarity(10)
+  ..setAmount(0)
+  ..setMaxDistance(1000)
 )
 
 public constant minigun = compiletime(
@@ -267,6 +296,29 @@ public constant teleport = compiletime(
   ..setAmount(0)
 )
 
+public constant villagerKid = compiletime(
+  new WeaponDefinition(Icons.bTNVillagerKid, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Villager Kid")
+  ..setDescription("He just wants to have some fun!")
+  ..setRarity(5)
+  ..setAmount(0)
+  ..setDuration(20)
+  ..setMaxDamage(30)
+  ..setMaxKnockBack(60)
+  ..setMinRadius(200)
+)
+
+public constant web = compiletime(
+  new WeaponDefinition(Icons.bTNWeb, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Web")
+  ..setDescription("Gotcha.")
+  ..setRarity(50)
+  ..setAmount(0)
+  ..setDuration(3)
+  ..setMinRadius(100)
+  ..setMaxRadius(300)
+)
+
 public constant wordOfPower = compiletime(
   new WeaponDefinition(Icons.bTNMonsoon, FiringType.POWERFUL, Targettype.NONE)
   ..setName("Word of Power")
@@ -298,10 +350,11 @@ public constant weaponList = asList(
   baseballBat,
   bazooka,
   bladestorm,
+  boomerHammer,
   chickenBomb,
   cloudGenerator,
   clusterBomb,
-  dynamite,
+  // dynamite,
   flameThrower,
   frogBomb,
   fusRoDah,
@@ -310,12 +363,16 @@ public constant weaponList = asList(
   hammerDrop,
   holyGrenade,
   landmine,
+  leap,
   minigun,
   molotov,
+  ascension,
   rainOfChaos,
   riotShield,
   shotgun,
   teleport,
+  villagerKid,
+  web,
   wordOfPower,
   wormRider
 )
