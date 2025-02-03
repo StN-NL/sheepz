@@ -568,7 +568,7 @@ public class SheepEntity extends MyUnitEntity
 
     givePoints(actor.getHP())
     if killer != null and tormentor == killer
-      print("Deja vu! " + actor.getName() + " got rekt again by " + tormentor.actor.getName())
+      print("Deja vu! " + owner.getNameColored(true) + " got rekt again by " + tormentor.owner.getNameColored(true))
       SOUND_DEJA_VU.playOnPoint(pos, 2).snd..setVolume(50)
 
   function arrangeFuneral()

@@ -318,22 +318,23 @@ public class MenuSetup
     ..setText("Start")
     ..disable()
     ..onClick() ->
-      if hasStarted
-        PauseGame(false)
-        window.setVisible(false)
-        SOUND_BUTTON_CLICK.play()
-      else if hasGameMode
-        startGameButton.setText("Close")
-        gameModeSurvivalCheckBox.disable()
-        gameModeSurvivalLives.disable()
-        gameModeTimedCheckBox.disable()
-        gameModeTimedDuration.disable()
-        mapTropicalIslandCheckBox.disable()
-        mapTheArenaCheckBox.disable()
-        window.setVisible(false)
-        SOUND_BUTTON_CLICK.play()
-        onGameStart.run()
-        hasStarted = true
+      if isPrivileged()
+        if hasStarted
+          PauseGame(false)
+          window.setVisible(false)
+          SOUND_BUTTON_CLICK.play()
+        else if hasGameMode
+          startGameButton.setText("Close")
+          gameModeSurvivalCheckBox.disable()
+          gameModeSurvivalLives.disable()
+          gameModeTimedCheckBox.disable()
+          gameModeTimedDuration.disable()
+          mapTropicalIslandCheckBox.disable()
+          mapTheArenaCheckBox.disable()
+          window.setVisible(false)
+          SOUND_BUTTON_CLICK.play()
+          onGameStart.run()
+          hasStarted = true
 
     // Page containers used for hiding and showing pages
     let gamePage = createFrame("FRAME", "", boxFrame, "", 0)
@@ -357,30 +358,33 @@ public class MenuSetup
     ..setSize(0.11, 0.04)
     ..setText("Basics")
     ..onClick() ->
-      gamePage.setVisible(true)
-      physicsPage.setVisible(false)
-      weaponsPage.setVisible(false)
-      SOUND_BUTTON_CLICK.play()
+      if isPrivileged()
+        gamePage.setVisible(true)
+        physicsPage.setVisible(false)
+        weaponsPage.setVisible(false)
+        SOUND_BUTTON_CLICK.play()
 
     let physicsButton = createFrame(FramehandleTypeNames.gluetextbutton, "", boxFrame, FramehandleNames.scriptDialogButton, 0)
     ..setPoint(FRAMEPOINT_LEFT, gameButton, FRAMEPOINT_RIGHT)
     ..setSize(0.11, 0.04)
     ..setText("Physics")
     ..onClick() ->
-      gamePage.setVisible(false)
-      physicsPage.setVisible(true)
-      weaponsPage.setVisible(false)
-      SOUND_BUTTON_CLICK.play()
+      if isPrivileged()
+        gamePage.setVisible(false)
+        physicsPage.setVisible(true)
+        weaponsPage.setVisible(false)
+        SOUND_BUTTON_CLICK.play()
 
     let weaponsButton = createFrame(FramehandleTypeNames.gluetextbutton, "", boxFrame, FramehandleNames.scriptDialogButton, 0)
     ..setPoint(FRAMEPOINT_LEFT, physicsButton, FRAMEPOINT_RIGHT)
     ..setSize(0.11, 0.04)
     ..setText("Weapons")
     ..onClick() ->
-      gamePage.setVisible(false)
-      physicsPage.setVisible(false)
-      weaponsPage.setVisible(true)
-      SOUND_BUTTON_CLICK.play()
+      if isPrivileged()
+        gamePage.setVisible(false)
+        physicsPage.setVisible(false)
+        weaponsPage.setVisible(true)
+        SOUND_BUTTON_CLICK.play()
 
     // Weapon pages
     for i = 0 to weaponsPageList.length - 1
@@ -394,28 +398,30 @@ public class MenuSetup
       ..setSize(0.04, 0.04)
       ..setText("<")
       ..onClick() ->
-        weaponsPageList[index].setVisible(false)
-        if index == 0
-          index = weaponsPageList.length - 1
-        else
-          index -= 1
+        if isPrivileged()
+          weaponsPageList[index].setVisible(false)
+          if index == 0
+            index = weaponsPageList.length - 1
+          else
+            index -= 1
 
-        weaponsPageList[index].setVisible(true)
-        SOUND_BUTTON_CLICK.play()
+          weaponsPageList[index].setVisible(true)
+          SOUND_BUTTON_CLICK.play()
 
       createFrame(FramehandleTypeNames.gluetextbutton, "", weaponsPage, FramehandleNames.scriptDialogButton, 0)
       ..setPoint(FRAMEPOINT_LEFT, weaponsButtonBack, FRAMEPOINT_RIGHT)
       ..setSize(0.04, 0.04)
       ..setText(">")
       ..onClick() ->
-        weaponsPageList[index].setVisible(false)
-        if index == weaponsPageList.length - 1
-          index = 0
-        else
-          index += 1
+        if isPrivileged()
+          weaponsPageList[index].setVisible(false)
+          if index == weaponsPageList.length - 1
+            index = 0
+          else
+            index += 1
 
-        weaponsPageList[index].setVisible(true)
-        SOUND_BUTTON_CLICK.play()
+          weaponsPageList[index].setVisible(true)
+          SOUND_BUTTON_CLICK.play()
 
     // <<<<<<<<<< <<<<<<<<<< --------- >>>>>>>>>> >>>>>>>>>>
     // <<<<<<<<<< <<<<<<<<<< Page Game >>>>>>>>>> >>>>>>>>>>

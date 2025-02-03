@@ -34,7 +34,8 @@ init
 
 function printWelcome()
   print(SLOGAN, 5)
-  print("\nFor more information, visit the quest log.", 5)
+  print("\nFor more information, visit the quest log.", 10)
+  print("\nType \"?\" for help", 30)
 
 
 function setupPlayers()

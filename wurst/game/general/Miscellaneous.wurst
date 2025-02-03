@@ -10,6 +10,13 @@ import SoundUtils
 import Utils
 
 public constant SLOGAN = "Welcome to |cffff0095Sheepz|r, where candy is free and weapons come cheap!"
+public constant HOW_TO_PLAY = "Weapons come in many varieties, are controlled using the numerical keys |cffffcc001-8|r." + "\n\n" +
+  "Get access to new weapons by using your |cffff0095Weapon draft|r (|cffffcc00T|r) ability!" + "\n\n" + 
+  "Instant".color(BLUE) + " - these weapons fire instantly when releasing the key." + "\n" +
+  "Charged".color(PURPLE) + " - holding down the key will increase the power of the weapon." + "\n" +
+  "Powerful".color(RED) + " - these weapons need to be charged at least a certain amount of seconds to take effect." + "\n\n" +
+  "None".color(YELLOW) + " - these weapons do not require a target but aiming can be smart." + "\n" +
+  "Point".color(GREEN) + " - these weapons require a target."
 
 DynamicCellValue<int> array[24] LIVES
 DynamicCellValue<int> array[24] POINTS
@@ -92,6 +99,9 @@ public function addListenersChat()
     else if EventData.getChatMessage() == "16"
       SOUND_GREAT_CRIME.play().snd.setVolume(40)
 
+    if EventData.getChatMessage() == "?"
+      EventData.getTriggerPlayer().print("\n" + HOW_TO_PLAY, 15)
+
 
 public function addQuests()
   new Quest(true)
@@ -103,17 +113,9 @@ public function addQuests()
   )
 
   new Quest(true)
-  ..setTitle("Weapons")
-  ..setIcon(MyIcons.bTNDynamite)
-  ..setDescription(
-    "Weapons come in many varieties, are controlled using the numerical keys |cffffcc001-8|r." + "\n\n" +
-    "Get access to new weapons by using your |cffff0095Weapon draft|r (|cffffcc00T|r) ability!" + "\n\n" + 
-    "Instant".color(BLUE) + " - these weapons fire instantly when releasing the key." + "\n" +
-    "Charged".color(PURPLE) + " - holding down the key will increase the power of the weapon." + "\n" +
-    "Powerful".color(RED) + " - these weapons need to be charged at least a certain amount of seconds to take effect." + "\n\n" +
-    "None".color(YELLOW) + " - these weapons do not require a target but aiming can be smart." + "\n" +
-    "Point".color(GREEN) + " - these weapons require a target."
-  )
+  ..setTitle("How to Play")
+  ..setIcon(Icons.bTNCritterChicken)
+  ..setDescription(HOW_TO_PLAY)
 
   new Quest(true)
   ..setTitle("Lore")
@@ -125,10 +127,11 @@ public function addQuests()
   
   new Quest(false)
   ..setTitle("Credits")
-  ..setIcon(Icons.bTNInnerFire)
-  ..setDescription( 
-    "Lead testing: SuperPear, HolyHenk\n".color(LEGENDARY) +
-    "Testing: MzHyde, PhrasPerNL\n".color(EPIC) +
+  ..setIcon(Icons.bTNCritterRabbit)
+  ..setDescription(
+    "WurstScript: Frotty\n".color(LEGENDARY) +
+    "Lead testing: SuperPear, HolyHenk\n".color(EPIC) +
+    "Testing: MzHyde, PhrasPerNL\n".color(RARE) +
     "\n" +
     "Worms Model Pack: Lord-T-Rex\n".color(UNCOMMON) +
     "Parachute: Fingolfin\n".color(UNCOMMON) +
