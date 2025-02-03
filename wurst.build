@@ -4,11 +4,16 @@ dependencies:
 - https://github.com/wurstscript/wurstStdlib2
 - https://github.com/Frotty/Frentity
 buildMapData:
-  name: '|cffff0095Sheepz 0.1.8|r'
-  fileName: Sheepz 0.1.8
+  name: '|cffff0095Sheepz 1.0.1|r'
+  fileName: Sheepz 1.0.1
   author: stn
   scenarioData:
-    description: Duke it out with the other sheeps. WurstScript powered!
+    description: '|cffff0095Duke it out with other sheeps.|r ***
+      Boom baby! - |cffffd000The New York Times|r ***
+      Kept playing until my balls fell off - |cffffd000The Guardian|r ***
+      Bezos! - |cffffd000The Washington Post|r ***
+      Putain - |cffffd000Le Monde|r ***
+      Bloody hell mate - |cffffd000The Times|r'
     suggestedPlayers: The more the merrier
     loadingScreen:
       model: LoadingScreen.mdx
