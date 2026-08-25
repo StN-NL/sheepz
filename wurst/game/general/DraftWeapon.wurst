@@ -5,6 +5,7 @@ import ClosureFrames
 import ClosureTimers
 import ConfigGame
 import ConfigWeapons
+import GameEnd
 import HashMap
 import MyAssets
 import Utils
@@ -25,8 +26,10 @@ public function initWeaponDraft()
 
 function player.draftPeriodically()
   // this pattern allows for the draft interval to change
+  if isGameOver() or not getPlayersIngame().has(this)
+    return
   this.addLumber(1)
-  doAfter(ARSENAL_DRAFT_INTERVAL) -> 
+  doAfter(ARSENAL_DRAFT_INTERVAL) ->
     this.draftPeriodically()
 
 public function player.draftWeapon()

@@ -1,0 +1,228 @@
+package HeroDefinitionFull
+import Abilities
+import AbilityObjEditing
+import Icons
+import ObjectIdGenerator
+import Objects
+import ObjectIds
+import Soundsets
+import Textures
+import UnitIds
+import Units
+
+let RANGER_ID = compiletime(HERO_ID_GEN.next())
+
+// Template for copy-paste reference only. Restore @compiletime on gen() when
+// deriving a real definition — as written it must not bake object data into the map.
+function gen()
+    new HeroDefinition(RANGER_ID, UnitIds.sylvanuswindrunner)
+        /* Abilities */
+        ..setDefaultActiveAbility("") // If the unit/building/hero has been assigned one or more autocast abilities, one ability can be chosen to be active by default.
+        ..setNormalAbilities(commaList(AbilityIds.inventory, AbilityIds.ultravision)) // Assign a number of normal abilities to the unit/building/hero. The number assigned is not limited, however each unit has 7 free slots, and heroes and buildings each have 6 free slots. Note that abilities such as Invulnerable (Neutral) and Locust do not consume any slots. Also note that some abilities have both ability and upgrade components to them (e.g. Moon Glaive). If all slots are being used, use the "Spellbook" ability to assign extra normal abilities.
+        ..setHeroAbilities(commaList(AbilityIds.coldArrows, AbilityIds.scout, AbilityIds.trueshotAura1, AbilityIds.starfall)) // Assign up to a maximum of 5 hero abilities to the hero unit. Heroes may also be assigned normal abilities, through the Unit Editor field "Abilities - Normal".
+        /* Art */
+        ..setAllowCustomTeamColor(false) // Allow/deny a unit/building/hero to change its team color from the color it had at the start of the game. Colors can be changed via the "Player - Change Color", "Unit - Change Color" and "Unit - Change Owner" trigger actions, and also via the "Art - Team Color" Unit Editor field.
+        ..setAnimationBlendTimeseconds(0.15) // The amount of time it takes a unit/building/hero to blend from being visible to being invisible, and vice versa. If the unit/building/hero has been assigned an ability such as Shadow Meld, this field will apply to it.
+        ..setAnimationCastBackswing(0.510) // The amount of time it takes a unit/building/hero to go through half the physical movement necessary to cast a spell. If the unit/building/hero has no animations for casting spells, the time set in this field still applies, but there will be no viewed physical movement. This field combines additively with "Art - Animation - Cast Point" to form the total time taken to physically cast a spell. 
+        ..setAnimationCastPoint(0.300) // The amount of time it takes a unit/building/hero to go through half the physical movement necessary to cast a spell. If the unit/building/hero has no animations for casting spells, the time set in this field still applies, but there will be no viewed physical movement. This field combines additively with "Art - Animation - Cast Backswing" to form the total time taken to physically cast a spell.
+        ..setAnimationRunSpeed(200.0) // Obsolete. The speed by which the unit/building/hero model moves, when performing any of its "Run" animations. Note that this field only affects the speed of the model itself, and NOT how fast the model moves across the map (see field Movement - Speed Base). Note that there are no known units/buildings/heroes in the game which possess a run animation, so this field currently has no purpose.
+        ..setAnimationWalkSpeed(200.0) // The speed by which the unit/building/hero model moves, when performing any of its "Walk" animations. Note that this field only affects the speed of the model itself, and NOT how fast the model moves across the map (see field Movement - Speed Base).
+        ..setButtonPositionX(0) // Defines in which column to place the button for the unit/building/hero, in the bottom-right command-interface area. A building's button can be viewed in the construction tab of a worker unit who can construct that building. For units and heroes, it can be viewed in the building in which the unit or hero is trained. Column values range from 0 (Left-most column) to 3 (Right-most column).
+        ..setButtonPositionY(0) // Defines in which row to place the button for the unit/building/hero, in the bottom-right command-interface area. A building's button can be viewed in the construction tab of a worker unit who can construct that building. For units and heroes, it can be viewed in the building in which the unit or hero is trained. Row values range from 0 (top-most row) to 2 (Bottom-most row).
+        ..setDeathTimeseconds(3.00) // Defines the time it takes between when the unit/building/hero is killed and the game registers the unit as being dead. Does not affect the speed of the unit/building/hero death animation.
+        ..setElevationSamplePoints(0) // Unknown.
+        ..setElevationSampleRadius(30.0) // Unknown.
+        ..setFogOfWarSampleRadius(0.0) // Unknown.
+        ..setHasWaterShadow(true) // Defines whether the flying unit/hero casts a shadow when positioned over a body of deep water.
+        ..setIconGameInterface(Icons.bTNSylvanusWindRunner) // Defines what icon a unit/building/hero will have when present in the bottom-right command-interface area.
+        ..setIconScoreScreen(Textures.scorescreen_hero_sylvanus) // Defines the icon to show for a player's hero in the game score screen, under the "Heroes" tab. There will be 3 icons per player at most displayed under the tab, and the actual icons shown will be determined by which heroes scored the most points in the game.
+        ..setMaximumPitchAngledegrees(10.0) // Defines the maximum angle the flying unit/hero can tilt forwards and backwards. This field has no bearing on the ability to move over particular terrain.
+        ..setMaximumRollAngledegrees(10.0) // Defines the maximum angle the flying unit/hero can tilt left and right. This field has no bearing on the ability to move over particular terrain.
+        ..setModelFile(Units.sylvanusWindrunner1) // Defines the 3D model to use for the unit/building/hero. This field purely defines 3D artwork; it has no bearing on any other characteristic of the unit/building/hero.
+        ..setModelFileExtraVersions("None") // In cases where the artwork of a particular unit has been redrawn for The Frozen Throne, this field defines whether to use the Reign of Chaos or The Frozen Throne model version. If both options are checked, The Frozen Throne model version will be used by default.
+        ..setOccluderHeight(0.0) // If units/buildings/heroes have their occluder height set to a non-zero value, they will cause other nearby units/buildings/heroes to have their lines of sight obstructed by their presence. Flying units/heroes do not suffer from this effect.
+        ..setOrientationInterpolation(5) // Unknown.
+        ..setProjectileImpactZ(60) // Height offset that an attacking projectile will impact the target unit/building/hero, with zero being at its base.
+        ..setProjectileImpactZSwimming(0) // Height offset that an attacking projectile will impact the target unit/building/hero while in shallow water, with zero being at its base.
+        ..setProjectileLaunchX(0) // Horizontally (Left-right) offsets the location where the projectile is launched from the attacking unit/building/hero, with zero being its origin point.
+        ..setProjectileLaunchY(0) // Vertically (front-back) offsets the location where the projectile is launched from the attacking unit/building/hero, with zero being its origin point.
+        ..setProjectileLaunchZ(60) // Offsets the height (Up-down) location where the projectile is launched from the attacking unit/building/hero, with zero being at its base.
+        ..setProjectileLaunchZSwimming(0) // Offsets the height (Up-down) location where the projectile is launched from the attacking unit/building/hero while in shallow water, with zero being at its base.
+        ..setPropulsionWindowdegrees(60.0) // Maximum angle that a unit/hero can launch a projectile before it needs to physically turn itself towards a target.
+        ..setRequiredAnimationNames("") // Defines which alternative stand animation to play for the unit/building/hero, instead of its default stand animation. When writing the animation name, each word of the name occupies an individual string, and doesn't include the word "Stand".
+        ..setRequiredAnimationNamesAttachments("") // Unknown.
+        ..setRequiredAttachmentLinkNames("") // Unknown.
+        ..setRequiredBoneNames("") // Unknown.
+        ..setScaleProjectiles(true) // For ranged attackers, defines whether to scale the projectile art to match the size of the attacker's 3D model (see fields "Combat - Attack x - Projectile Art" and "Art - Scaling Value).
+        ..setScalingValue(1.1) // Defines the size of the 3D model, with 1.00 being the model's normal size. Note that changing the value of this field changes the model only; it has no bearing on any other characteristic of the unit/building/hero for which the model is being used.
+        ..setSelectionCircleHeight(0.0) // Defines the height of the unit/building/hero's selection circle.
+        ..setSelectionCircleOnWater(false) // Defines the height of the unit/building/hero's selection circle when inside a body of water.
+        ..setSelectionScale(1.5) // Defines the size of the unit/building/hero's selection circle.
+        ..setShadowImageUnit("Normal") // Defines the type of shadow image the unit/hero is to have. This field has no effect on buildings.
+        ..setShadowImageCenterX(60.0) // Defines the horizontal position of the shadow image with respect to its default position.
+        ..setShadowImageCenterY(60.0) // Defines the vertical position of the shadow image with respect to its default position.
+        ..setShadowImageHeight(120.0) // Defines the length of the shadow image with respect to its default length.
+        ..setShadowImageWidth(120.0) // Defines the width of the shadow image with respect to its default width.
+        ..setShadowTextureBuilding("None") // Defines the type of shadow image the building is to have. This field has no effect on units or heroes.
+        ..setArtSpecial(Objects.humanLargeDeathExplode) // For units, this field defines the model graphics to play when they die from an attack by a unit/building/hero that has their Unit Editor Field "Combat - Attack x - Weapon Type" set to "Artillery" or "Artillery (Line)". For buildings, in addition to having their own death animation, the model graphic defined in this field will always play when they become destroyed. For Heroes, this field has no effect.
+        ..setArtTarget("") // When the unit/building/hero is attacking, the model defined here will be played at the location of the attacked unit/building/hero.
+        // ..setTeamColor(0) // Defines what team color the unit/building/hero is to have. This field will only work if the Unit Editor field "Art - Allow Custom Team Color" has been set to "True".
+        ..setTintingColorRed(255) // Defines the amount of Red tinting the unit/building/hero is to have. Units/Buildings/Heroes can only be made darker than their current colour state, making them lighter is not possible short of editing the 3D model itself.
+        ..setTintingColorGreen(255) // Defines the amount of Green tinting the unit/building/hero is to have. Units/Buildings/Heroes can only be made darker than their current colour state, making them lighter is not possible short of editing the 3D model itself.
+        ..setTintingColorBlue(255) // Defines the amount of Blue tinting the unit/building/hero is to have. Units/Buildings/Heroes can only be made darker than their current colour state, making them lighter is not possible short of editing the 3D model itself.
+        ..setUseExtendedLineofSight(false) // Unknown.
+        /* Combat */
+        ..setAcquisitionRange(650.0) // The range at which a unit/building/hero will automatically look for targets, and move or attack the target as necessary. Note that the attacking range of a unit/building/hero can never be greater than its acquisition range (see Unit Editor field "Combat - Attack x - Range").
+        ..setArmorSoundType(ArmorSoundType.Flesh) // Defines the nature of the unit/building/hero's physical defenses. This field purely affects the sound played when the unit/building/hero is struck by a melee attacker - it has no bearing on defensive capabilities (see field - Combat - Defense Type).
+        ..setAttack1AnimationBackswingPoint(0.580) // The amount of time it takes a unit/building/hero to go through half the physical movement necessary to attack something. If the unit/building/hero has no animations for attacking, the time set in this field still applies, but there will be no viewed physical movement. This field combines additively with "Combat - Attack x - Animation Damage Point" to form the total time taken to physically attack a target.
+        ..setAttack1AnimationDamagePoint(0.700) // The amount of time it takes a unit/building/hero to go through half the physical movement necessary to attack something. If the unit/building/hero has no animations for attacking, the time set in this field still applies, but there will be no viewed physical movement. This field combines additively with "Combat - Attack x - Animation Backswing Point" to form the total time taken to physically attack a target.
+        ..setAttack1AreaofEffectFullDamage(0) // Defines the size of the area around the target in which other units/buildings/heroes will receive the same damage that the target receives when attacked by the unit/building/hero. This field will have no effect unless the Unit Editor field "Combat - Attack x - Attack Type" is set to "Artillery", "Artillery (Line)", "Missile (Splash)", "Missile (Bounce)", or "Missile (Line)".
+        ..setAttack1AreaofEffectMediumDamage(0) // Defines the size of the area around the target in which other units/buildings/heroes will receive a medium percentage of the damage that the target receives when attacked by the unit/building/hero. The exact percentage of damage received is defined in the Unit Editor field "Combat - Attack x - Damage Factor - Medium". The actual area of medium damage is the radius of the medium AOE minus the radius of the full AOE. As such, the full AOE field must have a smaller value than the medium AOE field. This field will have no effect unless the Unit Editor field "Combat - Attack x - Attack Type" is set to "Artillery", "Artillery (Line)", "Missile (Splash)", "Missile (Bounce)", or "Missile (Line)".
+        ..setAttack1AreaofEffectSmallDamage(0) // Defines the size of the area around the target in which other units/buildings/heroes will receive a small percentage of the damage that the target receives when attacked by the unit/building/hero. The exact percentage of damage received is defined in the Unit Editor field "Combat - Attack x - Damage Factor - Small". The actual area of small damage is the radius of the small AOE minus the radius of the medium AOE. As such, the medium AOE field must have a smaller value than the small AOE field. This field will have no effect unless the Unit Editor field "Combat - Attack x - Attack Type" is set to "Artillery", "Artillery (Line)", "Missile (Splash)", "Missile (Bounce)", or "Missile (Line)".
+        ..setAttack1AreaofEffectTargets("") // Defines the types of targets that will be affected by AOE damage.
+        ..setAttack1AttackType(AttackType.Hero) // Defines the type of attack the unit/building/hero is to have. When a target is attacked, the amount of damage it receives is affected by how the attacker's attack type matches up against the target's defense type. To see a list of attack type versus defense type modifiers, please refer to the "Combat - Damage Bonus Table" fields in Gameplay Constants.
+        ..setAttack1CooldownTime(2.46) // Defines the amount of time a unit/building/hero must wait between attacks.
+        ..setAttack1DamageBase(0) // Defines the base damage that a unit/building/hero does when attacking. Additional damage is determined by the Unit Editor fields "Combat - Attack x - Damage Number of Dice" and "Combat - Attack x - Damage Sides per Die".
+        ..setAttack1DamageFactorMedium(0.0)  // Defines the percentage damage received by units in a medium AOE around the target of the attacking unit/building/hero. The full damage that the target receives is determined by the Unit Editor fields "Combat - Attack x - Damage Base", "Combat - Attack x - Damage Number of Dice" and "Combat - Attack x - Damage Sides per Die". The size of the medium AOE is set in the Unit Editor field "Combat - Attack x - Area of Effect (Medium Damage)".
+        ..setAttack1DamageFactorSmall(0.0) // Defines the percentage damage received by units in a small AOE around the target of the attacking unit/building/hero. The full damage that the target receives is determined by the Unit Editor fields "Combat - Attack x - Damage Base", "Combat - Attack x - Damage Number of Dice" and "Combat - Attack x - Damage Sides per Die". The size of the small AOE is set in the Unit Editor field "Combat - Attack x - Area of Effect (Medium Damage)".
+        ..setAttack1DamageLossFactor(0.0) // Defines a damage multiplier loss for every additional target hit after the first one, when attacking units using the "Artillery (Line)" or "Missile (Line)" attack types. As each target is hit, the amount of damage done is the Damage Loss Factor multiplied by the amount of damage done to the previous target.
+        ..setAttack1DamageNumberofDice(2) // Every time a unit/building/hero attacks a target, a dice roll occurs. A certain number of dice, with a certain number of sides each, is rolled, and a number is determined. This number is then added to the number in the field "Combat - Attack x - Damage Base" to determine the total damage the attacker has done. This field defines the number of dice that are to be rolled. The Unit Editor field "Combat - Attack x - Damage Sides per Die" determines how many sides each die has.
+        ..setAttack1DamageSidesperDie(6) // Every time a unit/building/hero attacks a target, a dice roll occurs. A certain number of dice, with a certain number of sides each, is rolled, and a number is determined. This number is then added to the number in the field "Combat - Attack x - Damage Base" to determine the total damage the attacker has done. The Unit Editor field "Combat - Attack x - Damage Number of Dice" defines the number of dice that are to be rolled. This field determines how many sides each die has.
+        ..setAttack1DamageSpillDistance(0.0) // This is for the 'Missle-Line' weapon type. It determines how far the missle can travel and still deal damage.
+        ..setAttack1DamageSpillRadius(0.0) // This is for the 'Missle-Line' weapon type. It determines the size of the damage area throughout the spill distance.
+        ..setAttack1DamageUpgradeAmount(0) // Unknown.
+        ..setAttack1MaximumNumberofTargets(1) // This is for the 'Missle-Bounce' weapon type. It determines the total number of units the attack can hit.
+        ..setAttack1ProjectileArc(0.15) // For ranged attackers, defines the size of the missile arc from the attacker to the target. The arc flattens out towards the value of 0.00 and increases towards the value of 1.00.
+        ..setAttack1ProjectileArt(Abilities.moonPriestessMissile) // For ranged attackers, defines the artwork of the attacking missile.
+        ..setAttack1ProjectileHomingEnabled(true) // For ranged attackers, defines whether fired missiles will home in on the target, or simply fire in a straight line (potentially missing the target if it is moving).
+        ..setAttack1ProjectileSpeed(900) // For ranged attackers, defines the speed of a fired missile.
+        ..setAttack1Range(600) // For ranged attackers, defines how far they can fire at targets.
+        ..setAttack1RangeMotionBuffer(250.0) // Unknown.
+        ..setAttack1ShowUI(true) // Defines whether or not to show the attack icon in the bottom-right command interface area.
+        ..setAttack1TargetsAllowed(commaList("Ground","Structure","Debris","Air","Item","Ward","Wall")) // Defines the type of targets that the unit/building/hero can attack. To be able to attack a target, the attacker's Targets Allowed field must have all the target types that are selected in the target's "Combat - Targeted as" field.
+        ..setAttack1WeaponSound(WeaponSound.Nothing) // For melee attackers, defines the type of sound the attacker's weapon makes when striking a target.
+        ..setAttack1WeaponType(WeaponType.Missile) // Defines the nature of the unit/building/hero's attack. This field determines which of the other Combat fields do and don't have any effect on the attack, and also affects whether certain abilities can be used in combination with the attack.
+        ..setAttack2AnimationBackswingPoint(0.580)
+        ..setAttack2AnimationDamagePoint(0.700)
+        ..setAttack2AreaofEffectFullDamage(0)
+        ..setAttack2AreaofEffectMediumDamage(0)
+        ..setAttack2AreaofEffectSmallDamage(0)
+        ..setAttack2AreaofEffectTargets("")
+        ..setAttack2AttackType(AttackType.Hero)
+        ..setAttack2CooldownTime(2.13)
+        ..setAttack2DamageBase(0)
+        ..setAttack2DamageFactorMedium(0.0)
+        ..setAttack2DamageFactorSmall(0.0)
+        ..setAttack2DamageLossFactor(0.0)
+        ..setAttack2DamageNumberofDice(2)
+        ..setAttack2DamageSidesperDie(4)
+        ..setAttack2DamageSpillDistance(0.0)
+        ..setAttack2DamageSpillRadius(0.0)
+        ..setAttack2DamageUpgradeAmount(0)
+        ..setAttack2MaximumNumberofTargets(1)
+        ..setAttack2ProjectileArc(0.0)
+        ..setAttack2ProjectileArt("")
+        ..setAttack2ProjectileHomingEnabled(false)
+        ..setAttack2ProjectileSpeed(0)
+        ..setAttack2Range(500)
+        ..setAttack2RangeMotionBuffer(250.0)
+        ..setAttack2ShowUI(true)
+        ..setAttack2TargetsAllowed(commaList("Ground","Structure","Debris","Air","Item","Ward"))
+        ..setAttack2WeaponSound(WeaponSound.Nothing)
+        ..setAttack2WeaponType(WeaponType.Missile)
+        ..setAttacksEnabled(1) // Defines which of the unit/building/hero's two attacks will be available to use in the game. Either one or both attacks can be selected.
+        ..setDeathType(3) // Defines the properties the unit/building/hero's corpse has after it is killed. Determines whether it can be raised by abilities such as "Raise Skeleton" or "Animated Dead", and also whether it experiences natural decay or not.
+        ..setDefenseBase(0) // Defines the amount of defense the unit/building/hero has. A higher value means a greater reduction in the amount of damage received when being attacked.
+        ..setArmorType(ArmorType.Hero) // Defines the type of defense the unit/building/hero is to have. When a target is attacked, the amount of damage it receives is affected by how the attacker's attack type matches up against the target's defense type. To see a list of attack type versus defense type modifiers, please refer to the "Combat - Damage Bonus Table" fields in Gameplay Constants.
+        ..setDefenseUpgradeBonus(0) // This is the ammount of armor the unit recieves when you research Iron Plating, Steel Armor, Creature Carapice, and others at your lumber mill or graveyard.
+        ..setMinimumAttackRange(0) // Defines the minimum distance at which a unit/building/hero is permitted to attack. If a target is within the minimum distance, then the attacker will not be allowed to attack that target.
+        ..setTargetedAs(commaList("Ground")) // Defines what target type(s) in which the unit/building/hero will be categorised. For an attacker to be able to attack the unit/building/hero, the attacker's "Combat - Attack x - Targets Allowed" field must contain all the types that have been selected in this field.
+        /* Movement */
+        ..setGroupSeparationEnabled(false) // Defines whether to allow/deny flying units/heroes to physically separate from each other when issued a move order. If set to false, the units/heroes will be allowed to bunch on top of each other when moving.
+        ..setGroupSeparationGroupNumber(0) // Unknown.
+        ..setGroupSeparationParameter(0) // Unknown.
+        ..setGroupSeparationPriority(0) // Unknown.
+        ..setMovementHeight(0.0) // Defines at what height the unit/building/hero is to stand and move about. This field will only have an effect if the Unit Editor field "Movement - Type" is set to "Fly" or "Hover".
+        ..setMovementHeightMinimum(0.0) // Defines the lowest height at which the unit/building/hero is allowed to descend. Height change can only be affected by certain spells, and by the trigger action "Animation - Change Unit Flying Height".
+        ..setSpeedBase(350) // Defines the standard movement speed of the unit/building/hero, when unaffected by any spells or upgrades. The maximum speed allowed by the game is 522.
+        ..setSpeedMaximum(0) // Defines the maximum speed at which the unit/building/hero is allowed to travel. Speed change can only be affected by certain spells, and by the trigger action "Unit - Set Movement Speed". The maximum speed allowed by the game is 522. The Gameplay Constants field "Movement - Unit Speed - Maximum" defines the universal maximum speed that will work in the game. Speed values set above the maximum value will be automatically reset to maximum value instead.
+        ..setSpeedMinimum(0) // Defines the minimum speed at which the unit/building/hero is allowed to travel. Speed change can only be affected by certain spells, and by the trigger action "Unit - Set Movement Speed". A movement speed of zero will result in the unit/building/hero being unable to move under any circumstances. The Gameplay Constants field "Movement - Unit Speed - Minimum" defines the universal minimum speed that will work in the game. Speed values set below the minimum value will be automatically reset to the minimum value instead. Please note that a speed of zero is not considered a movement value, and therefore can be assigned under any circumstances (it is unaffected by the relevant Gameplay Constants field).
+        ..setTurnRate(0.6) // Defines the speed at which the unit/building/hero is allowed to turn. Turn speed can only be affected by certain spells, and by the trigger action "Animation - Change Unit Turn Speed". Turn speed values range between 0 and 1, with 1 being the fastest turn speed possible.
+        ..setMovementType(MovementType.Foot) // Defines the type of movement the unit/building/hero is to have. Movement type affects things such as the ability to move over particular terrain, and what spells the unit/building/hero can be subject to. It also affects which Unit Editor fields have an effect on the unit/building/hero.
+        /* Pathing */
+        ..setAIPlacementRadius(0.0) // Unknown.
+        ..setAIPlacementType("None") // Unknown.
+        ..setCollisionSize(32.0) // Defines how large an area the unit/building/hero physically occupies on a map, and consequently how well it is able to manoeuvre around other objects on a map (and vice versa).
+        /* Sound */
+        ..setSoundLoopingFadeInRate(0) // The time (in milliseconds) it takes the looping construction sound to fade in (see Unit Editor field "Sound - Construction"). Values can range from 0 to 12700.
+        ..setSoundLoopingFadeOutRate(0) // The time (in milliseconds) it takes the looping construction sound to fade out (see Unit Editor field "Sound - Construction"). Values can range from 0 to 12700.
+        ..setMovementSound("None") // Defines the sound played when the unit/hero is given a movement order. This sound will override the movement sounds defined as part of the unit's/hero's sound set (see Unit Editor field "Sound - Unit Sound Set").
+        ..setRandomSound("None") // Unknown.
+        ..setUnitSoundSet(Soundsets.sylvanusWindrunner) // Defines the set of sounds that the unit will use when commanded to perform such actions as moving and attacking.
+        /* Stats */
+        ..setAgilityPerLevel(1.5) // Defines the amount of points that will be added to the hero's agility statistic whenever the hero gains a level. Agility affects the speed of the hero's attack.
+        ..setBuildTime(55) // Defines the time it takes to train/construct the unit/building/hero.
+        ..setCanFlee(true) // Defines whether the unit/hero can automatically retreat when attacked. This field only affects units/heroes which do not attack other units automatically e.g. worker units.
+        ..setFoodCost(0) // Defines the amount of food resources the unit/building/hero consumes. The food cap can be modified by editing the field "Food Limit" in Gameplay Constants, or by using the trigger actions "Player - Set Property" and "Player - Add Property".
+        ..setFoodProduced(0) // Defines the amount of food resources the unit/building/hero produces. The food cap can be modified by editing the field "Food Limit" in Gameplay Constants, or by using the trigger actions "Player - Set Property" and "Player - Add Property".
+        ..setFormationRank(2) // Defines the position the unit/hero will take in a group when assigned a movement order as part of a group of units/heroes. The values entered can range from 0 to 9, with 0 indicating the unit will position itself at the front and 9 indicating the unit will position itself at the back.
+        ..setGoldBountyAwardedBase(30) // Bounty is the amount of gold awarded to the owner of the unit/building/hero that kills another unit/building/hero. The total gold awarded is calculated from the fields "Stats - Bound Awarded - Base", "Stats - Bounty Awarded - Number of Dice", "Stats - Bounty Awarded - Sides per Die".
+        ..setGoldBountyAwardedNumberofDice(8) // The formula is as follows: GOLD AWARDED = Base Bounty + A DICE ROLL OF [Number of dice] EACH HAVING [Sides per Die]
+        ..setGoldBountyAwardedSidesperDie(3) // Bounty is automatically awarded when killing Neutral player units/buildings/heroes. For other players, the bounty must be turned on using the trigger action "Player - Turn Player Flag On/Off".
+        ..setGoldCost(425) // Defines the amount of gold a unit/building/hero will cost to train/build.
+        ..hideHeroDeathMsg(false) // Defines whether to hide the death message displayed on the screen when the hero dies.
+        ..hideHeroInterfaceIcon(false) // Defines whether to hide the hero's icon displayed in the upper-left corner of the screen.
+        ..hideHeroMinimapDisplay(false) // Defines whether to display the special symbol used to locate heroes in the minimap.
+        ..setHideMinimapDisplay(false) // Defines whether the unit/building/hero is visible on the minimap.
+        ..setHitPointsMaximumBase(100) // Defines the maximum hit points of the unit/building/hero. This value can only be changed for units/buildings by using the trigger action "Player - Set Handicap". For heroes, this value will change when they gain a level.
+        ..setHitPointsRegenerationRate(0.25) // Defines the number of hit points the unit/building/hero will regenerate per second.
+        ..setHitPointsRegenerationType("Always") // Defines under what conditions the unit/building/hero will regenerate hit points.
+        ..setIntelligencePerLevel(2.6) // Defines the amount of points that will be added to the hero's intelligence statistic whenever the hero gains a level. Intelligence affects the number of mana points the hero has.
+        ..setIsaBuilding(false) // Defines whether the unit/building/hero is classified as a building. This field affects which Unit Editor fields are displayed/hidden, and also how the unit/building/hero behaves on the battlefield. Also defines in what Unit Editor folder the unit/building/hero will be placed.
+        ..setLevel(5) // Defines the level of the unit/building/hero. The values entered can range from 1 to 100, and determine the amount of experience points given to a hero who kills another unit/building/hero.
+        ..setLumberBountyAwardedBase(0)
+        ..setLumberBountyAwardedNumberofDice(0)
+        ..setLumberBountyAwardedSidesperDie(0)
+        ..setLumberCost(100) // Defines the amount of lumber a unit/building/hero will cost to train/build.
+        ..setManaInitialAmount(200) // Defines the initial amount of mana a unit/building/hero has when it first appears on the map. For units/buildings, the value entered should not be greater than the value specified in "Stats - Mana Maximum". For heroes, the "Stats - Intelligence per level" field additionally determines maximum mana, so the entered value in this field can be greater. 
+        ..setManaMaximum(0) // Defines the maximum mana points of the unit/building/hero. This value can only be changed by heroes when gaining a level.
+        ..setManaRegeneration(0.01) // Defines the number of mana points the unit/building/hero will regenerate per second.
+        ..setPointValue(100) // Defines a point value for the unit/building/hero. Has no significance in the game other than to be used as part of a trigger through the Integer functions "Unit - Point value of Unit" and "Unit - Point value of Unit-type".
+        ..setPrimaryAttribute("Agility") // Defines which attribute (out of Strength, Agility and Intelligence) is the primary attribute for the hero. Each point of the primary attribute will increase the hero's attack damage by 1.
+        ..setPriority(10) // Defines at what point the unit/building/hero will be attacked when within a group of units/buildings/heroes being attacked. The values entered can range from 0 to 20, with 0 meaning that the unit/building/hero will be attacked last, and 20 meaning that it will be attacked first.
+        ..setRace(Race.Human) // Defines the race to which the unit/building/hero belongs. This field also affects in which race folder the unit/building/hero is categorised in the Unit Editor.
+        ..setRepairGoldCost(425) // Defines the amount of gold it costs to repair the unit/building/hero to full health. This field only has an effect on objects that can be repaired, namely buildings. It is not possible to make units or heroes repairable.
+        ..setRepairLumberCost(100) // Defines the amount of lumber it costs to repair the unit/building/hero to full health. This field only has an effect on objects that can be repaired, namely buildings. It is not possible to make units or heroes repairable.
+        ..setRepairTime(55) // Defines the amount of time it takes to repair the unit/building/hero back to full health. This field only has an effect on objects that can be repaired, namely buildings. It is not possible to make units or heroes repairable.
+        ..setSightRadiusDay(1800) // Defines how far the unit/building/hero can see during the day (0600 to 1800 is the default day-time period). Sight may be obstructed by the presence of other objects.
+        ..setSightRadiusNight(800) // Defines how far the unit/building/hero can see during the night (1800 to 0600 is the default night-time period). Sight may be obstructed by the presence of other objects.
+        ..setSleeps(false) // Defines how far the unit/building/hero can see during the night (1800 to 0600 is the default night-time period). Sight may be obstructed by the presence of other objects.
+        ..setStartingAgility(19) // Defines the value of the hero's agility when first entering a map.
+        ..setStartingIntelligence(15) // Defines the value of the hero's intelligence when first entering a map.
+        ..setStartingStrength(18) // Defines the value of the hero's intelligence when first entering a map.
+        ..setStockMaximum(3) // Defines the maximum quantity of the unit/building/hero that can be stocked in the Neutral building that sells it.
+        ..setStockReplenishInterval(30) // Defines the maximum quantity of the unit/building/hero that can be stocked in the Neutral building that sells it.
+        ..setStockStartDelay(0) // Defines the maximum quantity of the unit/building/hero that can be stocked in the Neutral building that sells it.
+        ..setStrengthPerLevel(1.9) // Defines the amount of points that will be added to the hero's strength statistic whenever the hero gains a level. Strength affects the number of hit points the hero has.
+        ..setTransportedSize(1) // Defines how much space the unit/hero will take up when inside a transport vehicle.
+        ..setUnitClassification("") // Defines any special classifications for the unit/building/hero. Classifications can affect the ability of the unit/building/hero to be subject to certain spells and upgrades, and also how other units/heroes/buildings behave around it.
+        /* Techtree */
+        ..setDependencyEquivalents("") // This field was originally the main method for getting custom heroes to count in the default "3 heroes per player" limit in melee-style games. This functionality has now been deprecated with the presence of the Gameplay Constants field "Techtree - Dependency Equivalents - Hero". The current method for achieving the objective of this field is as follows:
+        ..setHeroRevivalLocations("") // Specifies which buildings the hero may be revived at after dying. A building is eligible to revive a dead hero if it is owned by the same owner of the dead hero, and if it has the Unit Editor field "Techtree - Revives Dead Heroes" set to true. If this field is left blank, the hero will be available for reviving at all player-owned buildings that meet the aforementioned requirements.
+        ..setItemsSold("") // Defines the items that can be sold by the unit/building/hero.
+        ..setRequirements("") // Defines what requirements must be met before the unit/building/hero can be made available for training/building.
+        ..setRequirementsLevels("") // Unknown.
+        ..setRequierementsForTier(2, "") // Sets the unit/building/hero requirements for creating another hero in melee-style maps. In a typical scenario, 1 hero per tier is allowed to be trained, with the maximum number of tiers set at 9. By default, the first hero trained by a player is available from the beginning of a game. For making melee-style maps where you want to include custom heroes in the 1 hero per tier limit, you must verify that the tier requirements are properly set for all your melee and custom heroes. Check all the "Techtree - Requirements - Tier x" fields and also "Techtree - Requirements - Tiers Used" for each hero. It will be typically the case that, for all the heroes that can be trained by a player, these Techtree field requirements will all be identical.
+        ..setStructuresBuilt("") // Defines what buildings can be constructed by the unit.
+        ..setUnitsSold("") // Defines what units can be bought at the unit/building/hero. Bought units are made available instantly, as opposed to trained units, which are only available after a prescribed period of time (see the Unit Editor field "Stats - Build Time").
+        ..setUpgradesUsed("") // Defines what upgrades apply to the unit/building/hero. Note that some abilities have both ability and upgrade components to them (e.g. Moon Glaive).
+        /* Text */
+        ..setDescription("") // A field used purely within the editor, describing the nature of the unit/building/hero.
+        ..setHotkey("P") // Defines the keyboard key that can be pressed in order to train the unit/building/hero. Used as an alternative to clicking on the icon in the command interface.
+        ..setName("Ranger") // A field used purely within the editor, commonly for categorising objects.
+        ..setProperNames(commaList("Sylvanas Windrunner")) // Defines the pool of names from which a hero's name can be assigned. After the hero is trained at an altar, a name is selected randomly from the pool and assigned to the hero.
+        ..setProperNamesUsed(1) // Only the first x number of names, defined in the Unit Editor field "Text - Proper Names", will be used to name the hero.
+        ..setTooltipAwaken("Revive Ranger") // The tooltip to display for awakening the hero.
+        ..setTooltipBasic("") // Similar to the Unit Editor field "Text - Name", but differs in that is viewable as part of the unit's/building's/hero's tooltip.
+        ..setTooltipExtended("") // Similar to the Unit Editor field "Text - Description", but differs in that is viewable as part of the unit's/building's/hero's tooltip.
+        ..setTooltipRevive("") // The tooltip to display for heroes made available for reviving after dying.

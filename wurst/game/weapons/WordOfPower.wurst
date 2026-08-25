@@ -27,22 +27,29 @@ public function SheepEntity.wordOfpower()
   if this.owner.getFiringPower() >= wordOfPower.delay
     let sharedHitGroup = new HashSet<UnitEntity>
     for ii = 1 to wordOfPower.shards
-      let xyA = (360 / wordOfPower.shards * ii).asAngleDegrees()
+      // Real division: integer 360 / shards would truncate for shard counts
+      // that don't divide 360, bunching the last shards together.
+      let xyA = (360. / wordOfPower.shards * ii).asAngleDegrees()
       new WordOfPowerProjectile(this, xyA, sharedHitGroup)
-  
-  
+    // All projectiles are gone after 1s (lifetime below); free the shared set.
+    doAfter(1.5) ->
+      destroy sharedHitGroup
+
+
 public class WordOfPowerProjectile extends MyProjectile
   HashSet<UnitEntity> sharedHitGroup
-  
+  CallbackSingle lifetimeCb = null
+
   construct(SheepEntity source, angle xyA, HashSet<UnitEntity> sharedHitGroup)
     super(source, wordOfPower.minRadius, Abilities.crushingWaveMissile)
     this.sharedHitGroup = sharedHitGroup
+    pos.z += 30
     setXYAngle(xyA)
     setPhysics()
     setPermanent()
-    doAfter(1.0) ->
-      if not done
-        terminate()
+    lifetimeCb = doAfter(1.0) ->
+      lifetimeCb = null
+      terminate()
 
     onHit3D() target ->
       if not sharedHitGroup.has(target)
@@ -51,9 +58,12 @@ public class WordOfPowerProjectile extends MyProjectile
 
   override function setPhysics()
     gravity = 0
-    pos.z += 30
     setSpeed(40)
 
   override function onGroundHit()
     if not done
       terminate()
+
+  ondestroy
+    if lifetimeCb != null
+      destroy lifetimeCb

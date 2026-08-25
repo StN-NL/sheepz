@@ -55,14 +55,16 @@ public class MyProjectile extends Projectile
     
   function checkHit3(unit u)
     let target = u.getMyUnitEntity()
-    if pos.distanceTo(target.pos) < radius
+    // Dummy units (arsenal, InstantDummyCaster) have no entity.
+    if target != null and pos.distanceTo(target.pos) < radius
       if not hitGroup3.has(target)
         if target.owner != owner or friendlyFire
           hit3(target)
 
   function removeHitUnit(MyUnitEntity e)
-    if not e.done
-      hitGroup3.remove(e)
+    // Remove unconditionally: a destroyed entity's id can be recycled, and a
+    // stale entry would block hits on whatever entity inherits that id.
+    hitGroup3.remove(e)
 
   function setPhysics()
     let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER

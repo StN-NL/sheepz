@@ -45,10 +45,13 @@ public function SheepEntity.charge()
   this.addMoveSpeed(CHARGE_MS_BONUS)
   doPeriodically(ANIMATION_PERIOD) cb ->
     let dt = this.owner.getChannelTime()
-    if dt == 0. or dt > CHARGE_MAX_CHANNEL_TIME
+    if dt == 0. or dt > CHARGE_MAX_CHANNEL_TIME or not this.isAlive()
       rightHand.destr()
       leftHand.destr()
-      this.addScale(-0.2)
+      // Heaven resets scale absolutely, so only revert it while still alive —
+      // otherwise each death mid-charge would shrink the sheep permanently.
+      if this.isAlive()
+        this.addScale(-0.2)
       this.addMoveSpeed(-CHARGE_MS_BONUS)
       destroy cb
 
@@ -59,7 +62,6 @@ public function initWeapons()
 
 
 function addListenersOnChannel()
-  baloonicide.onChannel(sheep -> sheep.charge())
   baseballBat.onChannel(sheep -> sheep.charge())
   bladestorm.onChannel(sheep -> sheep.charge())
   fusRoDah.onChannel(sheep -> sheep.charge())

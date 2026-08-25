@@ -1,0 +1,42 @@
+package GameMath
+import LinkedList
+
+// Pure, native-free helpers extracted so they can be unit tested (see GameMathTest).
+
+/** Linear blast falloff: 1.0 at or within minRadius, 0.0 at or beyond maxRadius,
+    linearly interpolated in between. Safe when minRadius >= maxRadius (no divide by zero). */
+public function blastFalloff(real distance, real minRadius, real maxRadius) returns real
+  if distance <= minRadius
+    return 1.
+  else if distance >= maxRadius
+    return 0.
+  else
+    return 1. - (distance - minRadius) / (maxRadius - minRadius)
+
+/** Greedy binary decomposition for the bonus ability system: returns the exponents
+    (15 down to 0, descending) of the powers of two that fit into value, matching the
+    16 doubling bonus abilities in Status. Fractional leftovers are dropped and a
+    negative value yields an empty list (no debuff support). Caller owns the list. */
+public function bonusBitExponents(real value) returns LinkedList<int>
+  let exponents = new LinkedList<int>
+  var remainder = value
+  var divisor = 32768 // 2^15
+  for exp = 15 downto 0
+    if divisor.toReal() <= remainder
+      remainder -= divisor.toReal()
+      exponents.add(exp)
+    divisor = divisor div 2
+  return exponents
+
+/** Given integer weights and a roll in [0, sum(weights) - 1], returns the index of the
+    selected element using cumulative weighting, or -1 if the roll is out of range. */
+public function pickWeightedIndex(LinkedList<int> weights, int roll) returns int
+  var cumulative = 0
+  var index = 0
+  var result = -1
+  for w in weights
+    cumulative += w
+    if result == -1 and cumulative > roll
+      result = index
+    index++
+  return result

@@ -28,7 +28,13 @@ public function player.getPoints() returns int
   return POINTS[this.getId()].value
 
 public function player.setLives(int value)
-  LIVES[this.getId()].updateValue(value)
+  // In TIMED mode the Lives cell is never attached to the board (cell == null);
+  // lives are still tracked as a plain value there.
+  let lives = LIVES[this.getId()]
+  if lives.cell != null
+    lives.updateValue(value)
+  else
+    lives.value = value
 
 public function player.setPoints(int value)
   POINTS[this.getId()].updateValue(value)
@@ -56,10 +62,13 @@ public function initMultiboard()
     if getPlayersIngame().has(p) or isSinglePlayer()
       POINTS[ii] = dynamicCell<int>(0, i -> i.toString())
       LIVES[ii] = dynamicCell<int>(SHEEP_MAX_LIVES, i -> i.toString())
-      board.addRow()
+      let row = board.addRow()
         ..addCell(p.getName())
         ..addDynamic(POINTS[ii])
-        ..addDynamic(LIVES[ii])
+      // Only SURVIVAL has a Lives column; attaching a third cell to a
+      // 2-column board writes out of range.
+      if GAME_MODE == GameMode.SURVIVAL
+        row.addDynamic(LIVES[ii])
 
   board.show()
 

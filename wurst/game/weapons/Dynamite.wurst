@@ -10,6 +10,7 @@ import TextTagEntity
 
 public class Dynamite extends MyProjectile
   int countdown = dynamite.delay.toInt()
+  CallbackPeriodic countdownCb = null
   // effect wick
   // vec3 wickPos
   
@@ -29,9 +30,10 @@ public class Dynamite extends MyProjectile
       explode()
 
   function countdown()
-    doPeriodically(0.7) cb ->
+    countdownCb = doPeriodically(0.7) cb ->
       fx.eff.setAlpha(225)
       if countdown == 0
+        countdownCb = null
         destroy cb
         if not done
           terminate()
@@ -45,6 +47,10 @@ public class Dynamite extends MyProjectile
   //   wickPos += vec3(0, 0, -1)
   //   wick.setPos(wickPos)
    
+  ondestroy
+    if countdownCb != null
+      destroy countdownCb
+
   function explode()
     // wick.destr()
     fx.eff.setTimeScale(1)

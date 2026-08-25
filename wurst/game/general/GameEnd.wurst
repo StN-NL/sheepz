@@ -9,6 +9,9 @@ import Utils
 
 var gameOver = false
 
+public function isGameOver() returns bool
+  return gameOver
+
 public function enableGameEndCondition()
   if GAME_MODE == GameMode.TIMED
     startGameEndTimer()
@@ -22,17 +25,21 @@ public function startGameEndTimer()
   gameEndTimerDialog.display(true)
   let gameDuration = 60 * GAME_DURATION
   gameEndTimer.start(gameDuration, function DoNothing)
-  doAfter(gameDuration) -> 
+  doAfter(gameDuration) ->
     gameOver = true
+    gameEndTimerDialog.destr()
+    gameEndTimer.release()
     getWinner().declareVictor()
 
 public function periodicallyCheckGameEnd()
   doPeriodically(1.0) cb ->
-    if not gameOver and not isSinglePlayer()
-      if getAlivePlayers() <= 1
-        gameOver = true
-        addEndGamePointsSurvival()
-        getWinner().declareVictor()
+    if gameOver
+      destroy cb
+    else if not isSinglePlayer() and getAlivePlayers() <= 1
+      gameOver = true
+      addEndGamePointsSurvival()
+      getWinner().declareVictor()
+      destroy cb
 
 function getAlivePlayers() returns int
   var alivePlayers = 0

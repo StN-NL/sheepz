@@ -105,6 +105,7 @@ public constant clusterBomb = compiletime(
   ..setMaxRadius(250)
   ..setShards(6)
   ..setShardsMaxDamage(8)
+  ..setShardsPower(8)
 )
 
 public constant chickenBomb = compiletime(

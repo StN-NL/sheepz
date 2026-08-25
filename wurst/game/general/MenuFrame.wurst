@@ -307,7 +307,9 @@ public class MenuSetup
     ..setText("Settings (" + "F8".color(COLOR_GOLD) + ")")
 
     onKeyPress(OSKEY_F8) ->
-      if hasStarted and not window.isVisible()
+      // Privileged only: PauseGame and the window are global, and only the
+      // host's Close button can undo them.
+      if isPrivileged() and hasStarted and not window.isVisible()
         PauseGame(true)
         window.setVisible(true)
         SOUND_BUTTON_CLICK.play()
@@ -393,35 +395,35 @@ public class MenuSetup
       ..setPoint(FRAMEPOINT_TOP, weaponsPage, FRAMEPOINT_TOP)
       ..setVisible(i == 0)
 
-      let weaponsButtonBack = createFrame(FramehandleTypeNames.gluetextbutton, "", weaponsPage, FramehandleNames.scriptDialogButton, 0)
-      ..setPoint(FRAMEPOINT_LEFT, weaponsButton, FRAMEPOINT_RIGHT)
-      ..setSize(0.04, 0.04)
-      ..setText("<")
-      ..onClick() ->
-        if isPrivileged()
-          weaponsPageList[index].setVisible(false)
-          if index == 0
-            index = weaponsPageList.length - 1
-          else
-            index -= 1
+    let weaponsButtonBack = createFrame(FramehandleTypeNames.gluetextbutton, "", weaponsPage, FramehandleNames.scriptDialogButton, 0)
+    ..setPoint(FRAMEPOINT_LEFT, weaponsButton, FRAMEPOINT_RIGHT)
+    ..setSize(0.04, 0.04)
+    ..setText("<")
+    ..onClick() ->
+      if isPrivileged()
+        weaponsPageList[index].setVisible(false)
+        if index == 0
+          index = weaponsPageList.length - 1
+        else
+          index -= 1
 
-          weaponsPageList[index].setVisible(true)
-          SOUND_BUTTON_CLICK.play()
+        weaponsPageList[index].setVisible(true)
+        SOUND_BUTTON_CLICK.play()
 
-      createFrame(FramehandleTypeNames.gluetextbutton, "", weaponsPage, FramehandleNames.scriptDialogButton, 0)
-      ..setPoint(FRAMEPOINT_LEFT, weaponsButtonBack, FRAMEPOINT_RIGHT)
-      ..setSize(0.04, 0.04)
-      ..setText(">")
-      ..onClick() ->
-        if isPrivileged()
-          weaponsPageList[index].setVisible(false)
-          if index == weaponsPageList.length - 1
-            index = 0
-          else
-            index += 1
+    createFrame(FramehandleTypeNames.gluetextbutton, "", weaponsPage, FramehandleNames.scriptDialogButton, 0)
+    ..setPoint(FRAMEPOINT_LEFT, weaponsButtonBack, FRAMEPOINT_RIGHT)
+    ..setSize(0.04, 0.04)
+    ..setText(">")
+    ..onClick() ->
+      if isPrivileged()
+        weaponsPageList[index].setVisible(false)
+        if index == weaponsPageList.length - 1
+          index = 0
+        else
+          index += 1
 
-          weaponsPageList[index].setVisible(true)
-          SOUND_BUTTON_CLICK.play()
+        weaponsPageList[index].setVisible(true)
+        SOUND_BUTTON_CLICK.play()
 
     // <<<<<<<<<< <<<<<<<<<< --------- >>>>>>>>>> >>>>>>>>>>
     // <<<<<<<<<< <<<<<<<<<< Page Game >>>>>>>>>> >>>>>>>>>>

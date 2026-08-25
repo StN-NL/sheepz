@@ -8,8 +8,7 @@ import Utils
 
 public class GuidedMissile extends MyProjectile
   vec2 target
-  bool guided = false
-  
+
   construct(SheepEntity source, vec2 target)
     super(source, guidedMissile.minRadius, Abilities.mortarMissile)
     this.target = target
@@ -33,10 +32,6 @@ public class GuidedMissile extends MyProjectile
     super.update()
 
   function useGuidingSystem()
-    // vel.x += (target.x - pos.x) / 2000
-    // vel.y += (target.y - pos.y) / 2000
-    // vel.x = max(min(vel.x, 15), -15)
-    // vel.y = max(min(vel.x, 15), -15)
     let velX = max(min((target.x - pos.x) / 20, 15), -15)
     let velY = max(min((target.y - pos.y) / 20, 15), -15)
     setVel(vec3(velX, velY, vel.z))

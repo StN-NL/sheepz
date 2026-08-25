@@ -20,7 +20,7 @@ class RiotShield extends Fx2Entity
   construct(MyUnitEntity e)
     super(e.owner, e.pos, angle(0), "")
     this.e = e
-    removeEffect()
+    removeEffectPlain()
 
   protected static function get(MyUnitEntity e) returns thistype
     if not map.has(e)
@@ -53,6 +53,9 @@ class RiotShield extends Fx2Entity
 
   private function removeEffect()
     e.unshield()
+    removeEffectPlain()
+
+  private function removeEffectPlain()
     fx.eff.setAlpha(0)
     fx.eff.destr()
     fx.eff = null

@@ -13,6 +13,7 @@ import Utils
 public class ClusterBomb extends MyProjectile
   bool triggered = false
   int countdown = clusterBomb.delay.toInt()
+  CallbackPeriodic countdownCb = null
 
   construct(SheepEntity source)
     super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)
@@ -20,12 +21,13 @@ public class ClusterBomb extends MyProjectile
     fx.eff.setTimeScale(0.2)
     countdown()
 
-    onEnd() -> 
+    onEnd() ->
       explode()
 
   function countdown()
-    doPeriodically(1.0) cb ->
+    countdownCb = doPeriodically(1.0) cb ->
       if countdown == 0
+        countdownCb = null
         destroy cb
         if not done
           terminate()
@@ -33,6 +35,10 @@ public class ClusterBomb extends MyProjectile
         SOUND_COUNTDOWN.playOnPoint(pos)
         new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
         countdown -= 1
+
+  ondestroy
+    if countdownCb != null
+      destroy countdownCb
 
   override function update()
     alignYawAndPitch()
@@ -52,7 +58,7 @@ public class ClusterBomb extends MyProjectile
     fx.eff.setScale(2)
     fx.eff.setTimeScale(0.5)
     SOUNDS_EXPLOSION.getRandomElement().playOnPoint(pos)
-    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.minRadius, clusterBomb.maxDamage)
+    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.maxRadius, clusterBomb.maxDamage)
 
 
 public class ClusterBombShard extends MyProjectile
@@ -67,7 +73,7 @@ public class ClusterBombShard extends MyProjectile
 
   override function setPhysics()
     setXYAngle(getRandomAngle())
-    let power = GetRandomReal(0.5, 1.5) * 8 // clusterBomb.shardsPower
+    let power = GetRandomReal(0.5, 1.5) * clusterBomb.shardsPower
     setSpeed(power)
     vel.z = PROJECTILE_FACTOR_Z * power
 
@@ -82,5 +88,5 @@ public class ClusterBombShard extends MyProjectile
   function explode()
     fx.eff.setScale(1)
     fx.eff.setTimeScale(0.7)
-    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.maxRadius, clusterBomb.maxDamage)
+    source.blastArea(pos, clusterBomb.minRadius, clusterBomb.maxRadius, clusterBomb.shardsMaxDamage)
     

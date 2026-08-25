@@ -27,7 +27,8 @@ public function unit.isNeutral() returns boolean
   return this.getOwner().isNeutral()
   
 public function player.isNeutral() returns boolean
-  return this == DUMMY_PLAYER or this == DUMMY_HOSTILE_PLAYER or this.getId() >= 22
+  // Neutral slots start at 24 (aggressive/victim/extra/passive); 0-23 are playable.
+  return this == DUMMY_PLAYER or this == DUMMY_HOSTILE_PLAYER or this.getId() >= bj_MAX_PLAYERS
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< MATH       >>>>>>>>>> >>>>>>>>>>
@@ -35,7 +36,8 @@ public function player.isNeutral() returns boolean
 
 /** Roll the dice on a number between 0 and 1 */
 public function roll(real val) returns boolean
-  return val >= GetRandomReal(0, 1)
+  // Strict comparison so roll(0) never succeeds; GetRandomReal's low bound is attainable.
+  return val > GetRandomReal(0, 1)
 
 public function getRandomAngle() returns angle
   return GetRandomReal(0, 360).asAngleDegrees()
@@ -44,8 +46,10 @@ public function vec2.getRandomPos(real range) returns vec2
   return this.polarOffset(getRandomAngle(), GetRandomReal(0, range))
 
 public function onceEvery(real seconds) returns bool
-  let interval = (seconds / ANIMATION_PERIOD).toInt()
-  return ModuloInteger((currentTime / 3 * 100).toInt(), interval) == 0
+  // Rounding (not truncating) keeps the accumulated-float tick counter from
+  // double-firing or skipping, and max(1, ...) guards sub-tick intervals.
+  let interval = max(1, (seconds / ANIMATION_PERIOD).round())
+  return ModuloInteger((currentTime / ANIMATION_PERIOD).round(), interval) == 0
 
 public function oneOutOf(int interval) returns bool
   return GetRandomInt(0, interval - 1) == 0

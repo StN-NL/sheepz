@@ -12,9 +12,14 @@ public function SheepEntity.bladestorm()
     ..setScale(0.6)
     ..destr()
   let maxDamage = (2 + this.owner.getFiringPower(2)) / 4 * bladestorm.maxDamage
+  // First wave fires immediately, so only numberOfWaves - 1 remain; the storm
+  // stops if the caster dies (otherwise it would resume around the respawn).
   this.whirl(maxDamage)
-  doPeriodicallyCounted(bladestorm.duration / bladestorm.numberOfWaves, bladestorm.numberOfWaves) cb ->
-    this.whirl(maxDamage)
+  doPeriodicallyCounted(bladestorm.duration / bladestorm.numberOfWaves, bladestorm.numberOfWaves - 1) cb ->
+    if this.isAlive()
+      this.whirl(maxDamage)
+    else
+      cb.stop()
 
 function SheepEntity.whirl(real maxDamage)
   this.blastArea(this.getPos(), bladestorm.minRadius, bladestorm.maxRadius, maxDamage, 2 * maxDamage, 0.7, false)

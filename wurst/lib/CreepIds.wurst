@@ -21,7 +21,8 @@ public function getRandomCreep() returns int
   return getRandomBiome().getRandomCreep()
 
 public function getRandomBiome() returns Biome
-  return GetRandomInt(0, 13) castTo Biome
+  // 13 biomes, valid enum indices 0-12 (GetRandomInt is inclusive on both bounds).
+  return GetRandomInt(0, 12) castTo Biome
 
 public function Biome.getRandomCreep() returns int
   return this.list().getRandomElement()
@@ -72,9 +73,9 @@ public function Biome.getName() returns string
     case LORDAERON_SUMMER
       return "|c00FF0000Lordaeron Summer|r"
     case LORDAERON_FALL
-      return "|c00640000Lordearon Fall|r"
+      return "|c00640000Lordaeron Fall|r"
     case LORDAERON_WINTER
-      return "|c006969FFLordearon Winter|r"
+      return "|c006969FFLordaeron Winter|r"
     case NORTHREND
       return "|c00000064Northrend|r"
     case OUTLAND

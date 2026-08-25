@@ -5,12 +5,15 @@ import BuffObjEditing
 import ClosureEvents
 import ClosureTimers
 import DamageEvent
+import GameMath
 import HashMap
+import LinkedList
 import InstantDummyCaster
 import ObjectIds
 import ObjectIdGenerator
 import Orders
 import StandardTextTags
+import UnitIndexer
 
 import Damage
 
@@ -41,7 +44,7 @@ public constant BUFF_STUN = compiletime(
 public function unit.setStatus(Status status, real duration)
   StatusHandler.get(this).setStatus(status, duration)
 
-/** Avoid this method as it can does not stack. */
+/** Avoid this method as it does not stack. */
 public function unit.setStatus(Status status, bool active)
   StatusHandler.get(this).setStatus(status, active)
 
@@ -406,14 +409,11 @@ class BonusDefinition
     for ii = 0 to 15
       u.removeAbility(abilIds[ii])
 
-    var remainder = value
-    for ii = 1 to 16
-      let exp = 16 - ii
-      let divisor = 2..pow(exp.toReal())
-      if divisor <= remainder
-        remainder -= divisor
-        u.addAbility(abilIds[exp])
-        u.hideAbility(abilIds[exp], true)
+    let exponents = bonusBitExponents(value)
+    for exp in exponents
+      u.addAbility(abilIds[exp])
+      u.hideAbility(abilIds[exp], true)
+    destroy exponents
 
   protected static function setup()
     map.put(Bonus.ATTACK_SPEED, compiletime(new BonusDefinition(Bonus.ATTACK_SPEED)))
@@ -458,6 +458,11 @@ class StatusHandler
     this.baseAttackCooldown[0] = u.getAttackCooldown(0)
     this.baseAttackCooldown[1] = u.getAttackCooldown(1)
 
+  ondestroy
+    destroy buffMap
+    destroy statusMap
+    destroy bonusMap
+
   function setBaseAttackCooldown(real cooldown, int weaponIndex)
     this.baseAttackCooldown[weaponIndex] = cooldown
     if weaponIndex == 0
@@ -473,8 +478,9 @@ class StatusHandler
   function setBuff(Buff b, real duration, int lvl)
     updateBuff(b, 1, lvl)
     doAfter(duration) ->
-      if u.isAlive()
-        updateBuff(b, -1, lvl)
+      // Decrement unconditionally: skipping it for dead units permanently
+      // inflates the counter (visual removal on a dead unit is harmless).
+      updateBuff(b, -1, lvl)
 
   function updateBuff(Buff b, int value, int lvl)
     let oldValue = buffMap.get(b)
@@ -494,8 +500,7 @@ class StatusHandler
   function setStatus(Status status, real duration)
     updateStatus(status, 1)
     doAfter(duration) ->
-      if u.isAlive()
-        updateStatus(status, -1)
+      updateStatus(status, -1)
 
   function updateStatus(Status status, int value)
     let oldValue = statusMap.get(status)
@@ -536,8 +541,7 @@ class StatusHandler
   function addBonus(Bonus bonus, real value, real duration)
     updateBonus(bonus, value)
     doAfter(duration) ->
-      if u.isAlive()
-        updateBonus(bonus, -value)
+      updateBonus(bonus, -value)
 
   private function updateBonus(Bonus bonus, real addValue)
     let value = bonusMap.get(bonus) + addValue
@@ -545,20 +549,21 @@ class StatusHandler
 
     switch bonus
       case ATTACK_COOLDOWN_1
-        let val = bonusMap.get(Bonus.ATTACK_COOLDOWN_1)
-        let cooldown = max((1. + value) * (baseAttackCooldown[0] + val), 0.01)
-        u.setAttackCooldown(cooldown, 0)
-      case ATTACK_COOLDOWN_2
-        let val = bonusMap.get(Bonus.ATTACK_COOLDOWN_2)
-        let cooldown = max((1. + value) * (baseAttackCooldown[1] + val), 0.01)
-        u.setAttackCooldown(cooldown, 1)
-      case ATTACK_COOLDOWN_PCT_1
         let pct = bonusMap.get(Bonus.ATTACK_COOLDOWN_PCT_1)
         let cooldown = max((1. + pct) * (baseAttackCooldown[0] + value), 0.01)
         u.setAttackCooldown(cooldown, 0)
-      case ATTACK_COOLDOWN_PCT_2
+      case ATTACK_COOLDOWN_2
         let pct = bonusMap.get(Bonus.ATTACK_COOLDOWN_PCT_2)
         let cooldown = max((1. + pct) * (baseAttackCooldown[1] + value), 0.01)
+        u.setAttackCooldown(cooldown, 1)
+      case ATTACK_COOLDOWN_PCT_1
+        // value is the new percentage total; the flat term comes from ATTACK_COOLDOWN_1.
+        let flat = bonusMap.get(Bonus.ATTACK_COOLDOWN_1)
+        let cooldown = max((1. + value) * (baseAttackCooldown[0] + flat), 0.01)
+        u.setAttackCooldown(cooldown, 0)
+      case ATTACK_COOLDOWN_PCT_2
+        let flat = bonusMap.get(Bonus.ATTACK_COOLDOWN_2)
+        let cooldown = max((1. + value) * (baseAttackCooldown[1] + flat), 0.01)
         u.setAttackCooldown(cooldown, 1)
       case MOVE_SPEED
         let pct = bonusMap.get(Bonus.MOVE_SPEED_PCT)
@@ -624,9 +629,19 @@ class StatusHandler
       if map.has(killer)
         map.get(killer).findGold()
 
+    // Handle ids are recycled after unit removal; without this a new unit could
+    // inherit a dead unit's handler (stale base stats, counters and bonuses).
+    onUnitDeindex() ->
+      let u = getIndexingUnit()
+      if map.has(u)
+        let handler = map.get(u)
+        map.remove(u)
+        destroy handler
+
   private function areaDamage(unit source, unit target, real amount)
     let damage = bonusMap.get(Bonus.AREA_DAMAGE) * amount
-    source.damageArea(target.getPos(), 128, damage, DamageEvent.getAttackType(), DamageEvent.getDamageType(), false)
+    if damage > 0.
+      source.damageArea(target.getPos(), 128, damage, DamageEvent.getAttackType(), DamageEvent.getDamageType(), false)
 
   private function rollForCrit(real amount)
     if bonusMap.get(Bonus.CRITICAL_HIT_CHANCE) > GetRandomReal(0., 1.)
@@ -644,16 +659,18 @@ class StatusHandler
 
   private function absorption(real amount)
     let absorbed = bonusMap.get(Bonus.SPELL_ABSORPTION) * amount
-    u.addMana(absorbed)
-    DamageEvent.setAmount(max(0, amount - absorbed))
-    if amount > 5. and GetRandomInt(0, 4) == 0
-      flashEffect(Abilities.moonWellCasterArt, u, AttachmentPoints.origin)
+    if absorbed > 0.
+      u.addMana(absorbed)
+      DamageEvent.setAmount(max(0, amount - absorbed))
+      if amount > 5. and GetRandomInt(0, 4) == 0
+        flashEffect(Abilities.moonWellCasterArt, u, AttachmentPoints.origin)
 
   private function thorns(unit source, real amount)
     let reflected = bonusMap.get(Bonus.THORNS) * amount
-    DamageEvent.setAmount(max(0, amount - reflected))
-    u.damage(source, reflected, DamageEvent.getAttackType(), DamageEvent.getDamageType())
-    flashEffect(Abilities.barkSkinTarget, u, AttachmentPoints.chest)
+    if reflected > 0.
+      DamageEvent.setAmount(max(0, amount - reflected))
+      u.damage(source, reflected, DamageEvent.getAttackType(), DamageEvent.getDamageType())
+      flashEffect(Abilities.barkSkinTarget, u, AttachmentPoints.chest)
 
   private function block(real amount)
     if bonusMap.get(Bonus.BLOCK_CHANCE) > GetRandomReal(0., 1.)

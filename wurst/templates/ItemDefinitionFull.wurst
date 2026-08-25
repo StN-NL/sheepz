@@ -1,0 +1,63 @@
+package ItemDefinitionFull
+import AbilityIds
+import Icons
+import ItemObjEditing
+import ObjectIdGenerator
+import ObjectIds
+import Objects
+
+public constant ITEM_GAUNTLETS = compiletime(ITEM_ID_GEN.next())
+
+// Template for copy-paste reference only. Restore @compiletime on gen() when
+// deriving a real definition — as written it must not bake object data into the map
+// (the example item was sellable by merchants and eligible as a random item drop).
+function gen()
+    new ItemDefinition(ITEM_GAUNTLETS, 'rst1')
+        /* Abilities */
+        ..setAbilities(commaList(AbilityIds.strengthBonusPlus3))
+        /* Art */
+        ..setButtonPositionX(0)
+        ..setButtonPositionY(0)
+        ..setInterfaceIcon(Icons.bTNGauntletsOfOgrePower)
+        ..setModelUsed(Objects.treasurechest1)
+        ..setScalingValue(1.0)
+        ..setTintingColor1Red(255)
+        ..setTintingColor2Green(255)
+        ..setTintingColor3Blue(255)
+        /* Combat */
+        // ..setArmorType(data)
+        /* Stats */
+        ..setActivelyUsed(false)
+        ..setCanBeDropped(true)
+        ..setCanBeSoldByMerchants(true)
+        ..setCanBeSoldToMerchants(true)
+        ..setClassification("Permanent")
+        ..setCooldownGroup(commaList(AbilityIds.strengthBonusPlus3))
+        ..setDroppedWhenCarrierDies(false)
+        ..setGoldCost(100)
+        ..setHitPoints(75)
+        ..setIgnoreCooldown(false)
+        ..setIncludeAsRandomChoice(true)
+        ..setLevel(1)
+        ..setLevelUnclassified(2)
+        ..setLumberCost(0)
+        ..setMaxStack(0)
+        ..setNumberofCharges(0)
+        ..setPerishable(false)
+        ..setPriority(58)
+        ..setStockMaximum(1)
+        ..setStockReplenishInterval(120)
+        ..setStockStartDelay(0)
+        ..setUseAutomaticallyWhenAcquired(false)
+        ..setValidTargetForTransformation(false)
+        /* Techtree */
+        ..setRequirements("")
+        ..setRequirementsLevels("")
+        /* Text */
+        ..setDescription("Boosts Strength by 3.")
+        ..setHotkey("S")
+        ..setName("Gauntlets of Ogre Strength +3")
+        ..setTooltipBasic("Purchase Gauntlets of Ogre Strength +3")
+        ..setTooltipExtended("Increases the Strength of the Hero by 3 when worn.")
+
+

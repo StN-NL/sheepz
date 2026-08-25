@@ -6,6 +6,7 @@ import ClosureKeyPresses
 import ClosureTimers
 import ConfigGame
 import FramehandleNames
+import GameMath
 import GameTimer
 import HashMap
 import InstantDummyCaster
@@ -53,26 +54,23 @@ public function player.addRandomWeapon(LinkedList<WeaponDefinition> weaponList) 
 
 
 public function getRandomWeapon(LinkedList<WeaponDefinition> weaponList) returns WeaponDefinition
-  var randomWeapon = thefinger
-  var lowBound = 0
-  let highBound = weaponList.foldl<int>(0, (i, q) -> q + i.rarity) - 1
-  let randomInt = GetRandomInt(lowBound, highBound)
+  let weights = new LinkedList<int>
   for weapon in weaponList
-    lowBound += weapon.rarity
-    if lowBound > randomInt
-      randomWeapon = weapon
-      break
-
-  return randomWeapon
+    weights.add(weapon.rarity)
+  let total = weaponList.foldl<int>(0, (i, q) -> q + i.rarity)
+  let index = pickWeightedIndex(weights, GetRandomInt(0, total - 1))
+  destroy weights
+  return index >= 0 ? weaponList.get(index) : thefinger
 
 
 public function getUniqueRandomWeapons(LinkedList<WeaponDefinition> weaponList, int size) returns LinkedList<WeaponDefinition>
   let list = new LinkedList<WeaponDefinition>
-  while list.size() < size
+  let limit = min(size, weaponList.size())
+  while list.size() < limit
     let def = getRandomWeapon(weaponList)
     if not list.has(def)
       list.add(def)
-      
+
   nullTimer(() -> destroy list)
   return list
 
@@ -171,6 +169,8 @@ class Arsenal
   private bool onCooldown
   private real keyPressStart
   private real keyPressDuration
+  private Weapon channelingWeapon = null
+  private int channelingKeyId = -1
 
   private construct(player owner)
     this.owner = owner
@@ -235,22 +235,29 @@ class Arsenal
         EventData.getTriggerPlayer().getArsenal().onKeysRelease(weaponId)
 
   private function onKeysPress(int weaponId)
-    let weapon = inventory.get(weaponId)
-    let sheep = owner.getSheep()
-    if sheep.isAlive() and inventory.has(weapon)
-      if not isCasting and not onCooldown and keyPressStart == 0.0
-        weapon.def.onStartChannel(sheep)
-        sheep.showPowerIndicator()
-        keyPressStart = getElapsedGameTime()
-
-  private function onKeysRelease(int weaponId)
-    if keyPressStart != 0.0
+    if weaponId < inventory.size()
       let weapon = inventory.get(weaponId)
       let sheep = owner.getSheep()
+      if sheep.isAlive() and inventory.has(weapon)
+        if not isCasting and not onCooldown and keyPressStart == 0.0
+          channelingWeapon = weapon
+          channelingKeyId = weaponId
+          weapon.def.onStartChannel(sheep)
+          sheep.showPowerIndicator()
+          keyPressStart = getElapsedGameTime()
+
+  private function onKeysRelease(int weaponId)
+    // Only the key that started the channel may fire, and it fires the weapon
+    // that channeled — releasing another key must neither fire nor steal the charge.
+    if keyPressStart != 0.0 and weaponId == channelingKeyId
+      let sheep = owner.getSheep()
+      let weapon = channelingWeapon
       sheep.hidePowerIndicator()
       keyPressDuration = getElapsedGameTime() - keyPressStart
       keyPressStart = 0.0
-      if sheep.isAlive()
+      channelingWeapon = null
+      channelingKeyId = -1
+      if sheep.isAlive() and inventory.has(weapon)
         fireWeapon(weapon)
   
   private function fireWeapon(Weapon weapon)

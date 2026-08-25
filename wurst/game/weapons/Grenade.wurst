@@ -9,13 +9,15 @@ import TextTagEntity
 
 public class Grenade extends MyProjectile
   int countdown = grenade.delay.toInt()
-  
+  CallbackPeriodic countdownCb = null
+
   construct(SheepEntity source)
     super(source, grenade.minRadius, MyModels.grenade)
     scaleVelXY(0.8)
     fx.eff.setTimeScale(0.2)
-    doPeriodically(1.0) cb ->
+    countdownCb = doPeriodically(1.0) cb ->
       if countdown == 0
+        countdownCb = null
         destroy cb
         if not done
           terminate()
@@ -23,9 +25,15 @@ public class Grenade extends MyProjectile
         SOUND_COUNTDOWN.playOnPoint(pos)
         new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
         countdown -= 1
-      
-    onEnd() -> 
+
+    onEnd() ->
       explode()
+
+  ondestroy
+    // Stop the countdown when the projectile dies early (e.g. out of bounds),
+    // so the closure never runs on a destroyed instance.
+    if countdownCb != null
+      destroy countdownCb
 
   override function update()
     bounceOfWalls()

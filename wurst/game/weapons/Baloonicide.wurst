@@ -19,11 +19,11 @@ public function SheepEntity.swell()
     if dt > 0. and dt < BAL_MAX_CHANNEL_TIME and this.isAlive()
       this.addScale(ANIMATION_PERIOD * BAL_BONUS_SCALE / BAL_MAX_CHANNEL_TIME)
     else
+      this.addMoveSpeed(-40)
       destroy cb
 
 
 public function SheepEntity.baloonicide()
-  this.addMoveSpeed(-40)
   this.setScale(SHEEP_SCALING_VALUE)
   let pos = this.getPos()
   SOUND_BALOONICIDE.playOnPoint(pos)

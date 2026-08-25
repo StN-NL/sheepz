@@ -14,7 +14,8 @@ public function SheepEntity.leap()
   flashEffect(Abilities.roarCaster, pos)  
   let firingPower = this.owner.getFiringPower(2)
   let direction = this.actor.getFacingAngle().direction()
-  let power = PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER * leap.maxDistance / 1000
+  // Parenthesized so maxDistance scales the whole launch power, not just the base term.
+  let power = (PROJECTILE_POWER_FACTOR * firingPower + PROJECTILE_BASE_POWER) * leap.maxDistance / 1000
   this.addVel(power * vec3(direction.x, direction.y, 1.5 * PROJECTILE_FACTOR_Z))
   this.skipFallDamage()
   

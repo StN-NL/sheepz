@@ -5,6 +5,7 @@ import ClosureTimers
 import ClosureForGroups
 import ConfigGame
 import Damage
+import GameMath
 import Heightmap
 import Miscellaneous
 import MyAssets
@@ -68,7 +69,6 @@ public function player.getSheep() returns SheepEntity
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 
 public function getRandomX() returns real
-  GetRandomReal(MAP_BOTTOMLEFT.x, MAP_TOPRIGHT.x)
   return GetRandomReal(MAP_BOTTOMLEFT.x, MAP_TOPRIGHT.x)
 
 public function getRandomY() returns real
@@ -146,6 +146,7 @@ public class SheepEntity extends MyUnitEntity
     setPos(getRandomPosOnLand().withZ(2000))
     gravity = 0.
     setVel(ZERO3)
+    immobalizedSources = 0
     actor.setMaxHP(SHEEP_MAX_HP.toInt())
     actor.setHP(SHEEP_MAX_HP)
     setOxygenLevel(SHEEP_MAX_HP)
@@ -174,6 +175,7 @@ public class SheepEntity extends MyUnitEntity
     orderOpenParachute()
     
   function onLeaveHeaven()
+    deathHandled = false
     gravity = defaultGravity
     actor.addAbility(ABIL_ID_JUMP)
     actor.addAbility(ABIL_ID_JETPACK)
@@ -204,22 +206,23 @@ public class SheepEntity extends MyUnitEntity
 
   function immobalize(bool value)
     immobalizedSources += value ? 1 : -1
+    if immobalizedSources < 0
+      immobalizedSources = 0
 
   function addMoveSpeed(real value)
     modifierMoveSpeed += value
 
   private function updateMoveSpeed()
-    if owner == players[0]
-      if isDead() or immobalizedSources > 0
-        actor.setMoveSpeed(0.)
-      else if isDeepWater
-        actor.setMoveSpeed(SHEEP_MS_DEEP_WATER + modifierMoveSpeed)
-      else if isJetPackOn and flying
-        actor.setMoveSpeed(SHEEP_MS_JET_PACK + modifierMoveSpeed)
-      else if pos.z > terrainZ + 20
-        actor.setMoveSpeed(SHEEP_MS_FLYING + modifierMoveSpeed)
-      else
-        actor.setMoveSpeed(SHEEP_MS_NORMAL + modifierMoveSpeed)
+    if isDead() or immobalizedSources > 0
+      actor.setMoveSpeed(0.)
+    else if isDeepWater
+      actor.setMoveSpeed(SHEEP_MS_DEEP_WATER + modifierMoveSpeed)
+    else if isJetPackOn and flying
+      actor.setMoveSpeed(SHEEP_MS_JET_PACK + modifierMoveSpeed)
+    else if pos.z > terrainZ + 20
+      actor.setMoveSpeed(SHEEP_MS_FLYING + modifierMoveSpeed)
+    else
+      actor.setMoveSpeed(SHEEP_MS_NORMAL + modifierMoveSpeed)
 
   // <<<<<<<<<<<< MISC >>>>>>>>>>>>
 
@@ -434,12 +437,14 @@ public class SheepEntity extends MyUnitEntity
 
     forUnitsInRange(pos.toVec2(), maxRadius) u ->
       let target = u.getEntity()
-      let distance = target.getPos().distanceTo(pos)
-      if distance < maxRadius and (targetSelf or target.toSheep() != this)
-        let factor = 1 - max(distance - minRadius, 0) / (maxRadius - minRadius)
-        let amount = factor * maxAmount
-        let knockback = factor * maxKnockback
-        this.blast(pos, target, amount, knockback, factorZ)
+      // Dummy units (arsenal, InstantDummyCaster) have no entity.
+      if target != null
+        let distance = target.getPos().distanceTo(pos)
+        if distance < maxRadius and (targetSelf or target.toSheep() != this)
+          let factor = blastFalloff(distance, minRadius, maxRadius)
+          let amount = factor * maxAmount
+          let knockback = factor * maxKnockback
+          this.blast(pos, target, amount, knockback, factorZ)
 
   function blast(vec3 pos, UnitEntity target, real amount)
     this.blast(pos, target, amount, amount)
@@ -495,7 +500,7 @@ public class SheepEntity extends MyUnitEntity
       givePoints(damage)
       
   private function givePoints(real amount)
-    if tormentor != null
+    if tormentor != null and not tormentor.done
       flashEffect(UI.goldCredit, tormentor.pos)
       tormentor.owner.addPoints(amount.toInt())
     
@@ -554,20 +559,26 @@ public class SheepEntity extends MyUnitEntity
 
   // <<<<<<<<<<<< DEATH >>>>>>>>>>>>
 
+  private var deathHandled = false
+
   private function onDeath()
-    removeFire()
-    awardBounty()
-    arrangeFuneral()
-    exposeTragedy()
-    nullTimer() -> 
+    // The one-shot work runs once; the heaven transition is queued every frame
+    // until it takes, so a throw in the one-shot work can never strand the sheep.
+    if not deathHandled
+      deathHandled = true
+      removeFire()
+      awardBounty()
+      arrangeFuneral()
+      exposeTragedy()
+    nullTimer() ->
       setState(State.IN_HEAVEN)
 
   function awardBounty()
-    if tormentor.isSheep()
+    if tormentor != null and not tormentor.done
       tormentor.actor.addLevels(1, true)
 
     givePoints(actor.getHP())
-    if killer != null and tormentor == killer
+    if killer != null and tormentor == killer and not killer.done
       print("Deja vu! " + owner.getNameColored(true) + " got rekt again by " + tormentor.owner.getNameColored(true))
       SOUND_DEJA_VU.playOnPoint(pos, 2).snd..setVolume(50)
 
@@ -604,6 +615,7 @@ public class SheepEntity extends MyUnitEntity
   override function terminate()
     owner.setLives(0)
     setState(State.TERMINATED)
+    sheeps[owner.getId()] = null // keep player.getSheep() from returning a freed instance
     super.terminate()
 
 

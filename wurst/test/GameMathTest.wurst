@@ -1,0 +1,89 @@
+package GameMathTest
+import GameMath
+import LinkedList
+
+// Run with the Wurst "Run unit tests" command (or `wurst tests`).
+// These cover the pure logic extracted into GameMath; the rest of the codebase is
+// coupled to WC3 natives and must be verified in-game.
+
+@Test function falloffWithinMinIsFull()
+  blastFalloff(0., 100., 300.).assertEquals(1., 0.0001)
+  blastFalloff(100., 100., 300.).assertEquals(1., 0.0001)
+
+@Test function falloffMidpointIsHalf()
+  blastFalloff(200., 100., 300.).assertEquals(0.5, 0.0001)
+
+@Test function falloffAtAndBeyondMaxIsZero()
+  blastFalloff(300., 100., 300.).assertEquals(0., 0.0001)
+  blastFalloff(400., 100., 300.).assertEquals(0., 0.0001)
+
+@Test function falloffEqualRadiiDoesNotDivideByZero()
+  // The ClusterBomb misuse passed minRadius as both args; this must stay finite.
+  blastFalloff(50., 125., 125.).assertEquals(1., 0.0001)
+  blastFalloff(125., 125., 125.).assertEquals(1., 0.0001)
+  blastFalloff(200., 125., 125.).assertEquals(0., 0.0001)
+
+@Test function weightedPickHitsCorrectBuckets()
+  let weights = new LinkedList<int>()
+  weights.add(10)
+  weights.add(10)
+  weights.add(10)
+  pickWeightedIndex(weights, 0).assertEquals(0)
+  pickWeightedIndex(weights, 9).assertEquals(0)
+  pickWeightedIndex(weights, 10).assertEquals(1)
+  pickWeightedIndex(weights, 19).assertEquals(1)
+  pickWeightedIndex(weights, 20).assertEquals(2)
+  pickWeightedIndex(weights, 29).assertEquals(2)
+  pickWeightedIndex(weights, 30).assertEquals(-1)
+  destroy weights
+
+@Test function weightedPickSkipsZeroWeights()
+  // A weapon with rarity/weight 0 must never be selected.
+  let weights = new LinkedList<int>()
+  weights.add(0)
+  weights.add(5)
+  pickWeightedIndex(weights, 0).assertEquals(1)
+  pickWeightedIndex(weights, 4).assertEquals(1)
+  destroy weights
+
+@Test function bonusDecompositionSplitsIntoPowersOfTwo()
+  // 5 = 2^2 + 2^0, exponents returned in descending order
+  let exponents = bonusBitExponents(5.)
+  exponents.size().assertEquals(2)
+  exponents.get(0).assertEquals(2)
+  exponents.get(1).assertEquals(0)
+  destroy exponents
+
+@Test function bonusDecompositionCoversFullRange()
+  // 65535 = sum of 2^0..2^15 — every one of the 16 bonus abilities
+  let exponents = bonusBitExponents(65535.)
+  exponents.size().assertEquals(16)
+  exponents.getFirst().assertEquals(15)
+  exponents.peek().assertEquals(0)
+  destroy exponents
+
+@Test function bonusDecompositionZeroAndNegativeAreEmpty()
+  // Documents current Status behavior: a negative bonus total applies nothing.
+  let zero = bonusBitExponents(0.)
+  zero.size().assertEquals(0)
+  destroy zero
+  let negative = bonusBitExponents(-5.)
+  negative.size().assertEquals(0)
+  destroy negative
+
+@Test function bonusDecompositionDropsFractions()
+  // 2.5 applies only the 2^1 ability; the 0.5 remainder is silently dropped.
+  let exponents = bonusBitExponents(2.5)
+  exponents.size().assertEquals(1)
+  exponents.get(0).assertEquals(1)
+  destroy exponents
+
+@Test function weightedPickFavoursHeavierWeight()
+  // rarity 100 (common) should dominate rarity 1 (legendary)
+  let weights = new LinkedList<int>()
+  weights.add(1)
+  weights.add(100)
+  pickWeightedIndex(weights, 0).assertEquals(0)
+  pickWeightedIndex(weights, 1).assertEquals(1)
+  pickWeightedIndex(weights, 100).assertEquals(1)
+  destroy weights
