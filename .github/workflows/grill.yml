@@ -1,0 +1,26 @@
+name: Grill CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  grill:
+    runs-on: ubuntu-latest
+    container:
+      image: frotty/wurstscript
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install project dependencies
+        run: grill install
+
+      - name: Run unit tests
+        run: grill test
+
+      - name: Build map
+        run: grill build Sheepz.w3x
