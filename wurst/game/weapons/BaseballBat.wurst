@@ -38,9 +38,12 @@ class BaseballBat extends Fx2Entity
 
   function punch(vec3 posBat)
     SOUND_PUNCH.playOnPoint(posBat)
+    // The bat may already be terminated when this fires, so capture what the punch needs.
+    let batter = source
+    let reach = radius
     doAfter(0.5) ->
-      forUnitsInRange(posBat.toVec2(), radius) u ->
+      forUnitsInRange(posBat.toVec2(), reach) u ->
         let target = u.getEntity()
         // Dummy units (arsenal, InstantDummyCaster) have no entity.
-        if target != null and target.getPos().distanceTo(posBat) < radius and u != source.actor
-          source.blast(source.getPos(), target, baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)
+        if target != null and target.getPos().distanceTo(posBat) < reach and u != batter.actor
+          batter.blast(batter.getPos(), target, baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)

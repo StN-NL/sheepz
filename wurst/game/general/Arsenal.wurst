@@ -87,6 +87,11 @@ public function player.getFiringPower(real maximum) returns real
 public function player.getChannelTime() returns real
   return this.getArsenal().getChannelTime()
 
+
+/** Trims stacks above ARSENAL_MAX_STACKS after it was lowered mid-game. */
+public function capArsenalStacks()
+  Arsenal.capAll()
+
 // <<<<<<<<<< <<<<<<<<<< ----- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< OTHER >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< ----- >>>>>>>>>> >>>>>>>>>>
@@ -194,6 +199,13 @@ class Arsenal
     
     return map.get(owner)
 
+  protected static function capAll()
+    for owner in map
+      let arsenal = map.get(owner)
+      for weapon in arsenal.inventory
+        weapon.stacks = min(weapon.stacks, ARSENAL_MAX_STACKS)
+      arsenal.indexWeapons()
+
   protected function add(Weapon weapon)
     weapon.addStack()
     if not inventory.has(weapon)
@@ -270,7 +282,7 @@ class Arsenal
     startCooldown()
     cacheSelection()
     selectWeapon(weapon)
-    forceCastSpell()
+    forceCastSpell(weapon)
 
   private function startCooldown()
     isCasting = true
@@ -290,8 +302,15 @@ class Arsenal
     owner.selectSingle(dummy)
     dummy.addAbility(selectedAbilId)
   
-  private function forceCastSpell()
-    doPeriodicallyCounted(0.01, 20) cb -> 
+  private function forceCastSpell(Weapon weapon)
+    // Untargeted weapons are ordered directly: a forced key press can be swallowed (e.g. by
+    // an open chat box), which left the cast pending and Word of Power's sheep frozen.
+    if weapon.def.ttype == Targettype.NONE
+      if not dummy.issueImmediateOrder(weapon.def.orderString)
+        restoreSelection()
+      return
+
+    doPeriodicallyCounted(0.01, 20) cb ->
       if isCasting
         ForceUIKeyBJ(owner, "Q")
       else
@@ -317,6 +336,7 @@ public class WeaponDefinition
   private string realname
 
   protected int abilId
+  protected string orderString
 
   string icon
   FiringType ftype
@@ -354,7 +374,9 @@ public class WeaponDefinition
       this.icon = icon
       abilId = ABIL_ID_GEN.next()
 
-      new ChannelAbilityPreset(abilId, 1, true)
+      let preset = new ChannelAbilityPreset(abilId, 1, true)
+      orderString = preset.getOrderString()
+      preset
         ..makeUnitSpell(0, 1.)
         ..setCastRange(1, 1000000)
         ..presetHotkey("Q")

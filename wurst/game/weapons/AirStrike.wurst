@@ -26,8 +26,9 @@ public class AirStrike extends Fx2Entity
   override function update()
     super.update()
     distanceY += vel.y
-    if nextMissile < distanceY and distanceY < 1700
-      nextMissile += 1500 / airStrike.shards
+    // Shards can be set to 0 in the menu; real division also avoids truncated spacing.
+    if airStrike.shards > 0 and nextMissile < distanceY and distanceY < 1700
+      nextMissile += 1500. / airStrike.shards
       new AirStrikeProjectile(source, pos)
 
     if distanceY > 2000

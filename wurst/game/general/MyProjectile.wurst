@@ -92,8 +92,8 @@ public class MyProjectile extends Projectile
     
   function checkHit3(unit u)
     let target = u.getMyUnitEntity()
-    // Dummy units (arsenal, InstantDummyCaster) have no entity.
-    if target != null and pos.distanceTo(target.pos) < radius
+    // Dummy units (arsenal, InstantDummyCaster) have no entity; sheep in heaven are not solid.
+    if target != null and (not target.isSheep() or target.toSheep().isAlive()) and pos.distanceTo(target.pos) < radius
       if not hitGroup3.has(target)
         if target.owner != owner or friendlyFire
           hit3(target)

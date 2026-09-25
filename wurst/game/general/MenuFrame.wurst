@@ -1,10 +1,13 @@
 package MenuFrame
 import Arsenal
+import ClosureEvents
 import ClosureFrames
 import ClosureKeyPresses
+import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import FramehandleNames
+import HashSet
 import LinkedList
 import MyAssets
 import Utils
@@ -37,10 +40,39 @@ interface OnSliderValueChangeInt
   function update(int value)
 
 
-function isPrivileged() returns boolean
+function privilegedPlayer() returns player
   // The lowest in-game slot, not players[0]: that slot may be empty or leave,
   // which would leave nobody able to start the game.
-  return EventData.getTriggerPlayer() == getPlayersIngame().getFirst() or IS_ANARCHY
+  return getPlayersIngame().getFirst()
+
+function isPrivileged() returns boolean
+  return EventData.getTriggerPlayer() == privilegedPlayer() or IS_ANARCHY
+
+
+// Every clickable menu frame; the locked ones are disabled for everyone by menu logic.
+constant menuControls = new LinkedList<framehandle>
+constant lockedControls = new HashSet<framehandle>
+
+function framehandle.addMenuControl() returns framehandle
+  menuControls.add(this)
+  return this
+
+function framehandle.lock()
+  lockedControls.add(this)
+  refreshMenuControls()
+
+function framehandle.unlock()
+  lockedControls.remove(this)
+  refreshMenuControls()
+
+/** Enabling is per player (local), so only players who may change settings can touch them. */
+function refreshMenuControls()
+  let allowed = IS_ANARCHY or localPlayer == privilegedPlayer()
+  for control in menuControls
+    control.setEnabled(allowed and not lockedControls.has(control))
+
+function framehandle.markSelected(string label, bool selected)
+  this.setText(selected ? label.color(GREEN) : label)
 
 
 abstract class Slider
@@ -53,7 +85,8 @@ abstract class Slider
     slider = createFrame("EscMenuSliderTemplate", parent, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, relative, FRAMEPOINT_BOTTOMLEFT, 0, -0.005)
     ..setWidth(0.12)
-    ..onSliderValueChange() -> 
+    ..addMenuControl()
+    ..onSliderValueChange() ->
       getSliderValueAndCallback()
       
     sliderLabel = createFrame("EscMenuLabelTextTemplate", parent, 0, 2)
@@ -74,12 +107,19 @@ abstract class Slider
     slider.setWidth(width)
 
   function enable()
-    slider.enable()
+    slider.unlock()
     sliderLabel.enable()
 
   function disable()
-    slider.disable()
+    slider.lock()
     sliderLabel.disable()
+
+  /** Moves everyone else's knob to the accepted value (labels are already synced). Setting it
+      fires a value-change event from each of those players: ignored as unprivileged, except
+      in anarchy, where such echoes could race a drag, so nothing is mirrored then. */
+  protected function mirror(real value)
+    if not IS_ANARCHY and localPlayer != EventData.getTriggerPlayer()
+      slider.setValue(value)
 
 
 class SliderInt extends Slider
@@ -102,6 +142,7 @@ class SliderInt extends Slider
       let value = BlzGetTriggerFrameValue()
       cb.update(value.toInt())
       sliderLabel.setText(prefix + value.toInt() + suffix)
+      mirror(value)
 
 
 class SliderReal extends Slider
@@ -124,6 +165,7 @@ class SliderReal extends Slider
       let value = BlzGetTriggerFrameValue()
       cb.update(value)
       sliderLabel.setText(prefix + value.toString(1) + suffix)
+      mirror(value)
 
 
 class WeaponFrame
@@ -293,6 +335,12 @@ public class MenuSetup
   private SliderInt gameModeSurvivalLives
   private framehandle mapTropicalIslandCheckBox
   private framehandle mapTheArenaCheckBox
+  // Checkbox states are local and can't be set from code, so the labels show the choice.
+  private framehandle gameModeTimedLabel
+  private framehandle gameModeSurvivalLabel
+  private framehandle anarchyLabel
+  private framehandle mapTropicalIslandLabel
+  private framehandle mapTheArenaLabel
 
   construct(OnGameStart onGameStart)
     // Load the necessary frames
@@ -321,7 +369,8 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_BOTTOMRIGHT, boxFrame, FRAMEPOINT_BOTTOMRIGHT, -0.02, 0.02)
     ..setSize(0.11, 0.04)
     ..setText("Start")
-    ..disable()
+    ..addMenuControl()
+    ..lock()
     ..onClick() ->
       if isPrivileged()
         if hasStarted
@@ -330,12 +379,12 @@ public class MenuSetup
           SOUND_BUTTON_CLICK.play()
         else if hasGameMode
           startGameButton.setText("Close")
-          gameModeSurvivalCheckBox.disable()
+          gameModeSurvivalCheckBox.lock()
           gameModeSurvivalLives.disable()
-          gameModeTimedCheckBox.disable()
+          gameModeTimedCheckBox.lock()
           gameModeTimedDuration.disable()
-          mapTropicalIslandCheckBox.disable()
-          mapTheArenaCheckBox.disable()
+          mapTropicalIslandCheckBox.lock()
+          mapTheArenaCheckBox.lock()
           window.setVisible(false)
           SOUND_BUTTON_CLICK.play()
           onGameStart.run()
@@ -362,6 +411,7 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_BOTTOMLEFT, boxFrame, FRAMEPOINT_BOTTOMLEFT, 0.02, 0.02)
     ..setSize(0.11, 0.04)
     ..setText("Basics")
+    ..addMenuControl()
     ..onClick() ->
       if isPrivileged()
         gamePage.setVisible(true)
@@ -373,6 +423,7 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_LEFT, gameButton, FRAMEPOINT_RIGHT)
     ..setSize(0.11, 0.04)
     ..setText("Physics")
+    ..addMenuControl()
     ..onClick() ->
       if isPrivileged()
         gamePage.setVisible(false)
@@ -384,6 +435,7 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_LEFT, physicsButton, FRAMEPOINT_RIGHT)
     ..setSize(0.11, 0.04)
     ..setText("Weapons")
+    ..addMenuControl()
     ..onClick() ->
       if isPrivileged()
         gamePage.setVisible(false)
@@ -402,6 +454,7 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_LEFT, weaponsButton, FRAMEPOINT_RIGHT)
     ..setSize(0.04, 0.04)
     ..setText("<")
+    ..addMenuControl()
     ..onClick() ->
       if isPrivileged()
         weaponsPageList[index].setVisible(false)
@@ -417,6 +470,7 @@ public class MenuSetup
     ..setPoint(FRAMEPOINT_LEFT, weaponsButtonBack, FRAMEPOINT_RIGHT)
     ..setSize(0.04, 0.04)
     ..setText(">")
+    ..addMenuControl()
     ..onClick() ->
       if isPrivileged()
         weaponsPageList[index].setVisible(false)
@@ -443,10 +497,11 @@ public class MenuSetup
     gameModeTimedCheckBox = createFrame(FramehandleNames.questCheckBox2, gamePage, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, gameModeTitle, FRAMEPOINT_TOPLEFT, 0, -0.025)
     ..setSize(0.025, 0.025)
+    ..addMenuControl()
     ..onCheckboxCheck(() -> setGameModeCheck(gameModeTimedCheckBox))
     ..onCheckboxUncheck(() -> setGameModeUncheck())
 
-    createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
+    gameModeTimedLabel = createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
     ..setPoint(FRAMEPOINT_LEFT, gameModeTimedCheckBox, FRAMEPOINT_RIGHT, 0.005, 0)
     ..setScale(1.4)
     ..setText("Against the Clock")
@@ -468,10 +523,11 @@ public class MenuSetup
     gameModeSurvivalCheckBox = createFrame(FramehandleNames.questCheckBox2, gamePage, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, gameModeTimedDescription, FRAMEPOINT_TOPLEFT, 0, -0.025)
     ..setSize(0.025, 0.025)
+    ..addMenuControl()
     ..onCheckboxCheck(() -> setGameModeCheck(gameModeSurvivalCheckBox))
     ..onCheckboxUncheck(() -> setGameModeUncheck())
 
-    createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
+    gameModeSurvivalLabel = createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
     ..setPoint(FRAMEPOINT_LEFT, gameModeSurvivalCheckBox, FRAMEPOINT_RIGHT, 0.005, 0)
     ..setScale(1.4)
     ..setText("Last Sheep Standing")
@@ -499,10 +555,11 @@ public class MenuSetup
     let anarchyCheckBox = createFrame(FramehandleNames.questCheckBox2, gamePage, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, anarchyTitle, FRAMEPOINT_TOPLEFT, 0, -0.025)
     ..setSize(0.025, 0.025)
+    ..addMenuControl()
     ..onCheckboxCheck(() -> setIsAnarchyCheck())
     ..onCheckboxUncheck(() -> setIsAnarchyUncheck())
 
-    createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
+    anarchyLabel = createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
     ..setPoint(FRAMEPOINT_LEFT, anarchyCheckBox, FRAMEPOINT_RIGHT, 0.005, 0)
     ..setScale(1.4)
     ..setText("Proclaim Anarchy")
@@ -538,6 +595,7 @@ public class MenuSetup
     ..setPrefix("Max Stacks: ")
     ..onSliderValueChange() (int value) ->
       ARSENAL_MAX_STACKS = value
+      capArsenalStacks()
 
     let arsenalDraftStart = new SliderInt(gamePage, arsenalMaxStacks.slider)
     ..setData(ARSENAL_DRAFT_START, 0, 100, 1)
@@ -562,10 +620,11 @@ public class MenuSetup
     mapTropicalIslandCheckBox = createFrame(FramehandleNames.questCheckBox2, gamePage, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, mapSelectionTitle, FRAMEPOINT_TOPLEFT, 0, -0.02)
     ..setSize(0.025, 0.025)
+    ..addMenuControl()
     ..onCheckboxCheck(() -> setMapSelectionCheck(mapTropicalIslandCheckBox))
     ..onCheckboxUncheck(() -> setMapSelectionUncheck())
 
-    createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
+    mapTropicalIslandLabel = createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
     ..setPoint(FRAMEPOINT_LEFT, mapTropicalIslandCheckBox, FRAMEPOINT_RIGHT, 0.005, 0)
     ..setScale(1.4)
     ..setText("Tropical Island")
@@ -573,10 +632,11 @@ public class MenuSetup
     mapTheArenaCheckBox = createFrame(FramehandleNames.questCheckBox2, gamePage, 0, 0)
     ..setPoint(FRAMEPOINT_TOPLEFT, mapTropicalIslandCheckBox, FRAMEPOINT_BOTTOMLEFT)
     ..setSize(0.025, 0.025)
+    ..addMenuControl()
     ..onCheckboxCheck(() -> setMapSelectionCheck(mapTheArenaCheckBox))
     ..onCheckboxUncheck(() -> setMapSelectionUncheck())
 
-    createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
+    mapTheArenaLabel = createFrame(FramehandleTypeNames.text, "", gamePage, "", 0)
     ..setPoint(FRAMEPOINT_LEFT, mapTheArenaCheckBox, FRAMEPOINT_RIGHT, 0.005, 0)
     ..setScale(1.4)
     ..setText("The Arena")
@@ -790,68 +850,83 @@ public class MenuSetup
 
       count += 1
 
+    refreshMenuControls()
+    // The privileged player may leave; nullTimer so Utils has dropped them by then.
+    EventListener.add(EVENT_PLAYER_LEAVE) ->
+      nullTimer(() -> refreshMenuControls())
+
   function updateStartGameButton()
     if hasGameMode and hasMapSelection
-      startGameButton.enable()
+      startGameButton.unlock()
     else
-      startGameButton.disable()
+      startGameButton.lock()
 
   function setGameModeCheck(framehandle checkBox)
     if not isPrivileged()
       return
-    
+
     if checkBox == gameModeTimedCheckBox
       GAME_MODE = GameMode.TIMED
       hasGameMode = true
       updateStartGameButton()
-      gameModeSurvivalCheckBox.disable()
+      gameModeSurvivalCheckBox.lock()
       gameModeSurvivalLives.disable()
+      gameModeTimedLabel.markSelected("Against the Clock", true)
     if checkBox == gameModeSurvivalCheckBox
       GAME_MODE = GameMode.SURVIVAL
       hasGameMode = true
       updateStartGameButton()
-      gameModeTimedCheckBox.disable()
+      gameModeTimedCheckBox.lock()
       gameModeTimedDuration.disable()
+      gameModeSurvivalLabel.markSelected("Last Sheep Standing", true)
 
   function setGameModeUncheck()
     if not isPrivileged()
       return
-    
+
     hasGameMode = false
     updateStartGameButton()
-    gameModeTimedCheckBox.enable()
+    gameModeTimedCheckBox.unlock()
     gameModeTimedDuration.enable()
-    gameModeSurvivalCheckBox.enable()
+    gameModeSurvivalCheckBox.unlock()
     gameModeSurvivalLives.enable()
+    gameModeTimedLabel.markSelected("Against the Clock", false)
+    gameModeSurvivalLabel.markSelected("Last Sheep Standing", false)
 
   function setIsAnarchyCheck()
     if not isPrivileged()
       return
-    
+
     IS_ANARCHY = true
-    
+    anarchyLabel.markSelected("Proclaim Anarchy", true)
+    refreshMenuControls()
+
   function setIsAnarchyUncheck()
     if not isPrivileged()
       return
-    
+
     IS_ANARCHY = false
-    
+    anarchyLabel.markSelected("Proclaim Anarchy", false)
+    refreshMenuControls()
+
   function setMapSelectionCheck(framehandle checkBox)
     if not isPrivileged()
       return
-    
+
     if checkBox == mapTropicalIslandCheckBox
       MAP_SELECTION = MapSelection.TROPICAL_ISLAND
       hasMapSelection = true
       updateStartGameButton()
       updateMap(-8, 8, 12, 12, Minimaps.tropicalIsland)
-      mapTheArenaCheckBox.disable()
+      mapTheArenaCheckBox.lock()
+      mapTropicalIslandLabel.markSelected("Tropical Island", true)
     if checkBox == mapTheArenaCheckBox
       MAP_SELECTION = MapSelection.THE_ARENA
       hasMapSelection = true
       updateStartGameButton()
       updateMap(9, 9, 10, 10, Minimaps.theArena)
-      mapTropicalIslandCheckBox.disable()
+      mapTropicalIslandCheckBox.lock()
+      mapTheArenaLabel.markSelected("The Arena", true)
 
   function setMapSelectionUncheck()
     if not isPrivileged()
@@ -859,5 +934,7 @@ public class MenuSetup
 
     hasMapSelection = false
     updateStartGameButton()
-    mapTropicalIslandCheckBox.enable()
-    mapTheArenaCheckBox.enable()
+    mapTropicalIslandCheckBox.unlock()
+    mapTheArenaCheckBox.unlock()
+    mapTropicalIslandLabel.markSelected("Tropical Island", false)
+    mapTheArenaLabel.markSelected("The Arena", false)

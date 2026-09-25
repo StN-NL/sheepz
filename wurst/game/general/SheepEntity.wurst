@@ -139,6 +139,11 @@ public class SheepEntity extends MyUnitEntity
   function isDead() returns bool
     return state != State.ALIVE and state != State.IN_HEAVEN
 
+  /** False once terminated, even after the freed id is recycled by another entity. */
+  function isInGame() returns bool
+    let id = owner.getId()
+    return id < bj_MAX_PLAYERS and sheeps[id] == this
+
   // <<<<<<<<<<<< HEAVEN >>>>>>>>>>>>
 
   function onEnterHeaven()
@@ -317,6 +322,8 @@ public class SheepEntity extends MyUnitEntity
   // <<<<<<<<<<<< JET PACK >>>>>>>>>>>>
   
   private var isJetPackOn = false
+  // Bumped per start, so an earlier flight's timer can't stop a later one.
+  private var jetPackFlight = 0
 
   function orderStartJetPack()
     actor.issueImmediateOrderById(OrderIds.defend)
@@ -346,8 +353,11 @@ public class SheepEntity extends MyUnitEntity
   private function startJetPack()
     SOUND_SHEEP_2.playOnPoint(pos)
     isJetPackOn = true
-    doAfter(JET_PACK_DURATION) -> 
-      orderStopJetPack()
+    jetPackFlight++
+    let flight = jetPackFlight
+    doAfter(JET_PACK_DURATION) ->
+      if isJetPackOn and jetPackFlight == flight
+        orderStopJetPack()
 
   private function stopJetPack()
     SOUND_SHEEP_3.playOnPoint(pos)
@@ -470,7 +480,9 @@ public class SheepEntity extends MyUnitEntity
 
   function blast(vec3 pos, UnitEntity target, real amount, real knockback, real factorZ)
     // Sheep units never die (death and heaven are states), so check the sheep state too.
-    if target.actor.isAlive() and (not target.isSheep() or target.toSheep().isAlive())
+    // A leaver's lingering weapons (mines, fire, ...) go inert: their freed sheep must not
+    // become anyone's tormentor again.
+    if isInGame() and target.actor.isAlive() and (not target.isSheep() or target.toSheep().isAlive())
       let knockbackFactor = target.actor.getMaxHP().pow(0.5) / target.actor.getHP().pow(0.5)
       pos.knockback(target, knockbackFactor * knockback, factorZ)
       if target.isSheep()
@@ -483,6 +495,8 @@ public class SheepEntity extends MyUnitEntity
     fireBlast(target, damage, this.pos)
 
   function fireBlast(SheepEntity target, real damage, vec3 pos)
+    if not isInGame()
+      return
     target.addFireStack()
     let fireDamage = damage / 10 * target.getFireStacks()
     blast(pos, target, fireDamage, fireDamage, 4)
@@ -506,15 +520,16 @@ public class SheepEntity extends MyUnitEntity
   private function takeDamage(SheepEntity source, real amount)
     SOUND_SHEEP_1.playOnPoint(pos)
     let hp = actor.getHP()
-    let damage = min(hp, amount)
-    if damage == hp
+    // WC3 kills a unit whose life drops below 0.405, so such a hit is lethal here too;
+    // otherwise the actor would die outside the state machine.
+    if amount >= hp - 0.405
       if source.owner == owner
         setState(State.DEATH_BY_SUICIDE)
       else
         setState(State.DEATH_BY_ENEMY)
     else
-      actor.addHP(-damage)
-      givePoints(damage)
+      actor.addHP(-amount)
+      givePoints(amount)
       
   private function givePoints(real amount)
     if tormentor != null and not tormentor.done

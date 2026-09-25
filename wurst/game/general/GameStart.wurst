@@ -1,13 +1,13 @@
 package GameStart
 import ConfigWeapons
 import ClosureTimers
+import ConfigGame
 import DraftWeapon
 import EntityManagement
 import GameEnd
 import MenuFrame
 import Miscellaneous
 import MyAssets
-import Players
 import SheepEntity
 import Utils
 import Weapons
@@ -55,12 +55,19 @@ function setupPlayer(player p)
 
 
 function targetPractice()
-  for ii = 1 to 5
-    doAfter(GetRandomReal(0, GAME_START_DELAY)) -> 
-      new SheepEntity(players[ii])
+  // Five dummies in the first free slots; the human's own slot would get a second sheep.
+  var dummies = 0
+  for ii = 0 to MAX_PLAYERS - 1
+    let p = players[ii]
+    if dummies < 5 and not getPlayersIngame().has(p)
+      dummies++
+      doAfter(GetRandomReal(0, GAME_START_DELAY)) ->
+        new SheepEntity(p)
 
 
 function addLeaveListener()
-  onPlayerLeave() p ->
+  // Not onPlayerLeave: it holds a single listener and would replace Utils' one.
+  EventListener.add(EVENT_PLAYER_LEAVE) ->
+    let p = GetTriggerPlayer()
     if p.getSheep() != null
       p.getSheep().terminate()

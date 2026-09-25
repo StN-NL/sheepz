@@ -4,6 +4,7 @@ import ConfigWeapons
 import HashMap
 import MyAssets
 import MyUnitEntity
+import SheepEntity
 
 
 public function MyUnitEntity.riotShield()
@@ -29,6 +30,10 @@ class RiotShield extends Fx2Entity
     return map.get(e)
 
   override function update()
+    // Dying ends the shield, or it would follow the sheep up to heaven and into the next life.
+    if e.isSheep() and not e.toSheep().isAlive()
+      duration = 0
+
     if fx.eff == null and duration <= 0
       DoNothing()
     else if fx.eff == null

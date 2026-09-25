@@ -112,5 +112,6 @@ init
       if p.isIngame()
         playersInGame.add(p)
 
-    onPlayerLeave() p ->
-      playersInGame.remove(p)
+    // Not onPlayerLeave: it holds a single listener, which GameStart's would replace.
+    EventListener.add(EVENT_PLAYER_LEAVE) ->
+      playersInGame.remove(GetTriggerPlayer())
