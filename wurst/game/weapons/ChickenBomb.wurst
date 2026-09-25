@@ -8,25 +8,34 @@ import SheepEntity
 import TextTagEntity
 
 
+/** An unarmed chicken arms itself after this long, so it can't lie around forever. */
+constant CHICKEN_MAX_UNARMED_TIME = 30.
+
 public class ChickenBomb extends MyProjectile
   let baseAttachmentPoint = vec3(0, 0, 50)
   int countdown = chickenBomb.delay.toInt()
   unit buddy = null
-  
+  bool armed = false
+
   construct(SheepEntity source)
     super(source, chickenBomb.minRadius, Units.easterChicken1)
     soundBounce = SOUNDS_CHICKEN.getRandomElement()
     scaleVelXY(0.8)
 
     onHit3D() target ->
-      if buddy == null
+      if not armed
         buddy = target.actor
         arm()
-      
-    onEnd() -> 
+
+    doAfterAlive(CHICKEN_MAX_UNARMED_TIME) ->
+      if not armed
+        arm()
+
+    onEnd() ->
       explode()
 
   function arm()
+    armed = true
     SOUNDS_CHICKEN.getRandomElement().playOnPoint(pos)
     doPeriodicallyAlive(1.0) cb ->
       if countdown == 0
@@ -46,11 +55,12 @@ public class ChickenBomb extends MyProjectile
     bounceOfWalls()
     super.update()
     if buddy != null
-      if buddy.isAlive()
+      if buddy.isAlive() and (not buddy.isSheep() or buddy.getSheep().isAlive())
         setPos(getAttachmentPoint())
       else
         // The buddy died or was removed from the game; stop tracking so the
-        // bomb doesn't snap to a garbage position from a stale handle.
+        // bomb doesn't snap to a garbage position from a stale handle, or follow
+        // a dead sheep (whose unit stays alive) up to heaven.
         buddy = null
 
   function getAttachmentPoint() returns vec3

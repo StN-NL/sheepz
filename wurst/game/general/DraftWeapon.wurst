@@ -47,6 +47,8 @@ public class WeaponSelector
   WeaponCard array[WEAPON_CARD_SLOTS] weaponCards
   
   player owner
+  // Synced state; frame visibility is local, so it can't be used to decide this.
+  bool isOpen = false
 
   construct(player owner)
     this.owner = owner
@@ -66,7 +68,8 @@ public class WeaponSelector
     return map.get(owner)
   
   function draft()
-    if owner.getLumber() > 0
+    // An open draft must be picked first, or the lumber is spent on a re-roll.
+    if not isOpen and owner.getLumber() > 0
       owner.addLumber(-1)
       var count = 0
       for def in getUniqueRandomWeapons(weaponList, WEAPON_CARD_SLOTS)
@@ -80,6 +83,7 @@ public class WeaponSelector
       for ii = count to WEAPON_CARD_SLOTS - 1
         weaponCards[ii].hide()
 
+      isOpen = true
       frameBox.setVisible(owner, true)
 
 // <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
@@ -137,6 +141,11 @@ public class WeaponCard
     frameCard.setVisible(owner, false)
 
   protected function select(WeaponDefinition def)
+    // Ignore a second click that arrives before the box is hidden.
+    let selector = WeaponSelector.get(owner)
+    if not selector.isOpen
+      return
+    selector.isOpen = false
     SOUND_BUTTON_CLICK.playForPlayer(owner).snd.setVolume(50)
     frameBox.setVisible(owner, false)
     owner.addWeapon(def, 1)

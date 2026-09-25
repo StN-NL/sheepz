@@ -41,6 +41,6 @@ class BaseballBat extends Fx2Entity
     doAfter(0.5) ->
       forUnitsInRange(posBat.toVec2(), radius) u ->
         let target = u.getEntity()
-        let distance = target.getPos().distanceTo(posBat)
-        if distance < radius and u != source.actor
+        // Dummy units (arsenal, InstantDummyCaster) have no entity.
+        if target != null and target.getPos().distanceTo(posBat) < radius and u != source.actor
           source.blast(source.getPos(), target, baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)

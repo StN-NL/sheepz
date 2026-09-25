@@ -25,5 +25,10 @@ public function SheepEntity.rejection(vec2 target)
     this.setPos(target.withTerrainZ(2000))
     this.skipFallDamage()
     this.addScale(3)
-    doPeriodicallyCounted(0.1, 30) cb -> 
-      this.addScale(-0.1)
+    let life = this.lifeCount
+    doPeriodicallyCounted(0.1, 30) cb ->
+      // Heaven resets scale absolutely, so stop shrinking once the sheep has died.
+      if this.lifeCount == life
+        this.addScale(-0.1)
+      else
+        cb.stop()

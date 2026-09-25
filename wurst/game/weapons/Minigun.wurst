@@ -8,8 +8,12 @@ import SheepEntity
 
 
 public function SheepEntity.minigun()
+  // Stops if the caster dies (otherwise it would fire from heaven and after the respawn).
   doPeriodicallyCounted(0.1, 20) cb ->
-    new MinigunProjectile(this)
+    if this.isAlive()
+      new MinigunProjectile(this)
+    else
+      cb.stop()
     
     
 public class MinigunProjectile extends MyProjectile

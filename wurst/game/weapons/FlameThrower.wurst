@@ -9,8 +9,12 @@ import SheepEntity
 
 
 public function SheepEntity.flameThrower()
+  // Stops if the caster dies (otherwise it would fire from heaven and after the respawn).
   doPeriodicallyTimed(0.2, flameThrower.duration) cb ->
-    new FlameThrowerProjectile(this)
+    if this.isAlive()
+      new FlameThrowerProjectile(this)
+    else
+      cb.stop()
     
     
 public class FlameThrowerProjectile extends MyProjectile

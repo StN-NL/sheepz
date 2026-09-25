@@ -29,7 +29,7 @@ public class WebProjectile extends MyProjectile
    
   function explode()
     forUnitsInRange(pos.toVec2(), web.maxRadius) u ->
-      if u.isSheep() and u.getSheep() != source
+      if u.isSheep() and u.getSheep() != source and u.getSheep().isAlive()
         let sheep = u.getSheep()
         sheep.immobalize(true)
         let life = sheep.lifeCount

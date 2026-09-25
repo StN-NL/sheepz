@@ -12,8 +12,11 @@ import Utils
 
 public function SheepEntity.wormRider()
   SOUND_DUNE_WOMAN_1.playOnPoint(this.getPos()).snd.setVolume(60)
-  doAfter(wormRider.delay) -> 
-    this.getWormRider().duration += wormRider.duration
+  let life = this.lifeCount
+  doAfter(wormRider.delay) ->
+    // Dying during the delay cancels the worm.
+    if this.lifeCount == life
+      this.getWormRider().duration += wormRider.duration
 
 
 public function SheepEntity.getWormRider() returns WormRider
@@ -58,7 +61,9 @@ class WormRider extends MyProjectile
     else
       removeEffect()
 
-    if e.pos.z < e.terrainZ and not e.pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY) and duration > ANIMATION_PERIOD
+    // Drowning or dying ends the ride on the next tick.
+    let inDeepWater = e.pos.z < e.terrainZ and not e.pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY)
+    if (inDeepWater or not e.isAlive()) and duration > ANIMATION_PERIOD
       duration = ANIMATION_PERIOD
 
   private function createEffect()

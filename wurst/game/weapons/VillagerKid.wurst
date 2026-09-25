@@ -69,9 +69,9 @@ public class VillagerKid extends MyProjectile
     favouriteToy = null
     minToyDistance = REAL_MAX
     forUnitsAll() u ->
-      // Only chase living entity units — never arsenal/caster dummies or corpses.
+      // Only chase living entity units — never arsenal/caster dummies, corpses or sheep in heaven.
       let toyDistance = u.getPos().distanceTo(pos.toVec2())
-      if toyDistance < minToyDistance and u.isAlive() and u.getEntity() != null and not wasHit(u) and u.getOwner() != owner
+      if toyDistance < minToyDistance and u.isAlive() and u.getEntity() != null and (not u.isSheep() or u.getSheep().isAlive()) and not wasHit(u) and u.getOwner() != owner
         minToyDistance = toyDistance
         favouriteToy = u
 

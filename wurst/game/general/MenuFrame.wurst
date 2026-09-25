@@ -7,6 +7,7 @@ import ConfigWeapons
 import FramehandleNames
 import LinkedList
 import MyAssets
+import Utils
 
 
 public function updateMap(real centerX, real centerY, real sizeX, real sizeY, string tex)
@@ -37,7 +38,9 @@ interface OnSliderValueChangeInt
 
 
 function isPrivileged() returns boolean
-  return EventData.getTriggerPlayer() == players[0] or IS_ANARCHY
+  // The lowest in-game slot, not players[0]: that slot may be empty or leave,
+  // which would leave nobody able to start the game.
+  return EventData.getTriggerPlayer() == getPlayersIngame().getFirst() or IS_ANARCHY
 
 
 abstract class Slider

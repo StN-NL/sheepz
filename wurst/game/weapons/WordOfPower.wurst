@@ -8,7 +8,6 @@ import HashSet
 import MyAssets
 import MyProjectile
 import SheepEntity
-import SoundUtils
 
 // lifeCount when each player's channel started, so the release on cast is
 // skipped if the sheep died mid-channel (death already reset the counter).
@@ -20,7 +19,7 @@ public function SheepEntity.youShallNotPass()
   this.immobalize(true)
   channelLife[this.owner.getId()] = this.lifeCount
   let pos = this.getPos()
-  new SoundDefinition(MySounds.youShallNotPass).playOnPoint(pos)
+  SOUND_YOU_SHALL_NOT_PASS.playOnPoint(pos)
   let eff = addEffect(Abilities.monsoonRain, pos)
 
   doAfter(wordOfPower.delay) ->

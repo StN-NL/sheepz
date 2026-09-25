@@ -157,6 +157,12 @@ public class SheepEntity extends MyUnitEntity
     actor.removeAbility(ABIL_ID_JETPACK)
     actor.removeAbility(ABIL_ID_PARACHUTE)
     actor.removeAbility(ABIL_ID_TICKLE)
+    // Removing the abilities may not issue their "off" orders, so reset the state here
+    // or a jet pack keeps lifting / a parachute effect leaks into the next life.
+    isJetPackOn = false
+    if parachute != null
+      parachute.destr()
+      parachute = null
     actor.addAbility(GHOST_INVIS_ID)
     setHeroName(owner.getNameColored(true) + " (in heaven)")
     doAfter(2) ->
@@ -289,10 +295,10 @@ public class SheepEntity extends MyUnitEntity
       setState(State.DEATH_BY_DROWNING)
 
   override function onEnterDeepWater()
-    super.onEnterDeepWater()
+    // Checked before super, which puts the fire out and clears the stacks.
     if getFireStacks() > 0
-      removeFireEffect()
       flashEffect(Abilities.arcaneTowerAttack, pos)
+    super.onEnterDeepWater()
 
   // <<<<<<<<<<<< JUMP >>>>>>>>>>>>
 
@@ -463,7 +469,8 @@ public class SheepEntity extends MyUnitEntity
     this.blast(pos, target, amount, knockback, 1)
 
   function blast(vec3 pos, UnitEntity target, real amount, real knockback, real factorZ)
-    if target.actor.isAlive()
+    // Sheep units never die (death and heaven are states), so check the sheep state too.
+    if target.actor.isAlive() and (not target.isSheep() or target.toSheep().isAlive())
       let knockbackFactor = target.actor.getMaxHP().pow(0.5) / target.actor.getHP().pow(0.5)
       pos.knockback(target, knockbackFactor * knockback, factorZ)
       if target.isSheep()

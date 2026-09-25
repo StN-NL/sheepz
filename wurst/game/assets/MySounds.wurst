@@ -47,6 +47,7 @@ public constant SOUND_DROP_SUPPLIES = new SoundDefinition(Sounds.goblinSapperPis
 public constant SOUND_DUNE_WOMAN_1 = new SoundDefinition(MySounds.duneWoman1)
 public constant SOUND_DUNE_WOMAN_2 = new SoundDefinition(MySounds.duneWoman2)
 public constant SOUND_FROG = new SoundDefinition(Sounds.frogWhat1)
+public constant SOUND_FUS_RO_DAH = new SoundDefinition(MySounds.fusRoDah)
 public constant SOUND_GOLD_PLEASE = new SoundDefinition(MySounds.goldPlease)
 public constant SOUND_GREAT_CRIME = new SoundDefinition(MySounds.greatCrime)
 public constant SOUND_HOLY_GRENADE = new SoundDefinition(MySounds.holyGrenade)

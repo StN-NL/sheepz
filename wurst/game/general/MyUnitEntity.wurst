@@ -16,8 +16,9 @@ public function vec3.addFireStacks(real range)
 
 public function vec3.addFireStacks(real range, int fireStacks, real fireDuration)
   forUnitsInRange(this.toVec2(), range) u ->
-    if this.distanceTo(u.getEntity().pos) < range
-      let e = u.getMyUnitEntity()
+    let e = u.getMyUnitEntity()
+    // Dummy units (arsenal, InstantDummyCaster) have no entity.
+    if e != null and this.distanceTo(e.pos) < range
       e.addFireStacks(fireStacks, fireDuration)
 
 

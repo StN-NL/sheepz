@@ -24,6 +24,7 @@ public class Cloud extends MyProjectile
   override function update()
     forUnitsInRange(pos.toVec2(), radius) u ->
       let target = u.getEntity()
-      if (target.getPos().z - pos.z).abs() < cloudGenerator.thickness
+      // Dummy units (arsenal, InstantDummyCaster) have no entity.
+      if target != null and (target.getPos().z - pos.z).abs() < cloudGenerator.thickness
         target.setVel(vec3(target.vel.x, target.vel.y, max(target.vel.z, 2.)))
       

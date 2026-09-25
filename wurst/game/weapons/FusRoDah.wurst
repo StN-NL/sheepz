@@ -5,11 +5,10 @@ import ConfigWeapons
 import MyAssets
 import MyProjectile
 import SheepEntity
-import SoundUtils
 
 
 public function SheepEntity.fusRoDah()
-  new SoundDefinition(MySounds.fusRoDah).playOnPoint(this.pos)
+  SOUND_FUS_RO_DAH.playOnPoint(this.pos)
   doAfter(fusRoDah.delay) ->
     new FusRoDahProjectile(this)
 
