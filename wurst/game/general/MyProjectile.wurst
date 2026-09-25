@@ -2,6 +2,7 @@ package MyProjectile
 import Arsenal
 import Assets
 import ClosureForGroups
+import ClosureTimers
 import ConfigGame
 import HashSet
 import Heightmap
@@ -15,10 +16,30 @@ import SoundUtils
 public interface OnHit3Listener
   function run(MyUnitEntity target)
 
+/** One-shot timer owned by a projectile: fires the action unless the projectile is destroyed first. */
+class ProjectileTimer extends CallbackSingle
+  MyProjectile owner
+  Callback action
+
+  construct(MyProjectile owner, Callback action)
+    this.owner = owner
+    this.action = action
+
+  override function call()
+    owner.onTimerFired(this)
+    action.call()
+
+  ondestroy
+    destroy action
+
 public class MyProjectile extends Projectile
   use PhysicsModule
-  
+
   private constant hitGroup3 = new HashSet<MyUnitEntity>
+  // Timers started through doAfterAlive/doPeriodicallyAlive; cancelled in ondestroy so
+  // their closures never run on a destroyed (possibly recycled) projectile.
+  private constant pendingTimers = new HashSet<CallbackSingle>
+  private constant pendingPeriodics = new HashSet<CallbackPeriodic>
   
   private OnHit3Listener onHit3 = null
   var friendlyFire = false
@@ -42,6 +63,22 @@ public class MyProjectile extends Projectile
 
   function setPermanent()
     this.maxHits = INT_MAX
+
+  /** doAfter that is cancelled if this projectile is destroyed first. */
+  function doAfterAlive(real timeToWait, Callback action)
+    pendingTimers.add(doAfter(timeToWait, new ProjectileTimer(this, action)))
+
+  /** doPeriodically that is cancelled if this projectile is destroyed first.
+      End it with stopTimer(cb), not destroy cb. */
+  function doPeriodicallyAlive(real interval, CallbackPeriodic cb)
+    pendingPeriodics.add(doPeriodically(interval, cb))
+
+  function stopTimer(CallbackPeriodic cb)
+    pendingPeriodics.remove(cb)
+    destroy cb
+
+  function onTimerFired(CallbackSingle cb)
+    pendingTimers.remove(cb)
 
   function scaleVelXY(real scaling)
     vel.x = scaling * vel.x
@@ -157,6 +194,12 @@ public class MyProjectile extends Projectile
       soundBounce.playOnPoint(pos)
 
   ondestroy
+    for cb in pendingTimers
+      destroy cb
+    destroy pendingTimers
+    for cb in pendingPeriodics
+      destroy cb
+    destroy pendingPeriodics
     destroy hitGroup3
     if onHit3 != null
       destroy onHit3

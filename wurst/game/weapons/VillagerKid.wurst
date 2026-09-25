@@ -15,15 +15,13 @@ public class VillagerKid extends MyProjectile
   bool isPlayingTime
   unit favouriteToy
   real minToyDistance
-  CallbackSingle lifetimeCb = null
 
   construct(SheepEntity source)
     super(source, villagerKid.minRadius, villagerKidModels.getRandomElement())
     soundBounce = SOUND_DRY_FART
     silent = true
     setPermanent()
-    lifetimeCb = doAfter(villagerKid.duration) ->
-      lifetimeCb = null
+    doAfterAlive(villagerKid.duration) ->
       terminate()
 
     onEnd() -> 
@@ -78,7 +76,3 @@ public class VillagerKid extends MyProjectile
         favouriteToy = u
 
     return favouriteToy
-
-  ondestroy
-    if lifetimeCb != null
-      destroy lifetimeCb

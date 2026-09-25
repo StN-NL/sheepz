@@ -36,7 +36,7 @@ class WormRider extends MyProjectile
     onHit3D() target ->
       SOUNDS_WOR_HIT.getRandomElement().playOnPoint(pos)
       e.blast(pos, target, wormRider.maxDamage)
-      doAfter(3.) -> 
+      doAfterAlive(3.) -> 
         if not done
           removeHitUnit(target)
         

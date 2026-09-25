@@ -51,6 +51,7 @@ Before calling a stdlib or Frentity function, **grep `_build/dependencies/` for 
 This is an existing codebase with established patterns. **Read what's there before adding to it.** Specifically:
 
 - New weapons go in `wurst/game/weapons/` — match the structure and style of existing weapon files (`Bazooka.wurst`, `Grenade.wurst`, `Shotgun.wurst` are good reference examples of the conventional weapon shape).
+- Timers inside a projectile that touch the projectile use `doAfterAlive` / `doPeriodicallyAlive` (end periodic ones with `stopTimer(cb)`), so they're cancelled when it's destroyed. Plain `doAfter` + `if not done` is unsafe: the instance may already be freed and recycled. Effects meant to outlive the projectile (e.g. Molotov fire) keep a plain timer and capture what they need in locals.
 - Damage and status effects route through `wurst/lib/Damage.wurst` and `wurst/lib/Status.wurst`. Don't bypass these.
 - Hero and item definitions follow the templates in `wurst/templates/`. Use them.
 - Entity behaviour builds on Frentity primitives — check how `SheepEntity.wurst`, `MyUnitEntity.wurst`, and `MyProjectile.wurst` use it before writing new entity code.

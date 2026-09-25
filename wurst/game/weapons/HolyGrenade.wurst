@@ -1,5 +1,4 @@
 package HolyGrenade
-import ClosureTimers
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -23,7 +22,7 @@ public class HolyGrenade extends MyProjectile
     if not bounceOfGround() and not hallelujah
       hallelujah = true
       SOUND_HOLY_GRENADE.playOnPoint(pos).snd.setVolume(300)
-      doAfter(2) ->
+      doAfterAlive(2) ->
         if not done 
           terminate()
 

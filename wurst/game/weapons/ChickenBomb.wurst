@@ -12,7 +12,6 @@ public class ChickenBomb extends MyProjectile
   let baseAttachmentPoint = vec3(0, 0, 50)
   int countdown = chickenBomb.delay.toInt()
   unit buddy = null
-  CallbackPeriodic countdownCb = null
   
   construct(SheepEntity source)
     super(source, chickenBomb.minRadius, Units.easterChicken1)
@@ -29,10 +28,9 @@ public class ChickenBomb extends MyProjectile
 
   function arm()
     SOUNDS_CHICKEN.getRandomElement().playOnPoint(pos)
-    countdownCb = doPeriodically(1.0) cb ->
+    doPeriodicallyAlive(1.0) cb ->
       if countdown == 0
-        countdownCb = null
-        destroy cb
+        stopTimer(cb)
         if not done
           terminate()
       else
@@ -61,10 +59,6 @@ public class ChickenBomb extends MyProjectile
   override function onGroundHit()
     bounceOfGround()
     super.onGroundHit()
-
-  ondestroy
-    if countdownCb != null
-      destroy countdownCb
 
   function explode()
     fx.eff.setScale(1.6)

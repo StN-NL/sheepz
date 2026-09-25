@@ -1,6 +1,5 @@
 package Shotgun
 import Assets
-import ClosureTimers
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -13,7 +12,7 @@ public class ShotgunProjectile extends MyProjectile
     super(source, shotgun.minRadius, Abilities.rifleImpact)
     flashEffect(MyModels.shotgun, source.actor, SpecialAttachmentPoints.rightHand)
     SOUND_SHOTGUN_SHOT.playOnPoint(pos).snd.setVolume(30)
-    doAfter(0.5) ->
+    doAfterAlive(0.5) ->
       if not done
         terminate()
 

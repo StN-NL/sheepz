@@ -1,6 +1,5 @@
 package FrogBomb
 import Assets
-import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import MyAssets
@@ -33,7 +32,7 @@ public class FrogBomb extends MyProjectile
 
   function explode()
     SOUND_CRAZY_FROG_RING.playOnPoint(pos)
-    doAfter(1) ->
+    doAfterAlive(1) ->
       for _ = 1 to frogBomb.shards
         new FrogBombShard(source, pos)
       
@@ -59,5 +58,5 @@ public class FrogBombShard extends FrogBomb
 
   override function explode()
     SOUND_CRAZY_FROG_RING.playOnPoint(pos)
-    doAfter(1) ->
+    doAfterAlive(1) ->
       boom()

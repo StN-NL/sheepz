@@ -1,6 +1,5 @@
 package BoomerHammer
 import Assets
-import ClosureTimers
 import ConfigGame
 import ConfigWeapons
 import MyProjectile
@@ -16,7 +15,7 @@ public class BoomerHammer extends MyProjectile
     onHit3D() target ->
       source.blast(pos, target, boomerHammer.maxDamage, boomerHammer.maxKnockBack)
       flashEffect(Abilities.stormBoltMissile, target.actor, AttachmentPoints.chest)
-      doAfter(1) ->
+      doAfterAlive(1) ->
         if not done
           removeHitUnit(target)
 

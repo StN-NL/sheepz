@@ -1,6 +1,5 @@
 package HammerDrop
 import Assets
-import ClosureTimers
 import ConfigWeapons
 import Fx2Entity
 import Heightmap
@@ -37,7 +36,7 @@ public class HammerDrop extends MyProjectile
     horse.terminate()
     pos.addFireStacks(400)
     source.blastArea(pos, hammerDrop.minRadius, hammerDrop.maxRadius, hammerDrop.maxDamage)
-    doAfter(3) ->
+    doAfterAlive(3) ->
       terminate()
 
   override function setPhysics()

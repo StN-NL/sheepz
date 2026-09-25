@@ -13,7 +13,6 @@ import Utils
 public class ClusterBomb extends MyProjectile
   bool triggered = false
   int countdown = clusterBomb.delay.toInt()
-  CallbackPeriodic countdownCb = null
 
   construct(SheepEntity source)
     super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)
@@ -25,20 +24,15 @@ public class ClusterBomb extends MyProjectile
       explode()
 
   function countdown()
-    countdownCb = doPeriodically(1.0) cb ->
+    doPeriodicallyAlive(1.0) cb ->
       if countdown == 0
-        countdownCb = null
-        destroy cb
+        stopTimer(cb)
         if not done
           terminate()
       else
         SOUND_COUNTDOWN.playOnPoint(pos)
         new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
         countdown -= 1
-
-  ondestroy
-    if countdownCb != null
-      destroy countdownCb
 
   override function update()
     alignYawAndPitch()

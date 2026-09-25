@@ -39,11 +39,14 @@ public class MolotovCocktail extends MyProjectile
     for _ = 1 to molotov.shards
       new MolotovShard(source, pos)
 
+    // The fire outlives this projectile (explode runs as it ends), so capture the
+    // thrower locally instead of reading a field of the destroyed cocktail.
+    let thrower = source
     doPeriodicallyTimed(0.5, molotov.duration) (CallbackCounted cb) ->
       forUnitsInRange(explosionPos.toVec2(), molotov.maxRadius) u ->
         if u.isSheep() and u.getPos3Real().z < explosionPos.getHeightMap() + 100
           let target = u.getSheep()
-          source.fireBlast(target, molotov.maxDamage, explosionPos)
+          thrower.fireBlast(target, molotov.maxDamage, explosionPos)
       
 
 public class MolotovShard extends MyProjectile
@@ -52,7 +55,7 @@ public class MolotovShard extends MyProjectile
     super(source, molotov.minRadius, Abilities.flameStrikeEmbers)
     sleeps = true
     setPos(pos)
-    doAfter(molotov.duration) ->
+    doAfterAlive(molotov.duration) ->
       if not done 
         terminate()
 

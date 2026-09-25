@@ -1,7 +1,6 @@
 package CloudGenerator
 import Assets
 import ClosureForGroups
-import ClosureTimers
 import ConfigWeapons
 import Entity
 import MySounds
@@ -19,7 +18,7 @@ public class Cloud extends MyProjectile
     setVel(vec3(0, 0, 0))
     setXY(vec3(pos.x + GetRandomReal(-30, 30), pos.y + GetRandomReal(-30, 30), pos.z + 256))
     SOUND_WOLOLO.playOnPoint(source.pos)
-    doAfter(60) -> 
+    doAfterAlive(60) -> 
       terminate()
 
   override function update()

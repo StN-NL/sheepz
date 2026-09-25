@@ -43,7 +43,6 @@ public function SheepEntity.wordOfpower()
 
 public class WordOfPowerProjectile extends MyProjectile
   HashSet<UnitEntity> sharedHitGroup
-  CallbackSingle lifetimeCb = null
 
   construct(SheepEntity source, angle xyA, HashSet<UnitEntity> sharedHitGroup)
     super(source, wordOfPower.minRadius, Abilities.crushingWaveMissile)
@@ -53,8 +52,7 @@ public class WordOfPowerProjectile extends MyProjectile
     setXYAngle(xyA)
     setPhysics()
     setPermanent()
-    lifetimeCb = doAfter(1.0) ->
-      lifetimeCb = null
+    doAfterAlive(1.0) ->
       terminate()
 
     onHit3D() target ->
@@ -69,7 +67,3 @@ public class WordOfPowerProjectile extends MyProjectile
   override function onGroundHit()
     if not done
       terminate()
-
-  ondestroy
-    if lifetimeCb != null
-      destroy lifetimeCb

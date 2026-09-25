@@ -19,7 +19,7 @@ public class MinigunProjectile extends MyProjectile
     fx.eff.setScale(0.2)
     flashEffect(MyModels.leeroyGun, source.actor, SpecialAttachmentPoints.rightHand)
     SOUND_MIN_SHOT.playOnPoint(pos)
-    doAfter(1) ->
+    doAfterAlive(1) ->
       if not done
         terminate()
 

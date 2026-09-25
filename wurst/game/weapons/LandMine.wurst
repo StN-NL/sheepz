@@ -12,9 +12,6 @@ public class LandMine extends MyProjectile
   int countdown = landmine.delay.toInt()
   int alpha = 255
   int fadeTicks = (4 / ANIMATION_PERIOD).toInt()
-  CallbackPeriodic fadeCb = null
-  CallbackPeriodic countdownCb = null
-  CallbackSingle armCb = null
 
   construct(SheepEntity source)
     super(source, landmine.minRadius, Units.goblinLandMine)
@@ -24,43 +21,30 @@ public class LandMine extends MyProjectile
     onHit3D() target ->
       countdown()
 
-    fadeCb = doPeriodically(ANIMATION_PERIOD) cb ->
+    doPeriodicallyAlive(ANIMATION_PERIOD) cb ->
       alpha -= min(2, alpha)
       fx.eff.setAlpha(alpha)
       fadeTicks -= 1
       if fadeTicks <= 0
-        fadeCb = null
-        destroy cb
+        stopTimer(cb)
 
-    armCb = doAfter(5) ->
-      armCb = null
+    doAfterAlive(5) ->
       friendlyFire = true
 
     onEnd() ->
       explode()
 
   function countdown()
-    countdownCb = doPeriodically(0.3) cb ->
+    doPeriodicallyAlive(0.3) cb ->
       fx.eff.setAlpha(225)
       if countdown == 0
-        countdownCb = null
-        destroy cb
+        stopTimer(cb)
         if not done
           terminate()
       else
         SOUND_COUNTDOWN.playOnPoint(pos)
         new TextTagEntity(pos, vec3(0, 0, 8), countdown.toString(), 10, 1, colorA(255,0,0,255))
         countdown -= 1
-
-  ondestroy
-    // Cancel pending closures so none of them touch this instance after an
-    // early explosion (the mine can die well inside the 4s fade window).
-    if fadeCb != null
-      destroy fadeCb
-    if countdownCb != null
-      destroy countdownCb
-    if armCb != null
-      destroy armCb
 
   function explode()
     flashEffect(Objects.neutralBuildingExplosion, pos)

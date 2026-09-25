@@ -22,7 +22,7 @@ public class FusRoDahProjectile extends MyProjectile
     // Needed again: during super() the velocity field isn't initialized yet (speed 0).
     setPhysics()
     setPermanent()
-    doAfter(fusRoDah.maxDistance / velocity) ->
+    doAfterAlive(fusRoDah.maxDistance / velocity) ->
       if not done
         terminate()
 
