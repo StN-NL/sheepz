@@ -17,7 +17,7 @@ Build target is whatever `wurst.build` specifies — check that file before assu
   - `wurst/game/` — gameplay code (further subdivided into `assets/`, `general/`, `weapons/`)
   - `wurst/lib/` — shared utilities (`Damage`, `Status`, `Utils`, `CreepIds`)
   - `wurst/templates/` — hero and item definition templates for reuse
-- `imports/` — assets that get auto-imported into the map on save (icons, models). Everything here ships in the map, so keep it to files the map actually uses. A file here replaces the same path inside `Sheepz.w3x`: `war3mapMap.blp` (custom lobby minimap, which the World Editor overwrites on save), `LoadingScreen.mdx` (patched to use `Fullscreen.blp`) and `Fullscreen.tga` (a 1×1 placeholder that shrinks the unused 5.5 MB original in the base map).
+- `imports/` — assets that get auto-imported into the map on save (icons, models). Everything here ships in the map, so keep it to files the map actually uses. A file here replaces the same path inside `Sheepz.w3x`: `war3mapMap.blp` (custom lobby minimap, which the World Editor overwrites on save) and `war3mapPreview.tga` (256×256 lobby preview). The loading screen (`LoadingScreen.mdx` + `Fullscreen.tga`, 5.5 MB) stays in the base map as-is: converting it to BLP gave the wrong aspect ratio in-game.
 - `assets/` — source art, tools and unused audio kept out of the map (not imported).
 - `_build/` — generated. Compiled output and downloaded dependencies live here. **Gitignored.**
 - `_build/dependencies/wurstStdlib2/` — Wurst standard library source. Grep here for real API signatures; do NOT invent them.
@@ -31,6 +31,8 @@ Build target is whatever `wurst.build` specifies — check that file before assu
 ## Build and run
 
 Use the run button in VSCode (or `F1 → Wurst: Build Wurst Map`), or build from the shell with `grill build Sheepz.w3x` in the project root. The output map lands in `_build/`.
+
+Grill updates a cached copy of the map in place (`_build/cache/Sheepz_*_jass_cached.w3x`). After removing or renaming anything in `imports/`, delete that cache before building: otherwise removed imports linger, and a removed import that had replaced a base-map file deletes the original too.
 
 If `_build/dependencies/` is empty on a fresh clone, the extension needs to run a setup pass first (open the folder in VSCode with the Wurst extension installed and trigger any Wurst command).
 
