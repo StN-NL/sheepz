@@ -98,7 +98,7 @@ class SliderInt extends Slider
     if isPrivileged()
       let value = BlzGetTriggerFrameValue()
       cb.update(value.toInt())
-      sliderLabel.setText(prefix + value.toInt().toString() + suffix)
+      sliderLabel.setText(prefix + value.toInt() + suffix)
 
 
 class SliderReal extends Slider

@@ -101,7 +101,7 @@ function player.declareVictor()
     )
 
 function player.announceWinner(int points, string text1, string text2)
-  announce(0.5, "The game was won with " + points.toString() + " points!")
+  announce(0.5, "The game was won with " + points + " points!")
   doAfter(2) ->
     announce(0.45, text1)
     doAfter(2) -> 

@@ -2,11 +2,6 @@ package MySounds
 import LinkedList
 import SoundUtils
 
-public class MyMusic
-  static constant shortIntro = "Music\\ShortIntro.mp3"
-  static constant staleSocks = "Music\\StaleSocks.mp3"
-  static constant axelF = "Music\\AxelF.mp3"
-  
 public class MySounds
   static constant airhorn = "Sounds\\Airhorn.mp3"
   static constant chickenNuggets = "Sounds\\ChickenNuggets.mp3"
@@ -37,10 +32,6 @@ public class MySounds
   static constant yeet = "Sounds\\Yeet.mp3"
   static constant youAreAnIdiot = "Sounds\\YouAreAnIdiot.mp3"
   static constant youShallNotPass = "Sounds\\YouShallNotPass.mp3"
-
-public constant MUSIC_SHORT_INTRO = new SoundDefinition(MyMusic.shortIntro)
-public constant MUSIC_STALE_SOCKS = new SoundDefinition(MyMusic.staleSocks, true)
-public constant MUSIC_AXEL_F = new SoundDefinition(MyMusic.axelF, true)
 
 public constant SOUND_AIRHORN = new SoundDefinition(MySounds.airhorn)
 public constant SOUND_ARCHIMONDE_LAUGH = new SoundDefinition(Sounds.n01Archimonde30)
