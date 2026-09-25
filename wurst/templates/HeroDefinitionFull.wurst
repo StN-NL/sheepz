@@ -39,7 +39,7 @@ function gen()
         ..setMaximumPitchAngledegrees(10.0) // Defines the maximum angle the flying unit/hero can tilt forwards and backwards. This field has no bearing on the ability to move over particular terrain.
         ..setMaximumRollAngledegrees(10.0) // Defines the maximum angle the flying unit/hero can tilt left and right. This field has no bearing on the ability to move over particular terrain.
         ..setModelFile(Units.sylvanusWindrunner1) // Defines the 3D model to use for the unit/building/hero. This field purely defines 3D artwork; it has no bearing on any other characteristic of the unit/building/hero.
-        ..setModelFileExtraVersions("None") // In cases where the artwork of a particular unit has been redrawn for The Frozen Throne, this field defines whether to use the Reign of Chaos or The Frozen Throne model version. If both options are checked, The Frozen Throne model version will be used by default.
+        ..setModelFileExtraVersions(0) // In cases where the artwork of a particular unit has been redrawn for The Frozen Throne, this field defines whether to use the Reign of Chaos or The Frozen Throne model version. If both options are checked, The Frozen Throne model version will be used by default.
         ..setOccluderHeight(0.0) // If units/buildings/heroes have their occluder height set to a non-zero value, they will cause other nearby units/buildings/heroes to have their lines of sight obstructed by their presence. Flying units/heroes do not suffer from this effect.
         ..setOrientationInterpolation(5) // Unknown.
         ..setProjectileImpactZ(60) // Height offset that an attacking projectile will impact the target unit/building/hero, with zero being at its base.

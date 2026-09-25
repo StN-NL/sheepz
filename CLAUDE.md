@@ -17,7 +17,7 @@ Build target is whatever `wurst.build` specifies — check that file before assu
   - `wurst/game/` — gameplay code (further subdivided into `assets/`, `general/`, `weapons/`)
   - `wurst/lib/` — shared utilities (`Damage`, `Status`, `Utils`, `CreepIds`)
   - `wurst/templates/` — hero and item definition templates for reuse
-- `imports/` — assets that get auto-imported into the map on save (icons, models). Everything here ships in the map, so keep it to files the map actually uses. A file here replaces the same path inside `Sheepz.w3x`: `war3mapMap.blp` (custom lobby minimap, which the World Editor overwrites on save) and `war3mapPreview.tga` (256×256 lobby preview). The loading screen (`LoadingScreen.mdx` + `Fullscreen.tga`, 5.5 MB) stays in the base map as-is: converting it to BLP gave the wrong aspect ratio in-game.
+- `imports/` — assets that get auto-imported into the map on save (icons, models). Everything here ships in the map, so keep it to files the map actually uses. A file here replaces the same path inside `Sheepz.w3x`: `war3mapMap.blp` (lobby minimap, which the World Editor overwrites on save) and `war3mapPreview.tga` (128×128 lobby preview). Both are the 1.0.6 versions: the newer 256×256 preview and custom minimap (kept in `assets/`) break the loading screen on WC3 3.0. The loading screen (`LoadingScreen.mdx` + `Fullscreen.tga`, 5.5 MB) stays in the base map as-is: converting it to BLP gave the wrong aspect ratio in-game.
 - `assets/` — source art, tools and unused audio kept out of the map (not imported).
 - `_build/` — generated. Compiled output and downloaded dependencies live here. **Gitignored.**
 - `_build/dependencies/wurstStdlib2/` — Wurst standard library source. Grep here for real API signatures; do NOT invent them.

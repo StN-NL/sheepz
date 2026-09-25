@@ -8,12 +8,10 @@ buildMapData:
   fileName: Sheepz 1.0.9
   author: stn
   scenarioData:
-    description: '|cffff0095Duke it out with other sheeps.|r ***
-      Boom baby! - |cffffd000The New York Times|r ***
-      Kept playing until my balls fell off - |cffffd000The Guardian|r ***
-      Bezos! - |cffffd000The Washington Post|r ***
-      Putain - |cffffd000Le Monde|r ***
-      Bloody hell mate - |cffffd000The Times|r'
+    description: '|cffff0095Duke it out with other sheeps.|r *** Boom baby! - |cffffd000The
+      New York Times|r *** Kept playing until my balls fell off - |cffffd000The Guardian|r
+      *** Bezos! - |cffffd000The Washington Post|r *** Putain - |cffffd000Le Monde|r
+      *** Bloody hell mate - |cffffd000The Times|r'
     suggestedPlayers: The more the merrier
     loadingScreen:
       model: LoadingScreen.mdx
@@ -71,3 +69,4 @@ buildMapData:
     race: HUMAN
     controller: USER
     fixedStartLoc: false
+wc3Patch: v3.0
