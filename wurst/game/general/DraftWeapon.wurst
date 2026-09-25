@@ -72,7 +72,14 @@ public class WeaponSelector
       for def in getUniqueRandomWeapons(weaponList, WEAPON_CARD_SLOTS)
         weaponCards[count].update(def)
         count++
-      
+
+      // Refund when every weapon is set to rarity 0; hide cards left without a weapon.
+      if count == 0
+        owner.addLumber(1)
+        return
+      for ii = count to WEAPON_CARD_SLOTS - 1
+        weaponCards[ii].hide()
+
       frameBox.setVisible(owner, true)
 
 // <<<<<<<<<< <<<<<<<<<< ----------- >>>>>>>>>> >>>>>>>>>>
@@ -121,9 +128,13 @@ public class WeaponCard
 
   protected function update(WeaponDefinition def)
     this.def = def
+    frameCard.setVisible(owner, true)
     frameIcon.setTexture(def.icon, 0, true)
     frameName.setText(def.name)
     frameDescription.setText(def.description)
+
+  protected function hide()
+    frameCard.setVisible(owner, false)
 
   protected function select(WeaponDefinition def)
     SOUND_BUTTON_CLICK.playForPlayer(owner).snd.setVolume(50)

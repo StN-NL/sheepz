@@ -147,6 +147,7 @@ public class SheepEntity extends MyUnitEntity
     gravity = 0.
     setVel(ZERO3)
     immobalizedSources = 0
+    lifeCount++
     actor.setMaxHP(SHEEP_MAX_HP.toInt())
     actor.setHP(SHEEP_MAX_HP)
     setOxygenLevel(SHEEP_MAX_HP)
@@ -203,11 +204,20 @@ public class SheepEntity extends MyUnitEntity
   
   var modifierMoveSpeed = 0.
   var immobalizedSources = 0
+  // Bumped on every death, which also resets immobalizedSources, so a timed
+  // release started in an earlier life can be recognised and skipped.
+  var lifeCount = 0
 
   function immobalize(bool value)
     immobalizedSources += value ? 1 : -1
     if immobalizedSources < 0
       immobalizedSources = 0
+
+  /** Undoes an immobalize(true) made while lifeCount was startedLife. Ignored after a
+      death, so it can't cut short an immobilization from the next life. */
+  function releaseImmobalize(int startedLife)
+    if lifeCount == startedLife
+      immobalize(false)
 
   function addMoveSpeed(real value)
     modifierMoveSpeed += value
@@ -616,6 +626,14 @@ public class SheepEntity extends MyUnitEntity
     owner.setLives(0)
     setState(State.TERMINATED)
     sheeps[owner.getId()] = null // keep player.getSheep() from returning a freed instance
+    // Other sheep must not keep crediting this one: its id gets recycled once freed.
+    for ii = 0 to MAX_PLAYERS - 1
+      let other = sheeps[ii]
+      if other != null
+        if other.tormentor == this
+          other.tormentor = null
+        if other.killer == this
+          other.killer = null
     super.terminate()
 
 

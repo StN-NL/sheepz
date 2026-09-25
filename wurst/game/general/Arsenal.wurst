@@ -65,7 +65,8 @@ public function getRandomWeapon(LinkedList<WeaponDefinition> weaponList) returns
 
 public function getUniqueRandomWeapons(LinkedList<WeaponDefinition> weaponList, int size) returns LinkedList<WeaponDefinition>
   let list = new LinkedList<WeaponDefinition>
-  let limit = min(size, weaponList.size())
+  // Rarity 0 weapons are never drawn, so they can't count toward the limit.
+  let limit = min(size, weaponList.foldl<int>(0, (i, q) -> i.rarity > 0 ? q + 1 : q))
   while list.size() < limit
     let def = getRandomWeapon(weaponList)
     if not list.has(def)

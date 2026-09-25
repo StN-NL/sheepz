@@ -32,10 +32,11 @@ public class WebProjectile extends MyProjectile
       if u.isSheep() and u.getSheep() != source
         let sheep = u.getSheep()
         sheep.immobalize(true)
+        let life = sheep.lifeCount
         let eff = addEffect(Abilities.webTarget, u, AttachmentPoints.overhead)
           ..setScale(1)
 
         doAfter(web.duration) ->
 
-          sheep.immobalize(false)
+          sheep.releaseImmobalize(life)
           eff.destr()

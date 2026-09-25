@@ -47,36 +47,25 @@ import LinkedList
   destroy weights
 
 @Test function bonusDecompositionSplitsIntoPowersOfTwo()
-  // 5 = 2^2 + 2^0, exponents returned in descending order
-  let exponents = bonusBitExponents(5.)
-  exponents.size().assertEquals(2)
-  exponents.get(0).assertEquals(2)
-  exponents.get(1).assertEquals(0)
-  destroy exponents
+  // 5 = 2^2 + 2^0
+  bonusBits(5.).assertEquals(5)
 
 @Test function bonusDecompositionCoversFullRange()
   // 65535 = sum of 2^0..2^15 — every one of the 16 bonus abilities
-  let exponents = bonusBitExponents(65535.)
-  exponents.size().assertEquals(16)
-  exponents.getFirst().assertEquals(15)
-  exponents.peek().assertEquals(0)
-  destroy exponents
+  bonusBits(65535.).assertEquals(65535)
+
+@Test function bonusDecompositionCapsAtSixteenBits()
+  // Values beyond the 16 abilities saturate instead of spilling into bit 16.
+  bonusBits(70000.).assertEquals(65535)
 
 @Test function bonusDecompositionZeroAndNegativeAreEmpty()
   // Documents current Status behavior: a negative bonus total applies nothing.
-  let zero = bonusBitExponents(0.)
-  zero.size().assertEquals(0)
-  destroy zero
-  let negative = bonusBitExponents(-5.)
-  negative.size().assertEquals(0)
-  destroy negative
+  bonusBits(0.).assertEquals(0)
+  bonusBits(-5.).assertEquals(0)
 
 @Test function bonusDecompositionDropsFractions()
   // 2.5 applies only the 2^1 ability; the 0.5 remainder is silently dropped.
-  let exponents = bonusBitExponents(2.5)
-  exponents.size().assertEquals(1)
-  exponents.get(0).assertEquals(1)
-  destroy exponents
+  bonusBits(2.5).assertEquals(2)
 
 @Test function weightedPickFavoursHeavierWeight()
   // rarity 100 (common) should dominate rarity 1 (legendary)

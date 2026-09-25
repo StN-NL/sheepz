@@ -9,12 +9,13 @@ import SheepEntity
 public function SheepEntity.ascension()
   this.owner.print(("Hold at least " + ascension.delay.toString(0) + " seconds!").color(COLOR_GOLD))
   this.immobalize(true)
+  let life = this.lifeCount
   let eff = addEffect(Abilities.resurrectcaster, this.getPos())
     ..setTimeScale(0.3)
   
   doAfter(ascension.delay) -> 
     eff.destr()
-    this.immobalize(false)
+    this.releaseImmobalize(life)
 
 
 public function SheepEntity.rejection(vec2 target)

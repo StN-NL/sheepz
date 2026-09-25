@@ -19,6 +19,8 @@ public class FusRoDahProjectile extends MyProjectile
   
   construct(SheepEntity source)
     super(source, fusRoDah.minRadius, Abilities.shockwaveMissile)
+    // Needed again: during super() the velocity field isn't initialized yet (speed 0).
+    setPhysics()
     setPermanent()
     doAfter(fusRoDah.maxDistance / velocity) ->
       if not done

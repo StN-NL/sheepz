@@ -13,20 +13,20 @@ public function blastFalloff(real distance, real minRadius, real maxRadius) retu
   else
     return 1. - (distance - minRadius) / (maxRadius - minRadius)
 
-/** Greedy binary decomposition for the bonus ability system: returns the exponents
-    (15 down to 0, descending) of the powers of two that fit into value, matching the
-    16 doubling bonus abilities in Status. Fractional leftovers are dropped and a
-    negative value yields an empty list (no debuff support). Caller owns the list. */
-public function bonusBitExponents(real value) returns LinkedList<int>
-  let exponents = new LinkedList<int>
+/** Greedy binary decomposition for the bonus ability system: returns a bitmask where
+    bit n set means the 2^n ability applies, matching the 16 doubling bonus abilities
+    in Status. Fractional leftovers are dropped and a negative value yields 0
+    (no debuff support). */
+public function bonusBits(real value) returns int
+  var bits = 0
   var remainder = value
   var divisor = 32768 // 2^15
   for exp = 15 downto 0
     if divisor.toReal() <= remainder
       remainder -= divisor.toReal()
-      exponents.add(exp)
+      bits += divisor
     divisor = divisor div 2
-  return exponents
+  return bits
 
 /** Given integer weights and a roll in [0, sum(weights) - 1], returns the index of the
     selected element using cumulative weighting, or -1 if the roll is out of range. */

@@ -7,7 +7,6 @@ import ClosureTimers
 import DamageEvent
 import GameMath
 import HashMap
-import LinkedList
 import InstantDummyCaster
 import ObjectIds
 import ObjectIdGenerator
@@ -409,11 +408,13 @@ class BonusDefinition
     for ii = 0 to 15
       u.removeAbility(abilIds[ii])
 
-    let exponents = bonusBitExponents(value)
-    for exp in exponents
-      u.addAbility(abilIds[exp])
-      u.hideAbility(abilIds[exp], true)
-    destroy exponents
+    let bits = bonusBits(value)
+    var bit = 1
+    for exp = 0 to 15
+      if bits.bitAnd(bit) != 0
+        u.addAbility(abilIds[exp])
+        u.hideAbility(abilIds[exp], true)
+      bit *= 2
 
   protected static function setup()
     map.put(Bonus.ATTACK_SPEED, compiletime(new BonusDefinition(Bonus.ATTACK_SPEED)))
@@ -463,6 +464,12 @@ class StatusHandler
     destroy statusMap
     destroy bonusMap
 
+  /** Timed effects can expire after the unit was removed and this handler destroyed
+      (see onUnitDeindex). Pass the unit captured when the timer started, not the
+      field: a destroyed handler's fields may already belong to a recycled instance. */
+  private function isOwnerOf(unit target) returns bool
+    return map.get(target) == this
+
   function setBaseAttackCooldown(real cooldown, int weaponIndex)
     this.baseAttackCooldown[weaponIndex] = cooldown
     if weaponIndex == 0
@@ -477,10 +484,12 @@ class StatusHandler
 
   function setBuff(Buff b, real duration, int lvl)
     updateBuff(b, 1, lvl)
+    let target = u
     doAfter(duration) ->
-      // Decrement unconditionally: skipping it for dead units permanently
-      // inflates the counter (visual removal on a dead unit is harmless).
-      updateBuff(b, -1, lvl)
+      // Decrement even for dead units: skipping it permanently inflates the
+      // counter (visual removal on a dead unit is harmless).
+      if isOwnerOf(target)
+        updateBuff(b, -1, lvl)
 
   function updateBuff(Buff b, int value, int lvl)
     let oldValue = buffMap.get(b)
@@ -499,8 +508,10 @@ class StatusHandler
 
   function setStatus(Status status, real duration)
     updateStatus(status, 1)
+    let target = u
     doAfter(duration) ->
-      updateStatus(status, -1)
+      if isOwnerOf(target)
+        updateStatus(status, -1)
 
   function updateStatus(Status status, int value)
     let oldValue = statusMap.get(status)
@@ -540,8 +551,10 @@ class StatusHandler
 
   function addBonus(Bonus bonus, real value, real duration)
     updateBonus(bonus, value)
+    let target = u
     doAfter(duration) ->
-      updateBonus(bonus, -value)
+      if isOwnerOf(target)
+        updateBonus(bonus, -value)
 
   private function updateBonus(Bonus bonus, real addValue)
     let value = bonusMap.get(bonus) + addValue
