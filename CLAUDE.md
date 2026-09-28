@@ -32,6 +32,8 @@ Build target is whatever `wurst.build` specifies — check that file before assu
 
 Use the run button in VSCode (or `F1 → Wurst: Build Wurst Map`), or build from the shell with `grill build Sheepz.w3x` in the project root. The output map lands in `_build/`.
 
+When changing the version, update it in three places: `wurst.build` (`name`, `fileName`), `VERSION` and the `WHATS_NEW` player notes in `wurst/game/general/Miscellaneous.wurst`, and `CHANGELOG.md` (player-facing notes plus an "Under the hood" part with commits).
+
 Grill updates a cached copy of the map in place (`_build/cache/Sheepz_*_jass_cached.w3x`). After removing or renaming anything in `imports/`, delete that cache before building: otherwise removed imports linger, and a removed import that had replaced a base-map file deletes the original too.
 
 If `_build/dependencies/` is empty on a fresh clone, the extension needs to run a setup pass first (open the folder in VSCode with the Wurst extension installed and trigger any Wurst command).

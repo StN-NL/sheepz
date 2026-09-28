@@ -34,6 +34,7 @@ init
 
 function printWelcome()
   print(SLOGAN, 5)
+  print("\nNew in " + VERSION + ": " + WHATS_NEW_HEADLINE.color(PINK) + " - see What's New in the quest log (F9).", 10)
   print("\nFor more information, visit the quest log.", 10)
   print("\nType \"?\" for help", 30)
 
