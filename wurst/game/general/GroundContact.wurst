@@ -1,0 +1,30 @@
+package GroundContact
+import Entity
+import GameMath
+import Heightmap
+
+/** Ground handling for Sheepz bodies, in place of Frentity's PhysicsModule: the contact
+    callbacks see the impact velocity, and surface friction is applied after them. */
+public module GroundContactModule
+  real terrainZ = 0.
+
+  function onGroundHit()
+
+  function onEscapeGround()
+
+  /** Call once per tick, before the entity moves. */
+  function updateGroundContact(Entity e)
+    if not e.done and e.active
+      let pos = e.getPos()
+      terrainZ = pos.getHeightMap()
+      if pos.z > terrainZ
+        if not e.flying
+          e.flying = true
+          onEscapeGround()
+      else
+        if e.flying
+          e.flying = false
+          onGroundHit()
+        // onGroundHit may have terminated the entity (e.g. an exploding projectile).
+        if not e.done
+          e.scaleVel(SURFACE_FRICTION)

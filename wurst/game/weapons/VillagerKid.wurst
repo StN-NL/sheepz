@@ -3,6 +3,7 @@ import Assets
 import ClosureTimers
 import ConfigWeapons
 import Entity
+import GameMath
 import MyAssets
 import MyProjectile
 import SheepEntity
@@ -41,8 +42,10 @@ public class VillagerKid extends MyProjectile
     doAfter(2) -> 
       eff.destr()
       
-    if vel.z.abs() < 40
-      vel.z = vel.z.sign() * 40.
+    // Minimum hop height; tuned when friction still ran before the bounce.
+    let minHopSpeed = 40. / SURFACE_FRICTION
+    if vel.z.abs() < minHopSpeed
+      vel.z = vel.z.sign() * minHopSpeed
       
     return super.bounceOfGround()
 

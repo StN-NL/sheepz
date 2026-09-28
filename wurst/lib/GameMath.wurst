@@ -40,3 +40,19 @@ public function pickWeightedIndex(LinkedList<int> weights, int roll) returns int
       result = index
     index++
   return result
+
+/** Velocity multiplier per tick while a body touches the ground; applied after the contact response. */
+public constant SURFACE_FRICTION = 0.9
+
+/** Sheep landing bounce. The speed threshold was tuned when friction still ran before the bounce. */
+public constant SHEEP_BOUNCE_RESTITUTION = 0.5
+public constant SHEEP_MIN_BOUNCE_SPEED = 3. / SURFACE_FRICTION
+
+/** Projectiles hitting the ground faster than this bounce; slower ones stop bouncing.
+    Tuned when friction still ran before the bounce. */
+public constant PROJECTILE_MIN_BOUNCE_SPEED = 6. / SURFACE_FRICTION
+
+/** Vertical speed after hitting the ground at impactVelZ (negative = falling): bounces back
+    scaled by restitution when falling faster than minBounceSpeed, otherwise stops. */
+public function bounceVelZ(real impactVelZ, real restitution, real minBounceSpeed) returns real
+  return impactVelZ < -minBounceSpeed ? -restitution * impactVelZ : 0.

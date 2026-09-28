@@ -76,3 +76,42 @@ import LinkedList
   pickWeightedIndex(weights, 1).assertEquals(1)
   pickWeightedIndex(weights, 100).assertEquals(1)
   destroy weights
+
+// Equivalence: ground contact used to apply surface friction (x0.9) before the contact response.
+// The response now sees the raw impact velocity and friction follows, with the thresholds
+// rescaled; bounces must come out the same. The +0.0123 offsets keep speeds off the exact
+// threshold, where rounding may tip either version.
+
+/** Old sheep landing: friction first, then bounce back at half speed if falling faster than 3. */
+function oldSheepLandingVelZ(real impactVelZ) returns real
+  let felt = 0.9 * impactVelZ
+  return felt < -3 ? -0.5 * felt : 0.
+
+@Test function sheepLandingMatchesFrictionFirst()
+  for i = 0 to 4000
+    let v = -100. + i * 0.05 + 0.0123
+    let newVelZ = SURFACE_FRICTION * bounceVelZ(v, SHEEP_BOUNCE_RESTITUTION, SHEEP_MIN_BOUNCE_SPEED)
+    newVelZ.assertEquals(oldSheepLandingVelZ(v), 0.0001)
+
+@Test function projectileBounceMatchesFrictionFirst()
+  // MyProjectile.bounceOfGround: bounce when fast enough, scaling z by -c and xy by c.
+  let velXY = 7.3
+  for conservation in asList(0.5, 0.8)
+    for i = 0 to 4000
+      let v = -100. + i * 0.05 + 0.0123
+      // Old: friction on every component, then the check on the reduced speed.
+      let feltZ = 0.9 * v
+      let oldBounces = feltZ.abs() > 6
+      let oldZ = oldBounces ? -conservation * feltZ : feltZ
+      let oldXY = oldBounces ? conservation * 0.9 * velXY : 0.9 * velXY
+      // New: the check on the raw speed, the response, then friction.
+      let newBounces = v.abs() > PROJECTILE_MIN_BOUNCE_SPEED
+      let newZ = SURFACE_FRICTION * (newBounces ? -conservation * v : v)
+      let newXY = SURFACE_FRICTION * (newBounces ? conservation * velXY : velXY)
+      assertTrue(newBounces == oldBounces)
+      newZ.assertEquals(oldZ, 0.0001)
+      newXY.assertEquals(oldXY, 0.0001)
+
+@Test function slowLandingStopsInsteadOfBouncing()
+  bounceVelZ(-1., SHEEP_BOUNCE_RESTITUTION, SHEEP_MIN_BOUNCE_SPEED).assertEquals(0.)
+  bounceVelZ(-10., 0.5, 3.).assertEquals(5.)

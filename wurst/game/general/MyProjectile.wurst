@@ -4,11 +4,12 @@ import Assets
 import ClosureForGroups
 import ClosureTimers
 import ConfigGame
+import GameMath
+import GroundContact
 import HashSet
 import Heightmap
 import MyUnitEntity
 import MySounds
-import PhysicsEntity
 import Projectile
 import SheepEntity
 import SoundUtils
@@ -33,7 +34,7 @@ class ProjectileTimer extends CallbackSingle
     destroy action
 
 public class MyProjectile extends Projectile
-  use PhysicsModule
+  use GroundContactModule
 
   private constant hitGroup3 = new HashSet<MyUnitEntity>
   // Timers started through doAfterAlive/doPeriodicallyAlive; cancelled in ondestroy so
@@ -116,7 +117,7 @@ public class MyProjectile extends Projectile
       enforceDeepWater()
 
     if not done
-      physicsUpdate(this)
+      updateGroundContact(this)
     if not done
       checkCollision()
     if not done
@@ -176,7 +177,7 @@ public class MyProjectile extends Projectile
     setZAngle(pitch)
 
   function bounceOfGround() returns bool
-    if vel.z.abs() > 6
+    if vel.z.abs() > PROJECTILE_MIN_BOUNCE_SPEED
       scaleVelZ(-conservationBounce)
       scaleVelXY(conservationBounce)
       fx.eff.setTimeScale(0.1)

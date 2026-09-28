@@ -4,9 +4,10 @@ import public UnitIndexer
 import Assets
 import ClosureForGroups
 import ConfigGame
+import GameMath
+import GroundContact
 import Heightmap
 import MySounds
-import PhysicsEntity
 
 public function unit.getMyUnitEntity() returns MyUnitEntity
   return this.getEntity() castTo MyUnitEntity
@@ -23,7 +24,7 @@ public function vec3.addFireStacks(real range, int fireStacks, real fireDuration
 
 
 public class MyUnitEntity extends UnitEntity
-  use PhysicsModule
+  use GroundContactModule
   
   construct(unit actor)
     super(actor)
@@ -104,7 +105,7 @@ public class MyUnitEntity extends UnitEntity
     applyAirFriction()
     enforceCliffs()
     enforceDeepWater()
-    physicsUpdate(this)
+    updateGroundContact(this)
 
   function applyAirFriction()
     scaleVel(1 - 0.005 * UNIT_AIR_FRICTION)
@@ -131,7 +132,7 @@ public class MyUnitEntity extends UnitEntity
     bounceOfGround()
 
   function bounceOfGround()
-    scaleVelZ(vel.z < -3 ? -0.5 : 0)
+    vel.z = bounceVelZ(vel.z, SHEEP_BOUNCE_RESTITUTION, SHEEP_MIN_BOUNCE_SPEED)
 
   function onEnterDeepWater()
     actor.setPathing(false)
