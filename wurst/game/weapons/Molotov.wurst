@@ -20,7 +20,7 @@ public class MolotovCocktail extends MyProjectile
         terminate()
     
     onEnd() -> 
-      if not isUnderWater
+      if not isInWater
         explode()
       
   override function onGroundHit()
@@ -65,6 +65,6 @@ public class MolotovShard extends MyProjectile
     setSpeed(power)
     vel.z = PROJECTILE_FACTOR_Z * power
 
-  override function onEnterDeepWater()
+  override function onEnterWater()
     if not done 
       terminate()

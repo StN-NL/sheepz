@@ -305,12 +305,6 @@ public class SheepEntity extends MyUnitEntity
     if oxygenLevel < 0
       setState(State.DEATH_BY_DROWNING)
 
-  override function onEnterDeepWater()
-    // Checked before super, which puts the fire out and clears the stacks.
-    if getFireStacks() > 0
-      flashEffect(Abilities.arcaneTowerAttack, pos)
-    super.onEnterDeepWater()
-
   // <<<<<<<<<<<< JUMP >>>>>>>>>>>>
 
   private static function addListenerJump()

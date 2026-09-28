@@ -12,6 +12,11 @@ import MySounds
 public function unit.getMyUnitEntity() returns MyUnitEntity
   return this.getEntity() castTo MyUnitEntity
 
+/** Any water, shallow or deep: puts out fire and makes projectiles splash. Swimming and drowning
+    only happen in deep water (isTerrainDeepWater). */
+public function vec2.isTerrainWater() returns bool
+  return not this.isTerrainPathable(PATHING_TYPE_FLOATABILITY)
+
 public function vec3.addFireStacks(real range)
   this.addFireStacks(range, 1, 5)
 
@@ -108,6 +113,7 @@ public class MyUnitEntity extends UnitEntity
   function updatePhysics()
     applyAirFriction()
     enforceDeepWater()
+    extinguishInWater()
 
   function applyAirFriction()
     scaleVel(1 - 0.005 * UNIT_AIR_FRICTION)
@@ -134,7 +140,13 @@ public class MyUnitEntity extends UnitEntity
       if pos.z < terrainZ and pos.toVec2().isTerrainDeepWater()
         isDeepWater = true
         onEnterDeepWater()
-      
+
+  /** Water puts fire out, shallow or deep, also when set alight while standing in it. */
+  function extinguishInWater()
+    if getFireStacks() > 0 and pos.z < terrainZ and pos.toVec2().isTerrainWater()
+      flashEffect(Abilities.arcaneTowerAttack, pos)
+      removeFire()
+
   override function onGroundHit()
     actor.setPathing(true)
     bounceOfGround()
@@ -144,7 +156,6 @@ public class MyUnitEntity extends UnitEntity
 
   function onEnterDeepWater()
     actor.setPathing(false)
-    removeFire()
     SOUNDS_WATER_ENTER.getRandomElement().playOnPoint(pos)
     flashEffect(Abilities.crushingWaveDamage, pos)
 

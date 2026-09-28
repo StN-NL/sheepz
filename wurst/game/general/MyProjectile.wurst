@@ -50,7 +50,7 @@ public class MyProjectile extends Projectile
 
   real firingPower
   SheepEntity source
-  bool isUnderWater = false
+  bool isInWater = false
   real conservationBounce = 0.5
   SoundDefinition soundBounce = SOUND_BOUNCE_METAL
 
@@ -115,7 +115,7 @@ public class MyProjectile extends Projectile
       distance += vel.length()
       updateAirFriction()
       checkFriendlyFire()
-      enforceDeepWater()
+      enforceWater()
 
     if not done
       checkCollision()
@@ -134,21 +134,27 @@ public class MyProjectile extends Projectile
   private function isAwayFromSource() returns bool
     return source.pos.distanceTo2d(pos) > radius + 100
 
-  function enforceDeepWater()
-    if isUnderWater
-      if pos.z > terrainZ or pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY)
-        isUnderWater = false
-        onExitDeepWater()
+  function enforceWater()
+    if isInWater
+      if pos.z > terrainZ or not pos.toVec2().isTerrainWater()
+        isInWater = false
+        onExitWater()
     else
-      if pos.z < terrainZ and not pos.toVec2().isTerrainPathable(PATHING_TYPE_FLOATABILITY)
-        isUnderWater = true
-        onEnterDeepWater()
+      // At or below the surface: a landing (placed exactly on it) counts as touching the water.
+      if pos.z <= terrainZ and pos.toVec2().isTerrainWater()
+        isInWater = true
+        onEnterWater()
 
-  function onEnterDeepWater()
+  override function onGroundHit()
+    // Landing is resolved after the move, so update the water state before subclasses react
+    // (a Molotov landing in water must sizzle out, not explode).
+    enforceWater()
+
+  function onEnterWater()
     SOUNDS_WATER_ENTER.getRandomElement().playOnPoint(pos)
     flashEffect(Abilities.crushingWaveDamage, pos)
 
-  function onExitDeepWater()
+  function onExitWater()
     SOUNDS_WATER_EXIT.getRandomElement().playOnPoint(pos)
     flashEffect(Abilities.crushingWaveDamage, pos)
 
