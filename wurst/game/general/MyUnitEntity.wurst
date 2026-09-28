@@ -37,6 +37,7 @@ public class MyUnitEntity extends UnitEntity
     updatePhysics()
     updateFire()
     super.update()
+    enforceCliffs(start)
     updateGroundContact(this, start)
 
   ondestroy
@@ -106,18 +107,23 @@ public class MyUnitEntity extends UnitEntity
 
   function updatePhysics()
     applyAirFriction()
-    enforceCliffs()
     enforceDeepWater()
 
   function applyAirFriction()
     scaleVel(1 - 0.005 * UNIT_AIR_FRICTION)
 
-  function enforceCliffs()
-    let threshold = 30.
-    let target = pos.offset2d(actor.getFacingAngle(), 50)
-    if target.getHeightMap() > pos.z + threshold
-      let pushback = (target.getHeightMap() - pos.z - threshold) / 10
-      setXY(pos.moveTowards(target, -pushback))
+  /** Pushes the unit back from cliffs and hills too steep to climb, looking ahead in the direction
+      it actually moved this tick (not where it faces), so knockback can't carry it into one. */
+  function enforceCliffs(vec3 start)
+    let moved = (pos - start).toVec2()
+    if moved.length() > 0.1
+      let dir = moved.norm()
+      let pushback = cliffPushback((pos.toVec2() + dir * CLIFF_LOOKAHEAD).getHeightMap(), pos.z)
+      if pushback > 0
+        setXY(pos - dir.withZ(0) * pushback)
+        // Stop the push into the wall; knockback would otherwise overpower the pushback.
+        vel.x = 0
+        vel.y = 0
 
   function enforceDeepWater()
     if isDeepWater

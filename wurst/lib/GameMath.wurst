@@ -73,3 +73,13 @@ public function contactFraction(real heightBefore, real heightAfter) returns rea
     ground: it follows the terrain down, unless launched upward or dropping off a ledge. */
 public function staysGrounded(real heightAbove, real velZ, real stickDistance) returns bool
   return velZ <= 0 and heightAbove <= stickDistance
+
+/** Terrain rising more than CLIFF_STEP_HEIGHT above a unit within CLIFF_LOOKAHEAD ahead of it is
+    a wall: cliffs, and hills too steep to climb. */
+public constant CLIFF_STEP_HEIGHT = 30.
+public constant CLIFF_LOOKAHEAD = 50.
+
+/** How far to push a unit back from a wall, given the ground height CLIFF_LOOKAHEAD ahead of it
+    and its own height: 0 when there's no wall. */
+public function cliffPushback(real groundAhead, real z) returns real
+  return max(0., (groundAhead - z - CLIFF_STEP_HEIGHT) / 10)

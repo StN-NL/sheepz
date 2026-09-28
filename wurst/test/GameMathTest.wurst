@@ -141,3 +141,12 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
   assertTrue(not staysGrounded(128., 0., UNIT_STICK_DISTANCE))
   // Projectiles don't stick (distance 0): rolling downhill makes them airborne, as before.
   assertTrue(not staysGrounded(3., 0., 0.))
+
+@Test function cliffPushbackMatchesTheOldRule()
+  // Old enforceCliffs: push back (ahead - z - 30) / 10 when the ground ahead is more than 30
+  // above the unit, else no push. Only the look-ahead direction changed.
+  for i = 0 to 300
+    let groundAhead = -50. + i * 0.73
+    let z = 20.
+    let oldPush = groundAhead > z + 30 ? (groundAhead - z - 30) / 10 : 0.
+    cliffPushback(groundAhead, z).assertEquals(oldPush, 0.0001)
