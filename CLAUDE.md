@@ -26,7 +26,7 @@ Build target is whatever `wurst.build` specifies — check that file before assu
 - `wurst/war3map.j` — **DO NOT EDIT.** This is regenerated from `Sheepz.w3x` on every build. To change anything in it (unit placements, initial player setup, camera bounds, etc.), edit `Sheepz.w3x` in the World Editor and the regenerated `war3map.j` will reflect the change.
 - `wurst.build` — project config (name, dependencies, scenario data, player slots, etc.).
 - `wurst_run.args` — compiler flags passed when running from VSCode.
-- `wurst.dependencies` — pinned dependency revisions. Gitignored.
+- Dependencies are not pinned to revisions: `grill install` pulls the latest commit of each dependency's branch (Grill removed the old `wurst.dependencies` file). The stdlib branch follows `wc3Patch` in `wurst.build`; `grill outdated` checks for updates.
 
 ## Build and run
 
@@ -45,6 +45,8 @@ If `_build/dependencies/` is empty on a fresh clone, the extension needs to run 
 ## API discovery
 
 Before calling a stdlib or Frentity function, **grep `_build/dependencies/` for the actual name and signature.** Both libraries are niche enough that memorized API names are unreliable.
+
+**Avoid natives added in newer WC3 patches, to keep the map playable on older clients.** `wurst.build` deliberately targets `wc3Patch: v2.0` (stdlib branch `v2.0`, 2.0 core JASS) even though the dev client is 3.0, so calling a 3.0-only native (e.g. `BlzTriggerIsRunning`, `BlzSetSpecialEffectAnimation`) is a compile error. Don't raise `wc3Patch` to get one, and don't run `grill patch align`: it would move the project back to the installed client's patch (3.0).
 
 ## Architecture
 

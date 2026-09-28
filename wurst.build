@@ -1,7 +1,7 @@
 ---
 projectName: Sheepz
 dependencies:
-- https://github.com/wurstscript/wurstStdlib2
+- https://github.com/wurstscript/wurstStdlib2:v2.0
 - https://github.com/Frotty/Frentity
 buildMapData:
   name: '|cffff0095Sheepz 1.0.9|r'
@@ -69,4 +69,4 @@ buildMapData:
     race: HUMAN
     controller: USER
     fixedStartLoc: false
-wc3Patch: v3.0
+wc3Patch: v2.0
