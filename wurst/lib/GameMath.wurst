@@ -83,3 +83,20 @@ public constant CLIFF_LOOKAHEAD = 50.
     and its own height: 0 when there's no wall. */
 public function cliffPushback(real groundAhead, real z) returns real
   return max(0., (groundAhead - z - CLIFF_STEP_HEIGHT) / 10)
+
+/** How a body's contact with the ground changed over one move. */
+public enum ContactCase
+  IN_AIR
+  LANDED
+  ON_GROUND
+  LEFT_GROUND
+
+/** Classifies one move from the body's height above the ground at the start of the move (below
+    0 means it was on the ground) and at the end. Judged from the start position itself, not
+    Frentity's flying flag: for units that flag is set after the walk has already moved them. */
+public function contactCase(real heightBefore, real heightAfter, real velZ, real stickDistance) returns ContactCase
+  if heightBefore >= 0
+    return heightAfter < 0 ? ContactCase.LANDED : ContactCase.IN_AIR
+  if heightAfter < 0 or staysGrounded(heightAfter, velZ, stickDistance)
+    return ContactCase.ON_GROUND
+  return ContactCase.LEFT_GROUND

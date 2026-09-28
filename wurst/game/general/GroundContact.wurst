@@ -19,18 +19,18 @@ public module GroundContactModule
 
   function onEscapeGround()
 
-  /** Call once per tick, right after the entity moved from `start`. Entity.update set flying
-      before moving, so it still says whether the body was airborne when the move started. */
+  /** Call once per tick, right after the entity moved from `start`. */
   function updateGroundContact(Entity e, vec3 start)
     if e.done or not e.active
       return
     let pos = e.getPos()
     terrainZ = pos.getHeightMap()
-    let heightAbove = pos.z - terrainZ
-    if e.flying
-      if heightAbove < 0
-        // Landed during this move: continue from where it reached the ground.
-        let t = contactFraction(start.z - start.getHeightMap(), heightAbove)
+    let heightBefore = start.z - start.getHeightMap()
+    let heightAfter = pos.z - terrainZ
+    switch contactCase(heightBefore, heightAfter, e.getVel().z, stickDistance)
+      case LANDED
+        // Continue from where it reached the ground during this move.
+        let t = contactFraction(heightBefore, heightAfter)
         let contact = (start + (pos - start) * t).toVec2()
         terrainZ = contact.getHeightMap()
         e.setXY(contact.withZ(terrainZ))
@@ -40,17 +40,24 @@ public module GroundContactModule
         if not e.done
           e.scaleVel(SURFACE_FRICTION)
           settle(e)
-    else if heightAbove < 0 or staysGrounded(heightAbove, e.getVel().z, stickDistance)
-      e.scaleVel(SURFACE_FRICTION)
-      settle(e)
-    else
-      e.flying = true
-      if e.getVel().z > 0
-        onEscapeGround()
+      case ON_GROUND
+        e.scaleVel(SURFACE_FRICTION)
+        settle(e)
+      case LEFT_GROUND
+        e.flying = true
+        if e.getVel().z > 0
+          onEscapeGround()
+      case IN_AIR
+        skip
 
   /** Rests a body on the ground, or leaves it on the surface when it's moving up (a bounce). */
   private function settle(Entity e)
-    if e.getVel().z <= 0
+    let vel = e.getVel()
+    if vel.z <= 0
+      e.flying = false
       e.setXY(e.getPos().toVec2().withZ(terrainZ - 0.01))
+      // Resting: drop the gravity Entity.update added when a step down made it look airborne.
+      if vel.z < 0
+        e.setVel(vec3(vel.x, vel.y, 0))
     else
       e.setXY(e.getPos().toVec2().withZ(terrainZ))

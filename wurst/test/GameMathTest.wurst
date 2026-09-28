@@ -150,3 +150,24 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
     let z = 20.
     let oldPush = groundAhead > z + 30 ? (groundAhead - z - 30) / 10 : 0.
     cliffPushback(groundAhead, z).assertEquals(oldPush, 0.0001)
+
+@Test function walkingDownhillStaysOnTheGround()
+  // Regression: a unit resting on the ground (0.01 below the surface) that walks onto slightly
+  // lower terrain was treated as landing, and the landing point put it back at its start, so
+  // it could not walk downhill at all. Frentity adds gravity on such a step, hence velZ -0.8.
+  assertTrue(contactCase(-0.01, -0.5, -0.8, UNIT_STICK_DISTANCE) == ContactCase.ON_GROUND)
+  assertTrue(contactCase(-0.01, 3., -0.8, UNIT_STICK_DISTANCE) == ContactCase.ON_GROUND)
+  // Uphill: still on the ground.
+  assertTrue(contactCase(-0.01, -12., 0., UNIT_STICK_DISTANCE) == ContactCase.ON_GROUND)
+
+@Test function contactCasesForLandingAndLeaving()
+  // Falling from above the ground to below it: a landing.
+  assertTrue(contactCase(40., -10., -30., UNIT_STICK_DISTANCE) == ContactCase.LANDED)
+  // A bounce leaves the body exactly on the surface; still airborne next move.
+  assertTrue(contactCase(0., 12., 10., UNIT_STICK_DISTANCE) == ContactCase.IN_AIR)
+  // Jumping from the ground.
+  assertTrue(contactCase(-0.01, 20., 25., UNIT_STICK_DISTANCE) == ContactCase.LEFT_GROUND)
+  // Walking off a cliff (a 128 drop).
+  assertTrue(contactCase(-0.01, 128., -0.8, UNIT_STICK_DISTANCE) == ContactCase.LEFT_GROUND)
+  // Projectiles don't stick: rolling downhill makes them airborne.
+  assertTrue(contactCase(-0.01, 3., 0., 0.) == ContactCase.LEFT_GROUND)
