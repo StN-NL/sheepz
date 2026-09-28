@@ -1,0 +1,84 @@
+package UtilsTest
+import LinkedList
+import Utils
+
+// Equivalence: getPlayersIngame() used to keep its own list, filled with the in-game slots
+// 0-23 in ascending order and pruned on leave. It now filters Frentity's ALL_PLAYERS, which
+// holds every in-game slot 0-27 (neutral slots included) and is pruned on leave the same way.
+// For any combination of in-game slots, both must give the same players in the same order.
+
+/** Whether slot is in the game, for a bitmask with one bit per slot. */
+function inGame(int mask, int slot) returns bool
+  var m = mask
+  for _ = 1 to slot
+    m = m div 2
+  return m mod 2 == 1
+
+/** The old Utils rule: in-game slots among 0-23, ascending. */
+function oldPlayersInGame(int mask) returns LinkedList<player>
+  let list = new LinkedList<player>
+  for ii = 0 to 23
+    if inGame(mask, ii)
+      list.add(players[ii])
+  return list
+
+/** Frentity's Players rule for ALL_PLAYERS: in-game slots among all slots, ascending. */
+function allPlayersFor(int mask) returns LinkedList<player>
+  let list = new LinkedList<player>
+  for ii = 0 to bj_MAX_PLAYER_SLOTS - 1
+    if inGame(mask, ii)
+      list.add(players[ii])
+  return list
+
+function assertSamePlayers(LinkedList<player> expected, LinkedList<player> actual)
+  actual.size().assertEquals(expected.size())
+  let itr = actual.iterator()
+  for p in expected
+    assertTrue(itr.next() == p)
+  itr.close()
+
+function assertEquivalent(int mask)
+  let expected = oldPlayersInGame(mask)
+  let all = allPlayersFor(mask)
+  let actual = playableSlotsOf(all)
+  assertSamePlayers(expected, actual)
+  destroy actual
+
+  // Leaving: the old list and ALL_PLAYERS both just remove the leaver.
+  if not expected.isEmpty()
+    let leaver = expected.get(expected.size() div 2)
+    expected.remove(leaver)
+    all.remove(leaver)
+    let afterLeave = playableSlotsOf(all)
+    assertSamePlayers(expected, afterLeave)
+    destroy afterLeave
+
+  destroy expected
+  destroy all
+
+@Test function slotConstantsMatchTheOldRange()
+  // The old rule hard-coded 0-23 as the playable slots; the filter relies on bj_MAX_PLAYERS.
+  bj_MAX_PLAYERS.assertEquals(24)
+  assertTrue(bj_MAX_PLAYER_SLOTS > bj_MAX_PLAYERS)
+
+@Test function equivalentForEdgeCases()
+  let allSlots = 268435455 // 2^28 - 1: every slot, neutral ones included
+  assertEquivalent(0)
+  assertEquivalent(allSlots)
+  assertEquivalent(16777215) // 2^24 - 1: every playable slot, no neutral one
+  assertEquivalent(allSlots - 16777215) // only the neutral slots
+  assertEquivalent(1) // single player in slot 1 (red)
+  assertEquivalent(178956970) // alternating slots
+
+@Test function equivalentForEachSingleSlot()
+  var bit = 1
+  for _ = 0 to 27
+    assertEquivalent(bit)
+    bit *= 2
+
+@Test function equivalentForManySlotCombinations()
+  // Deterministic pseudo-random masks over all 28 slots.
+  var seed = 12345
+  for _ = 1 to 300
+    seed = (seed * 1103 + 12345) mod 268435456
+    assertEquivalent(seed)

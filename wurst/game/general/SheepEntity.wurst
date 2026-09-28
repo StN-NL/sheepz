@@ -11,6 +11,7 @@ import Miscellaneous
 import MyAssets
 import MyUnitEntity
 import Orders
+import Preloader
 import SoundUtils
 import StandardTextTags
 import TextTagEntity
@@ -83,6 +84,11 @@ public function getRandomPosOnLand() returns vec2
     return getRandomPosOnLand()
   else
     return pos
+
+init
+  // Sheep are all created at once when the game starts; load their models during map loading.
+  for heroId in HERO_IDS_SHEEPZ
+    preloadUnit(heroId)
 
 function player.createSheep() returns unit
   return createUnitZ(this, HERO_IDS_SHEEPZ.getRandomElement(), vec3(0, 0, 5000), getRandomAngle())

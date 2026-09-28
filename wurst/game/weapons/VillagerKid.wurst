@@ -1,6 +1,5 @@
 package VillagerKid
 import Assets
-import ClosureForGroups
 import ClosureTimers
 import ConfigWeapons
 import Entity
@@ -68,11 +67,16 @@ public class VillagerKid extends MyProjectile
   function findFavouriteToy() returns unit
     favouriteToy = null
     minToyDistance = REAL_MAX
-    forUnitsAll() u ->
-      // Only chase living entity units — never arsenal/caster dummies, corpses or sheep in heaven.
-      let toyDistance = u.getPos().distanceTo(pos.toVec2())
-      if toyDistance < minToyDistance and u.isAlive() and u.getEntity() != null and (not u.isSheep() or u.getSheep().isAlive()) and not wasHit(u) and u.getOwner() != owner
-        minToyDistance = toyDistance
-        favouriteToy = u
+    // Only entity units qualify, and sheep are the only ones, so scanning the sheep finds the same
+    // toys as scanning every unit on the map each tick.
+    for ii = 0 to bj_MAX_PLAYERS - 1
+      let sheep = players[ii].getSheep()
+      if sheep != null
+        let u = sheep.actor
+        // Only chase living entity units — never arsenal/caster dummies, corpses or sheep in heaven.
+        let toyDistance = u.getPos().distanceTo(pos.toVec2())
+        if toyDistance < minToyDistance and u.isAlive() and u.getEntity() != null and (not u.isSheep() or u.getSheep().isAlive()) and not wasHit(u) and u.getOwner() != owner
+          minToyDistance = toyDistance
+          favouriteToy = u
 
     return favouriteToy

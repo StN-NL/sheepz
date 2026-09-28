@@ -56,6 +56,12 @@ public function SheepEntity.charge()
       destroy cb
 
 
+init
+  // Map init only: the Preloader removes its dummy on the first timer tick.
+  for weapon in weaponList
+    weapon.preload()
+
+
 public function initWeapons()
   addListenersOnChannel()
   addListenersOnCast()

@@ -5,17 +5,21 @@ import GameTimer
 import HashSet
 import Players
 
-constant playersInGame = new LinkedList<player>
-
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< PLAYER     >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 
+/** Playable slots still in the game, lowest id first. Built on Frentity's ALL_PLAYERS, which
+    Players keeps up to date on leave. */
 public function getPlayersIngame() returns LinkedList<player>
-  let pl = playersInGame.copy()
+  let pl = playableSlotsOf(ALL_PLAYERS)
   nullTimer() ->
     destroy pl
   return pl
+
+/** ALL_PLAYERS covers every slot, including the neutral ones (24-27); keep the playable ones. */
+public function playableSlotsOf(LinkedList<player> all) returns LinkedList<player>
+  return all.filter(p -> p.getId() < bj_MAX_PLAYERS)
 
 public function isSinglePlayer() returns bool
   return getPlayersIngame().size() == 1
@@ -103,15 +107,3 @@ init
     
   EventListener.add(EVENT_PLAYER_UNIT_SPELL_ENDCAST) ->
     channelingUnits.remove(GetSpellAbilityUnit())
-
-
-init
-  doAfter(0.025) -> 
-    for ii = 0 to 23
-      let p = players[ii]
-      if p.isIngame()
-        playersInGame.add(p)
-
-    // Not onPlayerLeave: it holds a single listener, which GameStart's would replace.
-    EventListener.add(EVENT_PLAYER_LEAVE) ->
-      playersInGame.remove(GetTriggerPlayer())

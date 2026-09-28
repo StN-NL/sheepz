@@ -12,6 +12,7 @@ import HashMap
 import InstantDummyCaster
 import LinkedList
 import MapBounds
+import Preloader
 import SheepEntity
 
 constant CONSOLE_UI = getFrame("ConsoleUIBackdrop", 0)
@@ -99,6 +100,9 @@ public function capArsenalStacks()
 tuple hotkey(string name, oskeytype key)
 
 constant DUMMY_ARSENAL_UNIT_ID = compiletime(UNIT_ID_GEN.next())
+
+init
+  preloadUnit(DUMMY_ARSENAL_UNIT_ID)
 
 constant HOTKEY_COUNT = 8
 
@@ -491,6 +495,10 @@ public class WeaponDefinition
 
   function hasShardsMaxDamage() returns boolean
     return shardsMaxDamage != 0
+
+  /** Loads the weapon's ability during map init, so its first cast doesn't hitch. */
+  function preload() returns boolean
+    return preloadAbility(abilId)
 
   function getInstance(player owner) returns Weapon
     if not map.has(owner)
