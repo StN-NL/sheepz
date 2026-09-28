@@ -28,13 +28,16 @@ public class MyUnitEntity extends UnitEntity
   
   construct(unit actor)
     super(actor)
+    stickDistance = UNIT_STICK_DISTANCE
     createHeroName()
 
   override function update()
+    let start = pos
     updateHeroName()
     updatePhysics()
     updateFire()
     super.update()
+    updateGroundContact(this, start)
 
   ondestroy
     if nameTag != null
@@ -105,7 +108,6 @@ public class MyUnitEntity extends UnitEntity
     applyAirFriction()
     enforceCliffs()
     enforceDeepWater()
-    updateGroundContact(this)
 
   function applyAirFriction()
     scaleVel(1 - 0.005 * UNIT_AIR_FRICTION)

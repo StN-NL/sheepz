@@ -110,6 +110,7 @@ public class MyProjectile extends Projectile
     vel.z = PROJECTILE_FACTOR_Z * power
   
   override function update()
+    let start = pos
     if not done
       distance += vel.length()
       updateAirFriction()
@@ -117,11 +118,11 @@ public class MyProjectile extends Projectile
       enforceDeepWater()
 
     if not done
-      updateGroundContact(this)
-    if not done
       checkCollision()
     if not done
       super.update()
+    if not done
+      updateGroundContact(this, start)
 
   function updateAirFriction()
     scaleVel(1 - 0.005 * PROJECTILE_AIR_FRICTION)

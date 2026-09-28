@@ -115,3 +115,29 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
 @Test function slowLandingStopsInsteadOfBouncing()
   bounceVelZ(-1., SHEEP_BOUNCE_RESTITUTION, SHEEP_MIN_BOUNCE_SPEED).assertEquals(0.)
   bounceVelZ(-10., 0.5, 3.).assertEquals(5.)
+
+@Test function contactIsWhereTheMoveReachesTheGround()
+  // 10 above, then 10 below: halfway.
+  contactFraction(10., -10.).assertEquals(0.5, 0.0001)
+  // 30 above, then 10 below: three quarters of the way.
+  contactFraction(30., -10.).assertEquals(0.75, 0.0001)
+  // Starting on the surface: contact at the start.
+  contactFraction(0., -5.).assertEquals(0., 0.0001)
+
+@Test function contactFractionStaysWithinTheMove()
+  // Starting slightly below the surface can't place the contact before the move.
+  contactFraction(-1., -5.).assertEquals(0., 0.0001)
+  // No drop (not actually landing): the end of the move.
+  contactFraction(5., 5.).assertEquals(1., 0.0001)
+
+@Test function groundedUnitFollowsSlopesDown()
+  assertTrue(staysGrounded(8., 0., UNIT_STICK_DISTANCE))
+  assertTrue(staysGrounded(UNIT_STICK_DISTANCE, -1., UNIT_STICK_DISTANCE))
+
+@Test function groundedBodyLeavesWhenLaunchedOrAtLedges()
+  // Jump or knockback: moving up leaves the ground.
+  assertTrue(not staysGrounded(2., 25., UNIT_STICK_DISTANCE))
+  // A cliff level (128) is a ledge, not a slope.
+  assertTrue(not staysGrounded(128., 0., UNIT_STICK_DISTANCE))
+  // Projectiles don't stick (distance 0): rolling downhill makes them airborne, as before.
+  assertTrue(not staysGrounded(3., 0., 0.))

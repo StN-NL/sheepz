@@ -3,28 +3,54 @@ import Entity
 import GameMath
 import Heightmap
 
-/** Ground handling for Sheepz bodies, in place of Frentity's PhysicsModule: the contact
-    callbacks see the impact velocity, and surface friction is applied after them. */
+/** Ground handling for Sheepz bodies, in place of Frentity's PhysicsModule. Contact is resolved
+    right after the move, at the point where the body reached the ground, so nothing spends a
+    tick below the surface. The contact callbacks see the impact velocity; surface friction
+    is applied after them.
+
+    On the ground means just below the surface (terrain - 0.01), matching Entity.update, which
+    adds gravity from the surface up. */
 public module GroundContactModule
   real terrainZ = 0.
+  /** How far a body on the ground follows the terrain down per tick (see staysGrounded). */
+  real stickDistance = 0.
 
   function onGroundHit()
 
   function onEscapeGround()
 
-  /** Call once per tick, before the entity moves. */
-  function updateGroundContact(Entity e)
-    if not e.done and e.active
-      let pos = e.getPos()
-      terrainZ = pos.getHeightMap()
-      if pos.z > terrainZ
-        if not e.flying
-          e.flying = true
-          onEscapeGround()
-      else
-        if e.flying
-          e.flying = false
-          onGroundHit()
+  /** Call once per tick, right after the entity moved from `start`. Entity.update set flying
+      before moving, so it still says whether the body was airborne when the move started. */
+  function updateGroundContact(Entity e, vec3 start)
+    if e.done or not e.active
+      return
+    let pos = e.getPos()
+    terrainZ = pos.getHeightMap()
+    let heightAbove = pos.z - terrainZ
+    if e.flying
+      if heightAbove < 0
+        // Landed during this move: continue from where it reached the ground.
+        let t = contactFraction(start.z - start.getHeightMap(), heightAbove)
+        let contact = (start + (pos - start) * t).toVec2()
+        terrainZ = contact.getHeightMap()
+        e.setXY(contact.withZ(terrainZ))
+        e.flying = false
+        onGroundHit()
         // onGroundHit may have terminated the entity (e.g. an exploding projectile).
         if not e.done
           e.scaleVel(SURFACE_FRICTION)
+          settle(e)
+    else if heightAbove < 0 or staysGrounded(heightAbove, e.getVel().z, stickDistance)
+      e.scaleVel(SURFACE_FRICTION)
+      settle(e)
+    else
+      e.flying = true
+      if e.getVel().z > 0
+        onEscapeGround()
+
+  /** Rests a body on the ground, or leaves it on the surface when it's moving up (a bounce). */
+  private function settle(Entity e)
+    if e.getVel().z <= 0
+      e.setXY(e.getPos().toVec2().withZ(terrainZ - 0.01))
+    else
+      e.setXY(e.getPos().toVec2().withZ(terrainZ))

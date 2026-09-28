@@ -56,3 +56,20 @@ public constant PROJECTILE_MIN_BOUNCE_SPEED = 6. / SURFACE_FRICTION
     scaled by restitution when falling faster than minBounceSpeed, otherwise stops. */
 public function bounceVelZ(real impactVelZ, real restitution, real minBounceSpeed) returns real
   return impactVelZ < -minBounceSpeed ? -restitution * impactVelZ : 0.
+
+/** How far a unit on the ground follows the terrain down in one tick; a bigger drop is a ledge
+    it falls off. Covers walking down slopes at full speed (522/s is about 16 per tick). */
+public constant UNIT_STICK_DISTANCE = 20.
+
+/** Fraction (0-1) of a tick's move at which a body reached the ground, given its height above
+    the ground before the move (at least 0) and after it (below 0). */
+public function contactFraction(real heightBefore, real heightAfter) returns real
+  let drop = heightBefore - heightAfter
+  if drop <= 0
+    return 1.
+  return max(0., min(1., heightBefore / drop))
+
+/** Whether a body that was on the ground stays on it after moving to heightAbove above the
+    ground: it follows the terrain down, unless launched upward or dropping off a ledge. */
+public function staysGrounded(real heightAbove, real velZ, real stickDistance) returns bool
+  return velZ <= 0 and heightAbove <= stickDistance
