@@ -19,7 +19,7 @@ public constant HOW_TO_PLAY = "Weapons come in many varieties, are controlled us
   "Point".color(GREEN) + " - these weapons require a target."
 
 /** Keep in sync with the version in wurst.build. */
-public constant VERSION = "1.1"
+public constant VERSION = "1.1.0"
 public constant WHATS_NEW_HEADLINE = "Physics got real"
 
 /** Player-facing notes for the latest two versions; the full history is in CHANGELOG.md. */

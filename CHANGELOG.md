@@ -4,7 +4,7 @@ Newest first. Each version has a player-facing part (the in-game **What's New** 
 the latest two, from `WHATS_NEW` in `wurst/game/general/Miscellaneous.wurst`) and an
 **Under the hood** part for developers, with the commits that made each change.
 
-## 1.1 — unreleased
+## 1.1.0 — unreleased
 
 Not yet playtested; the notes may change before release.
 
