@@ -21,7 +21,7 @@ public interface OnHit3Listener
 public interface OnHitProjectileListener
   function run(MyProjectile target)
 
-public interface ForKnockableCallback
+public interface ForProjectileCallback
   function run(MyProjectile target)
 
 /** Live projectiles, so a blast can find the explosives it sets off and slow zones can report
@@ -43,12 +43,19 @@ function knockbackInRange(SheepEntity source, vec3 blastPos, real minRadius, rea
     let factor = blastFalloff(blastPos.distanceTo(target.pos), minRadius, maxRadius)
     target.takeBlast(source, blastPos, factor * maxAmount, factor * maxKnockback, factorZ)
 
-/** Every live projectile that can be knocked around within range of pos. The matches are
-    collected first: taking a blast can terminate one, which would mutate the registry. */
-public function forKnockablesInRange(vec3 pos, real range, ForKnockableCallback cb)
+/** Every live projectile within range of pos. The matches are collected first: the callback
+    can terminate one, which would mutate the registry mid-iteration. */
+public function forProjectilesInRange(vec3 pos, real range, ForProjectileCallback cb)
+  forProjectilesInRange(pos, range, false, cb)
+
+/** Every live projectile that can be knocked around within range of pos. */
+public function forKnockablesInRange(vec3 pos, real range, ForProjectileCallback cb)
+  forProjectilesInRange(pos, range, true, cb)
+
+function forProjectilesInRange(vec3 pos, real range, bool knockableOnly, ForProjectileCallback cb)
   let targets = new LinkedList<MyProjectile>
   for p in liveProjectiles
-    if p.knockable and not p.done and pos.distanceTo(p.pos) < range
+    if (p.knockable or not knockableOnly) and not p.done and pos.distanceTo(p.pos) < range
       targets.add(p)
   for target in targets
     if not target.done

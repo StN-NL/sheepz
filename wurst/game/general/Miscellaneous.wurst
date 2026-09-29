@@ -29,6 +29,7 @@ public constant WHATS_NEW = ("Sheepz " + VERSION + ": " + WHATS_NEW_HEADLINE).co
   "- Explosions set off explosives. Shoot a mine, a stick of dynamite, a grenade, a cluster bomb or a rocket in flight and it goes off, still owned by whoever put it there. Line three dynamites up and watch the chain go.\n" +
   "- Ticking explosives slow everyone near them. Grenades, cluster bombs, dynamite, armed mines and a landed Holy Hand Grenade drag you to a crawl until they blow. A swelling Baloonicide halves your speed. You are never slowed by your own.\n\n" +
   "- Trees grow back. Blow the scenery apart and it returns a couple of minutes later, so the map stops turning into a bald rock.\n" +
+  "- Momentum Reverser. A new weapon that flips the velocity of everything around you: sheep, rockets, grenades and your own fall. Reverse a plunge and you land softly; reverse someone else and they hit the ground hard.\n" +
   "- The Villager Kid can be fought back. Blasts, the Baseball Bat, Fus Ro Dah and the Boomer Hammer send it flying, and enough punishment puts it down for good.\n" +
   "Changed".color(PINK) + "\n" +
   "- Size is weight. The bigger the sheep, the less a blast shifts it, so the kill leader gets harder to move as they level. A fully swollen Baloonicide barely budges.\n" +

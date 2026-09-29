@@ -21,6 +21,10 @@ Not yet playtested; the notes may change before release.
 - **Ticking explosives slow everyone near them.** Grenades, cluster bombs, dynamite, armed
   mines and a landed Holy Hand Grenade drag nearby sheep to a crawl until they go off. A
   swelling Baloonicide halves the speed of everyone around it. You are never slowed by your own.
+- **Momentum Reverser.** A new weapon. Cast it and every velocity within 400 range flips:
+  sheep, every projectile in the air, and your own. Reversing your fall sends you back up and
+  out of fall damage; reversing a sheep that was launched slams it into the ground. Only the
+  direction changes, never the speed.
 - **Trees grow back.** A tree felled by a blast returns after two minutes, with a growth
   animation. Until now every explosion stripped the map permanently.
 - **The Villager Kid can be fought back.** It used to be untouchable. Now any blast, the
@@ -65,6 +69,12 @@ Not yet playtested; the notes may change before release.
   projectiles. `BlastAreaListener` widened to carry the blast's source and falloff parameters;
   `forKnockablesInRange` serves blasts, the Bat and the new `onHitProjectile` listener used by
   Fus Ro Dah and the Boomer Hammer (`146e4a7`).
+- Momentum Reverser: `SheepEntity.momentumReverser()` flips velocity on the caster, on living
+  sheep found with `forUnitsInRange`, and on every live projectile via the new
+  `forProjectilesInRange`. Projectiles keep their source and owner, and sheep keep their
+  tormentor, so credit is unchanged by the flip. Anything that sets its own velocity each
+  tick (Guided Missile steering, the Boomer Hammer's return, a chasing Villager Kid) undoes
+  the flip on the next tick.
 - Version bumped to 1.2.0 at the start of the work, so builds stop overwriting the previous
   release; `CLAUDE.md` now says to do that, and what `X.Y.Z` means for a map (`60ebb7f`).
 

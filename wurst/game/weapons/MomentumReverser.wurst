@@ -1,0 +1,29 @@
+package MomentumReverser
+import Assets
+import ClosureForGroups
+import ConfigWeapons
+import MyProjectile
+import SheepEntity
+
+
+public function SheepEntity.momentumReverser()
+  let pos = this.getPos()
+  flashEffect(Abilities.roarCaster, pos)
+
+  // Your own momentum flips too: reversing a fall sends you back up, out of fall damage.
+  this.scaleVel(-1)
+
+  forUnitsInRange(pos.toVec2(), momentumReverser.maxRadius) u ->
+    let target = u.getEntity()
+    // Dummy units (arsenal, InstantDummyCaster) have no entity.
+    if target != null and target.getPos().distanceTo(pos) < momentumReverser.maxRadius
+      // The caster was flipped already; flipping it twice would cancel out.
+      if target.isSheep() and target.toSheep() != this and target.toSheep().isAlive()
+        target.scaleVel(-1)
+        flashEffect(Abilities.thunderclapCaster, target.getPos())
+
+  // Only the velocity flips; source and owner are untouched, so the original shooter keeps
+  // the credit for whatever the projectile goes on to do.
+  forProjectilesInRange(pos, momentumReverser.maxRadius) target ->
+    target.scaleVel(-1)
+    flashEffect(Abilities.thunderclapCaster, target.pos)

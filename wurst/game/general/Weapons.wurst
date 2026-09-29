@@ -28,6 +28,7 @@ import LandMine
 import Leap
 import Minigun
 import Molotov
+import MomentumReverser
 import RainOfChaos
 import RiotShield
 import Shotgun
@@ -101,6 +102,7 @@ function addListenersOnCast()
   leap.onCast(sheep -> sheep.leap())
   minigun.onCast(sheep -> sheep.minigun())
   molotov.onCast(sheep -> new MolotovCocktail(sheep))
+  momentumReverser.onCast(sheep -> sheep.momentumReverser())
   rainOfChaos.onPointCast((sheep, target) -> sheep.rainOfChaos(target))
   riotShield.onCast(sheep -> sheep.riotShield())
   shotgun.onCast(sheep -> new ShotgunProjectile(sheep))

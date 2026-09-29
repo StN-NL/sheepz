@@ -245,6 +245,15 @@ public constant minigun = compiletime(
   ..setMinRadius(150)
 )
 
+public constant momentumReverser = compiletime(
+  new WeaponDefinition(Icons.bTNBerserkForTrolls, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Momentum Reverser")
+  ..setDescription("Whatever you were doing, do the opposite.")
+  ..setRarity(8)
+  ..setAmount(0)
+  ..setMaxRadius(400)
+)
+
 public constant molotov = compiletime(
   new WeaponDefinition(Icons.bTNUnstableConcoction, FiringType.CHARGED, Targettype.NONE)
   ..setName("Molotov Cocktail")
