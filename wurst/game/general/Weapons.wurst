@@ -20,6 +20,7 @@ import Dynamite
 import FlameThrower
 import FrogBomb
 import FusRoDah
+import Grapple
 import Grenade
 import GuidedMissile
 import HammerDrop
@@ -94,6 +95,7 @@ function addListenersOnCast()
   flameThrower.onCast(sheep -> sheep.flameThrower())
   frogBomb.onCast(sheep -> new FrogBomb(sheep))
   fusRoDah.onCast(sheep -> sheep.fusRoDah())
+  grapple.onCast(sheep -> new GrappleHook(sheep))
   grenade.onCast(sheep -> new Grenade(sheep))
   guidedMissile.onPointCast((sheep, target) -> new GuidedMissile(sheep, target))
   hammerDrop.onPointCast((sheep, target) -> new HammerDrop(sheep, target))

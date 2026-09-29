@@ -169,6 +169,18 @@ public constant fusRoDah = compiletime(
   ..setMinRadius(200)
 )
 
+public constant grapple = compiletime(
+  new WeaponDefinition(Icons.bTNEnsnare, FiringType.CHARGED, Targettype.NONE)
+  ..setName("Grapple")
+  ..setDescription("Come here. Or rather, here I come.")
+  ..setRarity(10)
+  ..setAmount(0)
+  ..setMaxKnockBack(6)
+  ..setMinRadius(100)
+  ..setMaxDistance(2000)
+  ..setDuration(2)
+)
+
 public constant grenade = compiletime(
   new WeaponDefinition(MyIcons.bTNGrenade, FiringType.CHARGED, Targettype.NONE)
   ..setName("Grenade")

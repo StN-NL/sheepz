@@ -21,6 +21,11 @@ Not yet playtested; the notes may change before release.
 - **Ticking explosives slow everyone near them.** Grenades, cluster bombs, dynamite, armed
   mines and a landed Holy Hand Grenade drag nearby sheep to a crawl until they go off. A
   swelling Baloonicide halves the speed of everyone around it. You are never slowed by your own.
+- **Grapple.** A new weapon. The hook latches onto the first thing it reaches - a sheep, a
+  tree, or the ground or cliff face it hits - and reels you towards it while you hang on.
+  Against another sheep the pull is shared by weight, so hooking someone bigger drags you to
+  them and hooking someone smaller drags them to you. Arriving at speed sets off the new
+  sheep-on-sheep bounce. Letting go leaves your momentum intact and spares you the landing.
 - **Momentum Reverser.** A new weapon. Cast it and every velocity within 400 range flips:
   sheep, every projectile in the air, and your own. Reversing your fall sends you back up and
   out of fall damage; reversing a sheep that was launched slams it into the ground. Only the
@@ -69,6 +74,13 @@ Not yet playtested; the notes may change before release.
   projectiles. `BlastAreaListener` widened to carry the blast's source and falloff parameters;
   `forKnockablesInRange` serves blasts, the Bat and the new `onHitProjectile` listener used by
   Fus Ro Dah and the Boomer Hammer (`146e4a7`).
+- Grapple: one `GrappleHook extends MyProjectile` handles flight, pull and release, so its
+  ondestroy is the single cleanup path. Flight overrides `setPhysics` for a fast flat arc;
+  latching comes from `onHit3D` (sheep), a per-tick `forDestructablesInRange` (trees) and
+  `onGroundHit` (ground and cliff faces, which are the same event for projectiles). The pull
+  immobilises the caster with the `lifeCount` guard Word of Power uses, and splits by
+  size-based mass against a sheep. The rope is a pool of chain effects repositioned each
+  tick. Release calls `skipFallDamage` for the caster only.
 - Momentum Reverser: `SheepEntity.momentumReverser()` flips velocity on the caster, on living
   sheep found with `forUnitsInRange`, and on every live projectile via the new
   `forProjectilesInRange`. Projectiles keep their source and owner, and sheep keep their

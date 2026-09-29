@@ -1,0 +1,161 @@
+package Grapple
+import Assets
+import ClosureForGroups
+import ConfigWeapons
+import LinkedList
+import MyProjectile
+import SheepEntity
+
+/** Flight: the shot is fast and flat, so the hook reaches its anchor before it drops.
+    All three need tuning in play. */
+constant GRAPPLE_SPEED_FACTOR = 2.
+constant GRAPPLE_GRAVITY_FACTOR = 0.25
+constant GRAPPLE_KICK_Z = 6.
+
+/** Longest a pull may last, so a hook that can never arrive still lets go. */
+constant GRAPPLE_MAX_PULL_TIME = 5.
+
+/** Links spread evenly between caster and anchor; they stretch as the rope grows. */
+constant ROPE_SEGMENTS = 12
+
+
+public class GrappleHook extends MyProjectile
+  private var latched = false
+  private SheepEntity targetSheep = null
+  private destructable targetTree = null
+  private vec3 fixedAnchor = ZERO3
+  private LinkedList<effect> rope = null
+  private var startedLife = 0
+  private var pullTime = 0.
+
+  construct(SheepEntity source)
+    super(source, grapple.minRadius, Abilities.sentinelMissile)
+    silent = true
+
+    onHit3D() target ->
+      if not latched and target.isSheep() and target.toSheep().isAlive()
+        latchToSheep(target.toSheep())
+
+    // Nothing caught in time: drop the hook rather than let it fly forever.
+    doAfterAlive(grapple.duration) ->
+      if not latched and not done
+        terminate()
+
+  override function setPhysics()
+    super.setPhysics()
+    // Charge still scales the shot; this only flattens and speeds up what it produced.
+    scaleVelXY(GRAPPLE_SPEED_FACTOR)
+    vel.z = GRAPPLE_KICK_Z
+    gravity = defaultGravity * GRAPPLE_GRAVITY_FACTOR
+
+  override function update()
+    if latched
+      pull()
+    else
+      alignYawAndPitch()
+      checkTrees()
+    super.update()
+
+  /** Ground and cliff faces both arrive here, so the hook bites into a wall as well. */
+  override function onGroundHit()
+    super.onGroundHit()
+    if not latched and not done
+      latchToPoint(pos)
+
+  private function checkTrees()
+    forDestructablesInRange(pos.toVec2(), radius) tree ->
+      if not latched and tree.getLife() > 0 and pos.distanceTo(tree.getPos().withZ(pos.z)) < radius
+        targetTree = tree
+        latchToPoint(pos)
+
+  // <<<<<<<<<<<< LATCH >>>>>>>>>>>>
+
+  private function latchToSheep(SheepEntity target)
+    targetSheep = target
+    startPull()
+
+  private function latchToPoint(vec3 anchor)
+    fixedAnchor = anchor
+    startPull()
+
+  private function startPull()
+    latched = true
+    gravity = 0
+    setVel(ZERO3)
+    // Casting stays allowed while reeled in; only movement is taken away.
+    source.immobalize(true)
+    startedLife = source.lifeCount
+    createRope()
+
+  private function anchorPos() returns vec3
+    return targetSheep != null ? targetSheep.pos : fixedAnchor
+
+  // <<<<<<<<<<<< PULL >>>>>>>>>>>>
+
+  private function pull()
+    let anchor = anchorPos()
+    setPos(anchor)
+    pullTime += ANIMATION_PERIOD
+
+    if isSpent(anchor)
+      terminate()
+      return
+
+    let d = (anchor - source.pos).norm()
+    let force = grapple.maxKnockBack
+    if targetSheep != null
+      // Split by size-based mass, so a heavy sheep reels you in and a light one comes to you.
+      let mC = source.mass()
+      let mT = targetSheep.mass()
+      source.addVel(d * (force * mT / (mC + mT)))
+      targetSheep.addVel(d * (-force * mC / (mC + mT)))
+      targetSheep.setTormentor(source)
+    else
+      source.addVel(d * force)
+
+    updateRope(anchor)
+
+  /** Checked one reason per line: Wurst ends a complete expression at the line break, so a
+      multi-line boolean would silently stop after the first test. */
+  private function isSpent(vec3 anchor) returns bool
+    if not source.isAlive()
+      return true
+    // Covers heaven too: a sheep waiting to respawn is not alive.
+    if targetSheep != null and not targetSheep.isAlive()
+      return true
+    if targetTree != null and targetTree.getLife() <= 0
+      return true
+    if pullTime > GRAPPLE_MAX_PULL_TIME
+      return true
+    let distance = source.pos.distanceTo(anchor)
+    return distance < grapple.minRadius or distance > grapple.maxDistance
+
+  // <<<<<<<<<<<< ROPE >>>>>>>>>>>>
+
+  private function createRope()
+    rope = new LinkedList<effect>
+    for _ = 1 to ROPE_SEGMENTS
+      rope.add(addEffect(Doodads.chain0, source.pos)..setScale(0.6))
+
+  private function updateRope(vec3 anchor)
+    let start = source.pos
+    let delta = anchor - start
+    var ii = 0
+    for link in rope
+      ii++
+      link.setPos(start + delta * (ii / (ROPE_SEGMENTS + 1.)))
+
+  private function destroyRope()
+    if rope != null
+      for link in rope
+        link.destr()
+      destroy rope
+      rope = null
+
+  ondestroy
+    destroyRope()
+    if latched
+      // Momentum is kept; only the hold is released.
+      source.releaseImmobalize(startedLife)
+      // Like Leap: you don't get hurt by the landing your own grapple set up.
+      source.skipFallDamage()
