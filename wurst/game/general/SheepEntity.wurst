@@ -101,28 +101,38 @@ init
 function player.createSheep() returns unit
   return createUnitZ(this, HERO_IDS_SHEEPZ.getRandomElement(), vec3(0, 0, 5000), getRandomAngle())
 
+/** Velocity a blast at this position adds to a body at targetPos. Shared by sheep and by
+    projectiles that can be knocked around, so both move the same way for the same mass. */
+public function vec3.knockbackVel(vec3 targetPos, real amount, real factorZ, real mass) returns vec3
+  let factorXY = min(this.distanceTo2d(targetPos) / 25, 1)
+  let angle = this.angleTo2d(targetPos)
+  return vec3(
+    0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.cos() * amount / mass,
+    0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.sin() * amount / mass,
+    0.7 * KNOCKBACK_FACTOR_Z * factorZ * amount / mass)
+
 public function vec3.knockback(UnitEntity target, real amount, real factorZ)
   if target.actor.isAlive()
-    let factorXY = min(this.distanceTo2d(target.getPos()) / 25, 1)
-    let angle = this.angleTo2d(target.getPos())
     // Heavier (bigger) bodies pick up less speed from the same blast. Anything that isn't
     // one of our entities (castTo is unchecked) keeps the old, unscaled knockback.
     let mass = target instanceof MyUnitEntity ? (target castTo MyUnitEntity).mass() : 1.
-    target.vel.x += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.cos() * amount / mass
-    target.vel.y += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.sin() * amount / mass
-    target.vel.z += 0.7 * KNOCKBACK_FACTOR_Z * factorZ * amount / mass
+    let dv = this.knockbackVel(target.getPos(), amount, factorZ, mass)
+    target.vel.x += dv.x
+    target.vel.y += dv.y
+    target.vel.z += dv.z
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< BLAST HOOK >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 
 public interface BlastAreaListener
-  function run(vec3 blastPos, real maxRadius)
+  function run(SheepEntity source, vec3 blastPos, real minRadius, real maxRadius, real maxAmount, real maxKnockback, real factorZ)
 
 BlastAreaListener blastAreaListener = null
 
-/** Called after every blastArea. Projectiles register here to detonate in a blast: they can't
-    be reached from this package directly, because MyProjectile already depends on it. */
+/** Called after every blastArea. Projectiles register here to detonate in a blast, and to be
+    knocked around by it: they can't be reached from this package directly, because
+    MyProjectile already depends on it. */
 public function onBlastArea(BlastAreaListener listener)
   blastAreaListener = listener
 
@@ -605,10 +615,10 @@ public class SheepEntity extends MyUnitEntity
           let knockback = factor * maxKnockback
           this.blast(pos, target, amount, knockback, factorZ)
 
-    // Set off explosives caught in the blast. Ignores falloff and ownership: your own
-    // projectiles go off too.
+    // Set off explosives caught in the blast, and shove whatever can be shoved. Detonation
+    // ignores falloff and ownership: your own projectiles go off too.
     if blastAreaListener != null
-      blastAreaListener.run(pos, maxRadius)
+      blastAreaListener.run(this, pos, minRadius, maxRadius, maxAmount, maxKnockback, factorZ)
 
   function blast(vec3 pos, UnitEntity target, real amount)
     this.blast(pos, target, amount, amount)

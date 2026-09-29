@@ -8,6 +8,7 @@ import GameMath
 import GroundContact
 import HashSet
 import Heightmap
+import LinkedList
 import MyUnitEntity
 import MySounds
 import Projectile
@@ -17,17 +18,43 @@ import SoundUtils
 public interface OnHit3Listener
   function run(MyUnitEntity target)
 
-/** Live projectiles, so a blast can find the explosives it sets off. */
+public interface OnHitProjectileListener
+  function run(MyProjectile target)
+
+public interface ForKnockableCallback
+  function run(MyProjectile target)
+
+/** Live projectiles, so a blast can find the explosives it sets off and slow zones can report
+    themselves to nearby sheep. */
 constant liveProjectiles = new HashSet<MyProjectile>
 
 init
-  onBlastArea() (blastPos, maxRadius) ->
+  onBlastArea() (source, blastPos, minRadius, maxRadius, maxAmount, maxKnockback, factorZ) ->
     detonateInRange(blastPos, maxRadius)
+    knockbackInRange(source, blastPos, minRadius, maxRadius, maxAmount, maxKnockback, factorZ)
 
 function detonateInRange(vec3 blastPos, real maxRadius)
   for p in liveProjectiles
     if p.detonatable and not p.done and not p.detonating and blastPos.distanceTo(p.pos) < maxRadius
       p.detonate()
+
+function knockbackInRange(SheepEntity source, vec3 blastPos, real minRadius, real maxRadius, real maxAmount, real maxKnockback, real factorZ)
+  forKnockablesInRange(blastPos, maxRadius) target ->
+    let factor = blastFalloff(blastPos.distanceTo(target.pos), minRadius, maxRadius)
+    target.takeBlast(source, blastPos, factor * maxAmount, factor * maxKnockback, factorZ)
+
+/** Every live projectile that can be knocked around within range of pos. The matches are
+    collected first: taking a blast can terminate one, which would mutate the registry. */
+public function forKnockablesInRange(vec3 pos, real range, ForKnockableCallback cb)
+  let targets = new LinkedList<MyProjectile>
+  for p in liveProjectiles
+    if p.knockable and not p.done and pos.distanceTo(p.pos) < range
+      targets.add(p)
+  for target in targets
+    if not target.done
+      cb.run(target)
+  destroy targets
+  destroy cb
 
 /** One-shot timer owned by a projectile: fires the action unless the projectile is destroyed first. */
 class ProjectileTimer extends CallbackSingle
@@ -55,11 +82,15 @@ public class MyProjectile extends Projectile
   private constant pendingPeriodics = new HashSet<CallbackPeriodic>
   
   private OnHit3Listener onHit3 = null
+  private OnHitProjectileListener onHitProjectile = null
+  private constant hitProjectiles = new HashSet<MyProjectile>
   var friendlyFire = false
   var maxHits = 1
   /** Goes off when caught in someone else's blast. */
   var detonatable = false
   var detonating = false
+  /** Gets shoved around by blasts and melee weapons instead of ignoring them. */
+  var knockable = false
   /** Slow zone this projectile radiates while it lives: 0 is off. */
   var slowPct = 0.
   var slowRadius = 0.
@@ -88,6 +119,14 @@ public class MyProjectile extends Projectile
   function startSlowZone(real slowPct, real slowRadius)
     this.slowPct = slowPct
     this.slowRadius = slowRadius
+
+  /** Takes a blast the way a sheep does. The default only moves the projectile, at mass 1 and
+      with no damage; subclasses that have hit points override this. */
+  function takeBlast(SheepEntity source, vec3 blastPos, real amount, real knockback, real factorZ)
+    let dv = blastPos.knockbackVel(pos, knockback, factorZ, 1.)
+    vel.x += dv.x
+    vel.y += dv.y
+    vel.z += dv.z
 
   /** Blows up a frame from now, through the weapon's own onEnd, so the explosion that set this
       off can't set it off again and a chain reaction spreads out over frames. */
@@ -123,6 +162,14 @@ public class MyProjectile extends Projectile
 
   function onHit3D(OnHit3Listener listener)
     this.onHit3 = listener
+
+  /** Hits knockable projectiles (the Villager Kid) the way onHit3D hits units. */
+  function onHitProjectile(OnHitProjectileListener listener)
+    this.onHitProjectile = listener
+
+  function removeHitProjectile(MyProjectile target)
+    // Removed unconditionally, like removeHitUnit: a freed instance's id can be recycled.
+    hitProjectiles.remove(target)
     
   function checkHit3(unit u)
     let target = u.getMyUnitEntity()
@@ -210,6 +257,16 @@ public class MyProjectile extends Projectile
       forUnitsInRange(pos.toVec2(), radius + HIT_SEARCH_MARGIN * SHEEP_HIT_RADIUS_GROWTH) u ->
         if not done and hitGroup3.size() < maxHits
           checkHit3(u)
+    if onHitProjectile != null
+      checkHitProjectiles()
+
+  private function checkHitProjectiles()
+    forKnockablesInRange(pos, radius) target ->
+      // Same ownership rule as checkHit3, and each target is hit once.
+      if not done and target != this and not hitProjectiles.has(target)
+        if target.owner != owner or friendlyFire
+          hitProjectiles.add(target)
+          onHitProjectile.run(target)
 
   private function hit3(MyUnitEntity target)
     if target.hasShield()
@@ -257,5 +314,8 @@ public class MyProjectile extends Projectile
       destroy cb
     destroy pendingPeriodics
     destroy hitGroup3
+    destroy hitProjectiles
     if onHit3 != null
       destroy onHit3
+    if onHitProjectile != null
+      destroy onHitProjectile

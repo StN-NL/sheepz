@@ -4,6 +4,7 @@ import ClosureTimers
 import ConfigWeapons
 import Fx2Entity
 import MyAssets
+import MyProjectile
 import SheepEntity
 
 
@@ -47,3 +48,6 @@ class BaseballBat extends Fx2Entity
         // Dummy units (arsenal, InstantDummyCaster) have no entity.
         if target != null and target.getPos().distanceTo(posBat) < reach and u != batter.actor
           batter.blast(batter.getPos(), target, baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)
+      // Your own kid gets swatted too, the same way the bat treats units.
+      forKnockablesInRange(posBat, reach) target ->
+        target.takeBlast(batter, batter.getPos(), baseballBat.maxDamage, baseballBat.maxKnockBack, 0.7)

@@ -297,6 +297,10 @@ public constant teleport = compiletime(
   ..setAmount(0)
 )
 
+/** The kid isn't a unit, so WeaponDefinition has no field for this and it shows no health bar.
+    Needs tuning in play. */
+public var VILLAGER_KID_HP = 100.
+
 public constant villagerKid = compiletime(
   new WeaponDefinition(Icons.bTNVillagerKid, FiringType.CHARGED, Targettype.NONE)
   ..setName("Villager Kid")

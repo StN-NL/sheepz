@@ -28,6 +28,9 @@ public class FusRoDahProjectile extends MyProjectile
     onHit3D() target ->
       source.blast(pos, target, 0, (4 + firingPower) / 6 * fusRoDah.maxKnockBack, 0.5)
 
+    onHitProjectile() target ->
+      target.takeBlast(source, pos, 0, (4 + firingPower) / 6 * fusRoDah.maxKnockBack, 0.5)
+
   override function setPhysics()
     gravity = 0
     pos.z += 30

@@ -19,6 +19,12 @@ public class BoomerHammer extends MyProjectile
         if not done
           removeHitUnit(target)
 
+    onHitProjectile() target ->
+      target.takeBlast(source, pos, boomerHammer.maxDamage, boomerHammer.maxKnockBack, 1)
+      doAfterAlive(1) ->
+        if not done
+          removeHitProjectile(target)
+
   override function setPhysics()
     super.setPhysics()
     setPermanent()

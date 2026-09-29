@@ -15,9 +15,11 @@ public class VillagerKid extends MyProjectile
   bool isPlayingTime
   unit favouriteToy
   real minToyDistance
+  real hp = VILLAGER_KID_HP
 
   construct(SheepEntity source)
     super(source, villagerKid.minRadius, villagerKidModels.getRandomElement())
+    knockable = true
     soundBounce = SOUND_DRY_FART
     silent = true
     setPermanent()
@@ -31,6 +33,17 @@ public class VillagerKid extends MyProjectile
     onHit3D() target ->
       SOUND_PUNCH.playOnPoint(pos)
       source.blast(pos, target, villagerKid.maxDamage, villagerKid.maxKnockBack, 0.5)
+
+  /** Takes a hit like a sheep: a hurt kid flies further, and enough damage kills it. */
+  override function takeBlast(SheepEntity source, vec3 blastPos, real amount, real knockback, real factorZ)
+    // Scaled with the hit points it had before this hit, the same as SheepEntity.blast.
+    let knockbackFactor = (VILLAGER_KID_HP / hp).pow(0.5)
+    super.takeBlast(source, blastPos, amount, knockbackFactor * knockback, factorZ)
+    hp -= amount
+    // Stop chasing and fly freely; onGroundHit starts it playing again on the first landing.
+    isPlayingTime = false
+    if hp <= 0 and not done
+      terminate()
 
   override function onGroundHit()
     super.onGroundHit()
