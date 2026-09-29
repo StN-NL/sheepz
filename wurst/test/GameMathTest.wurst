@@ -171,3 +171,27 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
   assertTrue(contactCase(-0.01, 128., -0.8, UNIT_STICK_DISTANCE) == ContactCase.LEFT_GROUND)
   // Projectiles don't stick: rolling downhill makes them airborne.
   assertTrue(contactCase(-0.01, 3., 0., 0.) == ContactCase.LEFT_GROUND)
+
+// <<<<<<<<<< 1.2.0: size-based mass and hitboxes >>>>>>>>>>
+
+@Test function massIsOneAtBaseScale()
+  massFromScale(2., 2., 2.).assertEquals(1., 0.0001)
+
+@Test function massGrowsWithSize()
+  // A Baloonicide sheep swollen from 2 to 7 is about 12 times as heavy.
+  massFromScale(7., 2., 2.).assertEquals(12.25, 0.0001)
+  massFromScale(4., 2., 2.).assertEquals(4., 0.0001)
+
+@Test function massExponentZeroTurnsSizeOff()
+  massFromScale(7., 2., 0.).assertEquals(1., 0.0001)
+  massFromScale(1., 2., 0.).assertEquals(1., 0.0001)
+
+@Test function hitRadiusUnchangedAtBaseScale()
+  hitRadius(125., 2., 2., 40.).assertEquals(125., 0.0001)
+
+@Test function hitRadiusGrowsWithTheSheep()
+  hitRadius(125., 4., 2., 40.).assertEquals(165., 0.0001)
+  hitRadius(125., 7., 2., 40.).assertEquals(225., 0.0001)
+
+@Test function hitRadiusGrowthZeroKeepsTheOldHitbox()
+  hitRadius(125., 7., 2., 0.).assertEquals(125., 0.0001)

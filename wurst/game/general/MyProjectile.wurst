@@ -93,8 +93,13 @@ public class MyProjectile extends Projectile
     
   function checkHit3(unit u)
     let target = u.getMyUnitEntity()
-    // Dummy units (arsenal, InstantDummyCaster) have no entity; sheep in heaven are not solid.
-    if target != null and (not target.isSheep() or target.toSheep().isAlive()) and pos.distanceTo(target.pos) < radius
+    // Dummy units (arsenal, InstantDummyCaster) have no entity.
+    if target == null
+      return
+    // The hitbox grows with the target, so a swollen sheep can be hit from further out.
+    let hitDistance = hitRadius(radius, target.scale, SHEEP_SCALING_VALUE, SHEEP_HIT_RADIUS_GROWTH)
+    // Sheep in heaven are not solid.
+    if (not target.isSheep() or target.toSheep().isAlive()) and pos.distanceTo(target.pos) < hitDistance
       if not hitGroup3.has(target)
         if target.owner != owner or friendlyFire
           hit3(target)
@@ -158,9 +163,13 @@ public class MyProjectile extends Projectile
     SOUNDS_WATER_EXIT.getRandomElement().playOnPoint(pos)
     flashEffect(Abilities.crushingWaveDamage, pos)
 
+  /** Widest a hitbox can grow: covers a sheep swollen to several times its base size.
+      The exact per-target distance is checked in checkHit3. */
+  private constant HIT_SEARCH_MARGIN = 3.
+
   private function checkCollision()
     if onHit3 != null
-      forUnitsInRange(pos.toVec2(), radius) u ->
+      forUnitsInRange(pos.toVec2(), radius + HIT_SEARCH_MARGIN * SHEEP_HIT_RADIUS_GROWTH) u ->
         if not done and hitGroup3.size() < maxHits
           checkHit3(u)
 

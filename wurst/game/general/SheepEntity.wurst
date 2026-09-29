@@ -97,9 +97,12 @@ public function vec3.knockback(UnitEntity target, real amount, real factorZ)
   if target.actor.isAlive()
     let factorXY = min(this.distanceTo2d(target.getPos()) / 25, 1)
     let angle = this.angleTo2d(target.getPos())
-    target.vel.x += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.cos() * amount
-    target.vel.y += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.sin() * amount
-    target.vel.z += 0.7 * KNOCKBACK_FACTOR_Z * factorZ * amount
+    // Heavier (bigger) bodies pick up less speed from the same blast. Anything that isn't
+    // one of our entities (castTo is unchecked) keeps the old, unscaled knockback.
+    let mass = target instanceof MyUnitEntity ? (target castTo MyUnitEntity).mass() : 1.
+    target.vel.x += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.cos() * amount / mass
+    target.vel.y += 0.5 * KNOCKBACK_FACTOR_XY * factorXY * angle.sin() * amount / mass
+    target.vel.z += 0.7 * KNOCKBACK_FACTOR_Z * factorZ * amount / mass
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< SHEEP      >>>>>>>>>> >>>>>>>>>>

@@ -74,6 +74,16 @@ public function contactFraction(real heightBefore, real heightAfter) returns rea
 public function staysGrounded(real heightAbove, real velZ, real stickDistance) returns bool
   return velZ <= 0 and heightAbove <= stickDistance
 
+/** Mass of a body from its model scale: 1.0 at the base scale, growing with exponent.
+    Exponent 0 turns size-based mass off (everything weighs 1). */
+public function massFromScale(real scale, real baseScale, real exponent) returns real
+  return (scale / baseScale).pow(exponent)
+
+/** Hit distance of a projectile against a body of the given scale: the projectile's own radius
+    at the base scale, growing with the body so bigger sheep can be hit from further out. */
+public function hitRadius(real radius, real scale, real baseScale, real growth) returns real
+  return radius + growth * (scale / baseScale - 1)
+
 /** Terrain rising more than CLIFF_STEP_HEIGHT above a unit within CLIFF_LOOKAHEAD ahead of it is
     a wall: cliffs, and hills too steep to climb. */
 public constant CLIFF_STEP_HEIGHT = 30.

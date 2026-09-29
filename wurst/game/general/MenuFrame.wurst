@@ -665,7 +665,13 @@ public class MenuSetup
     ..onSliderValueChange() (real value) -> 
       SHEEP_SCALING_VALUE = value
 
-    let sheepMsNormal = new SliderReal(physicsPage, sheepScalingValue.slider)
+    let sizeMassExponent = new SliderReal(physicsPage, sheepScalingValue.slider)
+    ..setData(SIZE_MASS_EXPONENT, 0, 3, 0.5)
+    ..setPrefix("Mass Exponent: ")
+    ..onSliderValueChange() (real value) ->
+      SIZE_MASS_EXPONENT = value
+
+    let sheepMsNormal = new SliderReal(physicsPage, sizeMassExponent.slider)
     ..setData(SHEEP_MS_NORMAL, 0, 500, 10)
     ..setPrefix("MS Normal: ")
     ..onSliderValueChange() (real value) -> 

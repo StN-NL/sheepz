@@ -99,6 +99,11 @@ public class MyUnitEntity extends UnitEntity
     scale += value
     actor.setScale(scale)
 
+  /** How hard this body is to shift: 1.0 at the base sheep size, more when bigger.
+      Divides the velocity that knockback adds. */
+  function mass() returns real
+    return massFromScale(scale, SHEEP_SCALING_VALUE, SIZE_MASS_EXPONENT)
+
   function scaleVelXY(real scaling)
     vel.x *= scaling
     vel.y *= scaling
