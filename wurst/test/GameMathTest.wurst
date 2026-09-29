@@ -195,3 +195,40 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
 
 @Test function hitRadiusGrowthZeroKeepsTheOldHitbox()
   hitRadius(125., 7., 2., 0.).assertEquals(125., 0.0001)
+
+// <<<<<<<<<< 1.2.0: sheep-on-sheep collisions >>>>>>>>>>
+
+@Test function equalMassBounceSwapsSpeeds()
+  // A flung sheep hits a stationary one: A stops dead, B flies off.
+  bounceVelN(30., 0., 1., 1., 1.).assertEquals(0., 0.0001)
+  bounceVelN(0., 30., 1., 1., 1.).assertEquals(30., 0.0001)
+
+@Test function restitutionDampensTheBounce()
+  // Momentum is shared; restitution only decides how much separation speed survives.
+  bounceVelN(30., 0., 1., 1., 0.8).assertEquals(3., 0.0001)
+  bounceVelN(0., 30., 1., 1., 0.8).assertEquals(27., 0.0001)
+
+@Test function lightSheepReboundsOffHeavyOne()
+  // Light A into a stationary heavy B: A comes back, B barely moves.
+  let vA = bounceVelN(30., 0., 1., 9., 1.)
+  let vB = bounceVelN(0., 30., 9., 1., 1.)
+  (vA < 0).assertTrue()
+  vA.assertEquals(-24., 0.0001)
+  vB.assertEquals(6., 0.0001)
+
+@Test function bounceConservesMomentum()
+  let m = 2.
+  let mOther = 5.
+  let u = 40.
+  let uOther = -10.
+  let v = bounceVelN(u, uOther, m, mOther, 0.8)
+  let vOther = bounceVelN(uOther, u, mOther, m, 0.8)
+  (m * v + mOther * vOther).assertEquals(m * u + mOther * uOther, 0.0001)
+
+@Test function collisionDamageStartsAtMinSpeed()
+  collisionDamage(10., 10., 1.).assertEquals(0., 0.0001)
+  collisionDamage(50., 10., 1.).assertEquals(40., 0.0001)
+  collisionDamage(50., 10., 2.).assertEquals(80., 0.0001)
+
+@Test function collisionDamageIsNeverNegative()
+  collisionDamage(2., 10., 1.).assertEquals(0., 0.0001)

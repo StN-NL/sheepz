@@ -20,6 +20,13 @@ import Utils
 
 SheepEntity array[24] sheeps
 
+/** Time left before a pair of sheep may bounce again, indexed by pairIndex(). Keeps a lasting
+    overlap from bouncing and hurting every tick. */
+real array[576] bounceCooldown
+
+function pairIndex(int idA, int idB) returns int
+  return idA * 24 + idB
+
 enum State
   ALIVE
   DEATH_BY_ENEMY
@@ -215,6 +222,7 @@ public class SheepEntity extends MyUnitEntity
     adventureOutOfBounds()
     updatePowerIndicator()
     updateMoveSpeed()
+    checkCollisions()
     if isDead()
       onDeath()
     if not done
@@ -253,6 +261,61 @@ public class SheepEntity extends MyUnitEntity
       actor.setMoveSpeed(SHEEP_MS_FLYING + modifierMoveSpeed)
     else
       actor.setMoveSpeed(SHEEP_MS_NORMAL + modifierMoveSpeed)
+
+  // <<<<<<<<<<<< COLLISION >>>>>>>>>>>>
+
+  private constant COLLISION_COOLDOWN = 0.5
+  private constant COLLISION_MAX_DELTA_Z = 100.
+
+  /** Each pair is visited by the lower-numbered sheep only, so it is handled once per tick. */
+  private function checkCollisions()
+    if not isAlive()
+      return
+    let myId = owner.getId()
+    for ii = myId + 1 to MAX_PLAYERS - 1
+      let other = sheeps[ii]
+      let idx = pairIndex(myId, ii)
+      if bounceCooldown[idx] > 0
+        bounceCooldown[idx] -= ANIMATION_PERIOD
+      else if other != null and other.isAlive()
+        collideWith(other, idx)
+
+  private function collideWith(SheepEntity other, int idx)
+    let delta = other.pos - pos
+    if delta.z.abs() >= COLLISION_MAX_DELTA_Z
+      return
+    let flat = delta.toVec2()
+    let distance = flat.length()
+    if distance >= 2 * SHEEP_COLLISION_RADIUS or distance < 0.01
+      return
+
+    // Contact line, pointing from this sheep to the other one.
+    let n = flat.norm()
+    let un = vel.x * n.x + vel.y * n.y
+    let unOther = other.vel.x * n.x + other.vel.y * n.y
+    let closingSpeed = un - unOther
+    if closingSpeed <= SHEEP_COLLISION_MIN_SPEED
+      return
+    bounceCooldown[idx] = COLLISION_COOLDOWN
+
+    // Bounce along the contact line only; the HP-based knockback scaling doesn't apply here.
+    let m = mass()
+    let mOther = other.mass()
+    let vn = bounceVelN(un, unOther, m, mOther, SHEEP_COLLISION_RESTITUTION)
+    let vnOther = bounceVelN(unOther, un, mOther, m, SHEEP_COLLISION_RESTITUTION)
+    vel.x += (vn - un) * n.x
+    vel.y += (vn - un) * n.y
+    other.vel.x += (vnOther - unOther) * n.x
+    other.vel.y += (vnOther - unOther) * n.y
+
+    flashEffect(Abilities.thunderclapCaster, pos + delta * 0.5, 0.5)
+
+    // Credit goes to whoever flung the other sheep, so a Bazooka shot into a bystander counts.
+    let amount = collisionDamage(closingSpeed, SHEEP_COLLISION_MIN_SPEED, SHEEP_COLLISION_DAMAGE_FACTOR)
+    let sourceForThis = other.tormentor != null ? other.tormentor : other
+    let sourceForOther = tormentor != null ? tormentor : this
+    takeDamage(sourceForThis, amount)
+    other.takeDamage(sourceForOther, amount)
 
   // <<<<<<<<<<<< MISC >>>>>>>>>>>>
 

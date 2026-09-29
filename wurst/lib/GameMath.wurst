@@ -84,6 +84,16 @@ public function massFromScale(real scale, real baseScale, real exponent) returns
 public function hitRadius(real radius, real scale, real baseScale, real growth) returns real
   return radius + growth * (scale / baseScale - 1)
 
+/** Velocity along the contact line after an elastic collision with restitution, for the body
+    with mass m moving at un against one with mass mOther at uOtherN. Call it once per body
+    with the arguments swapped. At equal mass and restitution 1 the two bodies swap speeds. */
+public function bounceVelN(real un, real uOtherN, real m, real mOther, real restitution) returns real
+  return (m * un + mOther * uOtherN - mOther * restitution * (un - uOtherN)) / (m + mOther)
+
+/** Impact damage of a collision, mirroring fall damage: nothing up to minSpeed, then linear. */
+public function collisionDamage(real closingSpeed, real minSpeed, real factor) returns real
+  return max(0., factor * (closingSpeed - minSpeed))
+
 /** Terrain rising more than CLIFF_STEP_HEIGHT above a unit within CLIFF_LOOKAHEAD ahead of it is
     a wall: cliffs, and hills too steep to climb. */
 public constant CLIFF_STEP_HEIGHT = 30.

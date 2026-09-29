@@ -63,6 +63,12 @@ public var CHARGE_MS_BONUS = 100.
 public var SIZE_MASS_EXPONENT = 2.
 public var SHEEP_HIT_RADIUS_GROWTH = 40.
 
+// <<<<<<< SHEEP_COLLISION >>>>>>>>>>>>
+public var SHEEP_COLLISION_RADIUS = 40.
+public var SHEEP_COLLISION_MIN_SPEED = 10.
+public var SHEEP_COLLISION_RESTITUTION = 0.8
+public var SHEEP_COLLISION_DAMAGE_FACTOR = 1.
+
 // <<<<<<< FALL_DAMAGE >>>>>>>>>>>>
 public var FALL_DAMAGE_MIN_VEL_Z = 25.
 public var FALL_DAMAGE_RADIUS = 400.
