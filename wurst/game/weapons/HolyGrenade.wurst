@@ -1,4 +1,5 @@
 package HolyGrenade
+import ConfigGame
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -21,6 +22,7 @@ public class HolyGrenade extends MyProjectile
     super.onGroundHit()
     if not bounceOfGround() and not hallelujah
       hallelujah = true
+      startSlowZone(SLOW_ZONE_PCT, holyGrenade.maxRadius)
       SOUND_HOLY_GRENADE.playOnPoint(pos).snd.setVolume(300)
       doAfterAlive(2) ->
         if not done 

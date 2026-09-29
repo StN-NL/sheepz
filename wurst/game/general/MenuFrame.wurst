@@ -1,5 +1,6 @@
 package MenuFrame
 import Arsenal
+import Baloonicide
 import ClosureEvents
 import ClosureFrames
 import ClosureKeyPresses
@@ -827,11 +828,31 @@ public class MenuSetup
     ..onSliderValueChange() (real value) ->
       PROJECTILE_POWER_FACTOR = value
 
-    new SliderReal(physicsPage, projectilePowerFactor.slider)
+    let projectileFactorZ = new SliderReal(physicsPage, projectilePowerFactor.slider)
     ..setData(PROJECTILE_FACTOR_Z, 0, 10, 0.1)
     ..setPrefix("Factor Z: ")
     ..onSliderValueChange() (real value) ->
       PROJECTILE_FACTOR_Z = value
+
+    // <<<<<<<<<< <<<<<<<<<< Slow Zones >>>>>>>>>> >>>>>>>>>>
+
+    let slowZoneTitle = createFrame(FramehandleTypeNames.text, "", physicsPage, "", 0)
+    ..setPoint(FRAMEPOINT_TOPLEFT, projectileFactorZ.slider, FRAMEPOINT_BOTTOMLEFT, 0, -0.01)
+    ..setScale(1.5)
+    ..setText("Slow Zones")
+    ..setTextColor(COLOR_GOLD)
+
+    let slowZonePct = new SliderReal(physicsPage, slowZoneTitle)
+    ..setData(SLOW_ZONE_PCT, 0, 1, 0.05)
+    ..setPrefix("Explosives: ")
+    ..onSliderValueChange() (real value) ->
+      SLOW_ZONE_PCT = value
+
+    let balSlowPct = new SliderReal(physicsPage, slowZonePct.slider)
+    ..setData(BAL_SLOW_PCT, 0, 1, 0.05)
+    ..setPrefix("Baloonicide: ")
+    ..onSliderValueChange() (real value) ->
+      BAL_SLOW_PCT = value
 
     // <<<<<<<<<< <<<<<<<<<< ------------ >>>>>>>>>> >>>>>>>>>>
     // <<<<<<<<<< <<<<<<<<<< Page Weapons >>>>>>>>>> >>>>>>>>>>

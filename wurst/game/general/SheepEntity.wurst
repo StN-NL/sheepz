@@ -126,6 +126,21 @@ public function onBlastArea(BlastAreaListener listener)
   blastAreaListener = listener
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< SLOW ZONE  >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+/** Reports a slow zone of the given strength and 2D range to the sheep in it, once per tick.
+    The owner of the zone is exempt; the strongest report of the tick is what applies. */
+public function vec3.reportSlowZone(real slowPct, real radius, player owner)
+  if slowPct <= 0
+    return
+  forUnitsInRange(this.toVec2(), radius) u ->
+    let e = u.getMyUnitEntity()
+    // Dummy units (arsenal, InstantDummyCaster) have no entity.
+    if e != null and e.isSheep() and e.owner != owner and this.distanceTo2d(e.pos) < radius
+      e.toSheep().reportSlow(slowPct)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< SHEEP      >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 
@@ -235,6 +250,7 @@ public class SheepEntity extends MyUnitEntity
     breatheAir()
     adventureOutOfBounds()
     updatePowerIndicator()
+    updateSlow()
     updateMoveSpeed()
     checkCollisions()
     if isDead()
@@ -264,17 +280,30 @@ public class SheepEntity extends MyUnitEntity
   function addMoveSpeed(real value)
     modifierMoveSpeed += value
 
+  // Strongest slow zone this sheep is in. Zones report themselves each tick (sheep can't reach
+  // the projectiles), so the reports are collected for the next tick and never linger.
+  private var slowPct = 0.
+  private var slowPctReported = 0.
+
+  function reportSlow(real pct)
+    slowPctReported = max(slowPctReported, pct)
+
+  private function updateSlow()
+    slowPct = slowPctReported
+    slowPctReported = 0.
+
   private function updateMoveSpeed()
     if isDead() or immobalizedSources > 0
       actor.setMoveSpeed(0.)
-    else if isDeepWater
-      actor.setMoveSpeed(SHEEP_MS_DEEP_WATER + modifierMoveSpeed)
-    else if isJetPackOn and flying
-      actor.setMoveSpeed(SHEEP_MS_JET_PACK + modifierMoveSpeed)
-    else if pos.z > terrainZ + 20
-      actor.setMoveSpeed(SHEEP_MS_FLYING + modifierMoveSpeed)
     else
-      actor.setMoveSpeed(SHEEP_MS_NORMAL + modifierMoveSpeed)
+      var speed = SHEEP_MS_NORMAL
+      if isDeepWater
+        speed = SHEEP_MS_DEEP_WATER
+      else if isJetPackOn and flying
+        speed = SHEEP_MS_JET_PACK
+      else if pos.z > terrainZ + 20
+        speed = SHEEP_MS_FLYING
+      actor.setMoveSpeed(slowedSpeed(speed + modifierMoveSpeed, slowPct))
 
   // <<<<<<<<<<<< COLLISION >>>>>>>>>>>>
 

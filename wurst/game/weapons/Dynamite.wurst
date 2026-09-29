@@ -1,6 +1,7 @@
 package Dynamite
 // import Assets
 import ClosureTimers
+import ConfigGame
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -16,6 +17,7 @@ public class Dynamite extends MyProjectile
   construct(SheepEntity source)
     super(source, dynamite.minRadius, MyModels.dynamite)
     detonatable = true
+    startSlowZone(SLOW_ZONE_PCT, dynamite.maxRadius)
     gravity = 0
     setVel(vec3(0, 0, 0))
     setXY(vec3(pos.x + GetRandomReal(-30, 30), pos.y + GetRandomReal(-30, 30), pos.z + 10))

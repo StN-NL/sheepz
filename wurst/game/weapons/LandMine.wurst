@@ -1,6 +1,7 @@
 package LandMine
 import Assets
 import ClosureTimers
+import ConfigGame
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -36,6 +37,7 @@ public class LandMine extends MyProjectile
       explode()
 
   function countdown()
+    startSlowZone(SLOW_ZONE_PCT, landmine.maxRadius)
     doPeriodicallyAlive(0.3) cb ->
       fx.eff.setAlpha(225)
       if countdown == 0

@@ -232,3 +232,17 @@ function oldSheepLandingVelZ(real impactVelZ) returns real
 
 @Test function collisionDamageIsNeverNegative()
   collisionDamage(2., 10., 1.).assertEquals(0., 0.0001)
+
+// <<<<<<<<<< 1.2.0: slow zones >>>>>>>>>>
+
+@Test function slowTakesAFractionOfTheSpeed()
+  slowedSpeed(100., 0.8).assertEquals(20., 0.0001)
+  slowedSpeed(50., 0.8).assertEquals(10., 0.0001)
+  slowedSpeed(100., 0.5).assertEquals(50., 0.0001)
+
+@Test function noSlowLeavesSpeedAlone()
+  slowedSpeed(100., 0.).assertEquals(100., 0.0001)
+
+@Test function slowIsClampedToSaneValues()
+  slowedSpeed(100., 1.5).assertEquals(0., 0.0001)
+  slowedSpeed(100., -0.5).assertEquals(100., 0.0001)

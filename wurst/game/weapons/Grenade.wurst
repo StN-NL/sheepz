@@ -1,5 +1,6 @@
 package Grenade
 import ClosureTimers
+import ConfigGame
 import ConfigWeapons
 import MyAssets
 import MyProjectile
@@ -13,6 +14,7 @@ public class Grenade extends MyProjectile
   construct(SheepEntity source)
     super(source, grenade.minRadius, MyModels.grenade)
     detonatable = true
+    startSlowZone(SLOW_ZONE_PCT, grenade.maxRadius)
     scaleVelXY(0.8)
     fx.eff.setTimeScale(0.2)
     doPeriodicallyAlive(1.0) cb ->

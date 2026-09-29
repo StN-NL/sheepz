@@ -60,6 +60,9 @@ public class MyProjectile extends Projectile
   /** Goes off when caught in someone else's blast. */
   var detonatable = false
   var detonating = false
+  /** Slow zone this projectile radiates while it lives: 0 is off. */
+  var slowPct = 0.
+  var slowRadius = 0.
   
   real distance = 0.
 
@@ -80,6 +83,11 @@ public class MyProjectile extends Projectile
 
   function setPermanent()
     this.maxHits = INT_MAX
+
+  /** Starts radiating a slow zone, until this projectile is destroyed. */
+  function startSlowZone(real slowPct, real slowRadius)
+    this.slowPct = slowPct
+    this.slowRadius = slowRadius
 
   /** Blows up a frame from now, through the weapon's own onEnd, so the explosion that set this
       off can't set it off again and a chain reaction spreads out over frames. */
@@ -148,6 +156,8 @@ public class MyProjectile extends Projectile
       enforceWater()
 
     if not done
+      updateSlowZone()
+    if not done
       checkCollision()
     if not done
       super.update()
@@ -156,6 +166,9 @@ public class MyProjectile extends Projectile
 
   function updateAirFriction()
     scaleVel(1 - 0.005 * PROJECTILE_AIR_FRICTION)
+
+  private function updateSlowZone()
+    pos.reportSlowZone(slowPct, slowRadius, owner)
 
   private function checkFriendlyFire()
     if not friendlyFire and isAwayFromSource()

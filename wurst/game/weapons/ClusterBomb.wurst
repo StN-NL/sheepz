@@ -17,6 +17,7 @@ public class ClusterBomb extends MyProjectile
   construct(SheepEntity source)
     super(source, clusterBomb.minRadius, Abilities.gyroCopterMissile)
     detonatable = true
+    startSlowZone(SLOW_ZONE_PCT, clusterBomb.maxRadius)
     scaleVelXY(0.8)
     fx.eff.setTimeScale(0.2)
     countdown()

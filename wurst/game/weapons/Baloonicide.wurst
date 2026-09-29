@@ -10,6 +10,7 @@ import SoundUtils
 
 public var BAL_MAX_CHANNEL_TIME = 5.
 public var BAL_BONUS_SCALE = 5.
+public var BAL_SLOW_PCT = 0.5
 
 public function SheepEntity.swell()
   this.addMoveSpeed(40)
@@ -18,6 +19,7 @@ public function SheepEntity.swell()
     let dt = this.owner.getChannelTime()
     if dt > 0. and dt < BAL_MAX_CHANNEL_TIME and this.isAlive()
       this.addScale(ANIMATION_PERIOD * BAL_BONUS_SCALE / BAL_MAX_CHANNEL_TIME)
+      this.getPos().reportSlowZone(BAL_SLOW_PCT, baloonicide.maxRadius, this.owner)
     else
       this.addMoveSpeed(-40)
       destroy cb

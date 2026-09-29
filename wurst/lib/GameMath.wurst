@@ -94,6 +94,10 @@ public function bounceVelN(real un, real uOtherN, real m, real mOther, real rest
 public function collisionDamage(real closingSpeed, real minSpeed, real factor) returns real
   return max(0., factor * (closingSpeed - minSpeed))
 
+/** Movement speed after a slow zone: slowPct is the fraction taken off, clamped to 0-1. */
+public function slowedSpeed(real speed, real slowPct) returns real
+  return speed * (1 - max(0., min(1., slowPct)))
+
 /** Terrain rising more than CLIFF_STEP_HEIGHT above a unit within CLIFF_LOOKAHEAD ahead of it is
     a wall: cliffs, and hills too steep to climb. */
 public constant CLIFF_STEP_HEIGHT = 30.
