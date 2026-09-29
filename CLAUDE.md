@@ -32,6 +32,18 @@ Build target is whatever `wurst.build` specifies — check that file before assu
 
 Use the run button in VSCode (or `F1 → Wurst: Build Wurst Map`), or build from the shell with `grill build Sheepz.w3x` in the project root. The output map lands in `_build/`.
 
+### Versioning
+
+`X.Y.Z`, read in gameplay terms rather than API-compatibility terms:
+
+- **Z (patch)** — bug fixes and balance-number tweaks only; nothing new to learn.
+- **Y (minor)** — new weapons or mechanics, anything that changes how the game plays.
+- **X (major)** — an overhaul: a new arena, a game mode, a rework that retires old habits.
+
+One bump per release, not per change. In WC3 the version is the filename and the filename is the lobby: `fileName: Sheepz 1.2.0` means every bump is a different file players need in order to join each other. A version that moves during development is fine; one that moves after people have downloaded it is not. No fourth component and no `-rc1` style suffixes — it is noise in a map name and another thing to keep in sync.
+
+Bump at the *start* of new work, not at the end: builds are named after the version, so working on an unbumped one overwrites the previous release's map in `_build/`.
+
 When changing the version, update it in three places: `wurst.build` (`name`, `fileName`), `VERSION` and the `WHATS_NEW` player notes in `wurst/game/general/Miscellaneous.wurst`, and `CHANGELOG.md` (player-facing notes plus an "Under the hood" part with commits).
 
 Grill updates a cached copy of the map in place (`_build/cache/Sheepz_*_jass_cached.w3x`). After removing or renaming anything in `imports/`, delete that cache before building: otherwise removed imports linger, and a removed import that had replaced a base-map file deletes the original too.
