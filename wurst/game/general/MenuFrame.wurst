@@ -854,6 +854,20 @@ public class MenuSetup
     ..onSliderValueChange() (real value) ->
       BAL_SLOW_PCT = value
 
+    // <<<<<<<<<< <<<<<<<<<< Trees >>>>>>>>>> >>>>>>>>>>
+
+    let treeTitle = createFrame(FramehandleTypeNames.text, "", physicsPage, "", 0)
+    ..setPoint(FRAMEPOINT_TOPLEFT, balSlowPct.slider, FRAMEPOINT_BOTTOMLEFT, 0, -0.01)
+    ..setScale(1.5)
+    ..setText("Trees")
+    ..setTextColor(COLOR_GOLD)
+
+    new SliderReal(physicsPage, treeTitle)
+    ..setData(TREE_REGROW_TIME, 0, 600, 10)
+    ..setPrefix("Regrow Time: ")
+    ..onSliderValueChange() (real value) ->
+      TREE_REGROW_TIME = value
+
     // <<<<<<<<<< <<<<<<<<<< ------------ >>>>>>>>>> >>>>>>>>>>
     // <<<<<<<<<< <<<<<<<<<< Page Weapons >>>>>>>>>> >>>>>>>>>>
     // <<<<<<<<<< <<<<<<<<<< ------------ >>>>>>>>>> >>>>>>>>>>

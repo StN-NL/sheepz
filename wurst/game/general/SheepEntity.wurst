@@ -6,6 +6,7 @@ import ClosureForGroups
 import ConfigGame
 import Damage
 import GameMath
+import HashSet
 import Heightmap
 import Miscellaneous
 import MyAssets
@@ -139,6 +140,25 @@ public function vec3.reportSlowZone(real slowPct, real radius, player owner)
     // Dummy units (arsenal, InstantDummyCaster) have no entity.
     if e != null and e.isSheep() and e.owner != owner and this.distanceTo2d(e.pos) < radius
       e.toSheep().reportSlow(slowPct)
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< TREES      >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+/** Destructables waiting to grow back, so one felled twice doesn't queue two timers. */
+constant regrowing = new HashSet<destructable>
+
+/** Brings this destructable back after TREE_REGROW_TIME. */
+function destructable.scheduleRegrow()
+  if TREE_REGROW_TIME <= 0 or regrowing.has(this)
+    return
+  regrowing.add(this)
+  // Plain timer with the handle in a local: the regrowth outlives whatever felled the tree.
+  let tree = this
+  doAfter(TREE_REGROW_TIME) ->
+    regrowing.remove(tree)
+    // birth = true, so it grows back instead of popping into place.
+    tree.restoreLife(tree.getMaxLife(), true)
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< SHEEP      >>>>>>>>>> >>>>>>>>>>
@@ -568,7 +588,11 @@ public class SheepEntity extends MyUnitEntity
 
   function blastArea(vec3 pos, real minRadius, real maxRadius, real maxAmount, real maxKnockback, real factorZ, bool targetSelf)
     forDestructablesInRange(pos.toVec2(), maxRadius) destr ->
-      destr.setLife(destr.getLife() - maxAmount)
+      // Only a tree this blast actually felled regrows; ones already down stay down.
+      let lifeBefore = destr.getLife()
+      destr.setLife(lifeBefore - maxAmount)
+      if lifeBefore > 0 and destr.getLife() <= 0
+        destr.scheduleRegrow()
 
     forUnitsInRange(pos.toVec2(), maxRadius) u ->
       let target = u.getEntity()

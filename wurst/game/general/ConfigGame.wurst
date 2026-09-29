@@ -72,6 +72,9 @@ public var SHEEP_COLLISION_DAMAGE_FACTOR = 1.
 // <<<<<<< SLOW_ZONES >>>>>>>>>>>>
 public var SLOW_ZONE_PCT = 0.8
 
+// <<<<<<< TREES >>>>>>>>>>>>
+public var TREE_REGROW_TIME = 120.
+
 // <<<<<<< FALL_DAMAGE >>>>>>>>>>>>
 public var FALL_DAMAGE_MIN_VEL_Z = 25.
 public var FALL_DAMAGE_RADIUS = 400.
