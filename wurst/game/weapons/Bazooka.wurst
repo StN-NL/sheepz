@@ -9,6 +9,7 @@ public class BazookaProjectile extends MyProjectile
   
   construct(SheepEntity source)
     super(source, bazooka.minRadius, Abilities.cannonTowerMissile)
+    detonatable = true
     onHit3D() target ->
       if not done and distance > 30
         terminate()

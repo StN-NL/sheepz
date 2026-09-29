@@ -12,6 +12,7 @@ public class Grenade extends MyProjectile
 
   construct(SheepEntity source)
     super(source, grenade.minRadius, MyModels.grenade)
+    detonatable = true
     scaleVelXY(0.8)
     fx.eff.setTimeScale(0.2)
     doPeriodicallyAlive(1.0) cb ->

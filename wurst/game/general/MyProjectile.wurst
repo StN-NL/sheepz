@@ -17,6 +17,18 @@ import SoundUtils
 public interface OnHit3Listener
   function run(MyUnitEntity target)
 
+/** Live projectiles, so a blast can find the explosives it sets off. */
+constant liveProjectiles = new HashSet<MyProjectile>
+
+init
+  onBlastArea() (blastPos, maxRadius) ->
+    detonateInRange(blastPos, maxRadius)
+
+function detonateInRange(vec3 blastPos, real maxRadius)
+  for p in liveProjectiles
+    if p.detonatable and not p.done and not p.detonating and blastPos.distanceTo(p.pos) < maxRadius
+      p.detonate()
+
 /** One-shot timer owned by a projectile: fires the action unless the projectile is destroyed first. */
 class ProjectileTimer extends CallbackSingle
   MyProjectile owner
@@ -45,6 +57,9 @@ public class MyProjectile extends Projectile
   private OnHit3Listener onHit3 = null
   var friendlyFire = false
   var maxHits = 1
+  /** Goes off when caught in someone else's blast. */
+  var detonatable = false
+  var detonating = false
   
   real distance = 0.
 
@@ -61,9 +76,19 @@ public class MyProjectile extends Projectile
     fx.eff.setScale(PROJECTILE_DEFAULT_SCALE)
     firingPower = owner.getFiringPower(2)
     setPhysics()
+    liveProjectiles.add(this)
 
   function setPermanent()
     this.maxHits = INT_MAX
+
+  /** Blows up a frame from now, through the weapon's own onEnd, so the explosion that set this
+      off can't set it off again and a chain reaction spreads out over frames. */
+  function detonate()
+    detonating = true
+    doAfterAlive(0) ->
+      // It may have gone off by itself in the meantime.
+      if not done
+        terminate()
 
   /** doAfter that is cancelled if this projectile is destroyed first. */
   function doAfterAlive(real timeToWait, Callback action)
@@ -211,6 +236,7 @@ public class MyProjectile extends Projectile
       soundBounce.playOnPoint(pos)
 
   ondestroy
+    liveProjectiles.remove(this)
     for cb in pendingTimers
       destroy cb
     destroy pendingTimers

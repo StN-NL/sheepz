@@ -11,6 +11,7 @@ public class GuidedMissile extends MyProjectile
 
   construct(SheepEntity source, vec2 target)
     super(source, guidedMissile.minRadius, Abilities.mortarMissile)
+    detonatable = true
     this.target = target
     silent = true
     scaleVelXY(0.7)

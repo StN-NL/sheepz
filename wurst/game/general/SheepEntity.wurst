@@ -112,6 +112,20 @@ public function vec3.knockback(UnitEntity target, real amount, real factorZ)
     target.vel.z += 0.7 * KNOCKBACK_FACTOR_Z * factorZ * amount / mass
 
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< BLAST HOOK >>>>>>>>>> >>>>>>>>>>
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
+
+public interface BlastAreaListener
+  function run(vec3 blastPos, real maxRadius)
+
+BlastAreaListener blastAreaListener = null
+
+/** Called after every blastArea. Projectiles register here to detonate in a blast: they can't
+    be reached from this package directly, because MyProjectile already depends on it. */
+public function onBlastArea(BlastAreaListener listener)
+  blastAreaListener = listener
+
+// <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< SHEEP      >>>>>>>>>> >>>>>>>>>>
 // <<<<<<<<<< <<<<<<<<<< ---------- >>>>>>>>>> >>>>>>>>>>
 
@@ -537,6 +551,11 @@ public class SheepEntity extends MyUnitEntity
           let amount = factor * maxAmount
           let knockback = factor * maxKnockback
           this.blast(pos, target, amount, knockback, factorZ)
+
+    // Set off explosives caught in the blast. Ignores falloff and ownership: your own
+    // projectiles go off too.
+    if blastAreaListener != null
+      blastAreaListener.run(pos, maxRadius)
 
   function blast(vec3 pos, UnitEntity target, real amount)
     this.blast(pos, target, amount, amount)
