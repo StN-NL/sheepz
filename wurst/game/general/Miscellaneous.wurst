@@ -24,24 +24,25 @@ public constant WHATS_NEW_HEADLINE = "Weight class"
 
 /** Player-facing notes for the latest two versions; the full history is in CHANGELOG.md. */
 public constant WHATS_NEW = ("Sheepz " + VERSION + ": " + WHATS_NEW_HEADLINE).color(COLOR_GOLD) + "\n\n" +
+  "New".color(PINK) + "\n" +
+  "- Sheep bounce off each other. Get flung into someone and you both take a hit, and the damage goes to whoever did the flinging. Ram a rival into the sea and the kill is yours.\n" +
+  "- Explosions set off explosives. Shoot a mine, a stick of dynamite, a grenade, a cluster bomb or a rocket in flight and it goes off, still owned by whoever put it there. Line three dynamites up and watch the chain go.\n" +
+  "- Ticking explosives slow everyone near them. Grenades, cluster bombs, dynamite, armed mines and a landed Holy Hand Grenade drag you to a crawl until they blow. A swelling Baloonicide halves your speed. You are never slowed by your own.\n\n" +
+  "- Trees grow back. Blow the scenery apart and it returns a couple of minutes later, so the map stops turning into a bald rock.\n" +
+  "- The Villager Kid can be fought back. Blasts, the Baseball Bat, Fus Ro Dah and the Boomer Hammer send it flying, and enough punishment puts it down for good.\n" +
+  "Changed".color(PINK) + "\n" +
+  "- Size is weight. The bigger the sheep, the less a blast shifts it, so the kill leader gets harder to move as they level. A fully swollen Baloonicide barely budges.\n" +
+  "- Big sheep are easier to hit. A grown sheep has a hitbox to match.\n" +
+  "- Every blast sets explosives off, hard landings and Bladestorm waves included.\n\n" +
+  "Sheepz 1.1.0: Physics got real".color(COLOR_GOLD) + "\n\n" +
   "Changed".color(PINK) + "\n" +
   "- Falling hurts more. Hard landings deal about 10% more damage and start from slightly lower heights. Choose your jet pack moments wisely.\n" +
   "- Cliffs are solid. Getting blasted into a cliff stops you at the cliff face instead of launching you on top of it.\n" +
   "- Smooth hills. Sheep walk down slopes instead of hopping, at their normal speed.\n" +
   "- Water puts out fire. Shallow water extinguishes a burning sheep too. You still only drown in deep water.\n" +
   "- Explosions land where they hit. Rockets, grenades and friends explode right on the ground instead of just below it.\n\n" +
-  "Sheepz 1.0.9: Bug stomping".color(COLOR_GOLD) + "\n\n" +
-  "Fixed".color(PINK) + "\n" +
-  "- Sheep could become impossible to kill after taking a tiny bit of damage.\n" +
-  "- Riot Shield no longer floats in the sky after you die.\n" +
-  "- Shots no longer explode mid-air on sheep waiting in heaven.\n" +
-  "- Landmines, fire and rain left behind by players who quit no longer hurt anyone or give out points.\n" +
-  "- Flame Thrower, Minigun, Ascension and Worm Rider stop when you die.\n" +
-  "- A Chicken Bomb that never finds a victim explodes by itself after 30 seconds.\n" +
-  "- The loading screen looks right again.\n" +
-  "- No more lag spike the first time a weapon is fired.\n\n" +
-  "Changed".color(PINK) + "\n" +
-  "- Only the host can change settings; everyone else sees them greyed out. With " + "Proclaim Anarchy".color(PINK) + ", everyone can."
+  "New".color(PINK) + "\n" +
+  "- What's New in the quest log, and a pointer to it when the game starts."
 
 DynamicCellValue<int> array[24] LIVES
 DynamicCellValue<int> array[24] POINTS

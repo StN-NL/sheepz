@@ -4,6 +4,70 @@ Newest first. Each version has a player-facing part (the in-game **What's New** 
 the latest two, from `WHATS_NEW` in `wurst/game/general/Miscellaneous.wurst`) and an
 **Under the hood** part for developers, with the commits that made each change.
 
+## 1.2.0 — unreleased
+
+Not yet playtested; the notes may change before release.
+
+### For players
+
+**New**
+- **Sheep bounce off each other.** Get flung into another sheep and you both take a hit that
+  grows with the impact speed. The damage is credited to whoever did the flinging, so bazooka
+  a rival into a bystander and both hits are yours.
+- **Explosions set off explosives.** Any blast detonates dynamite, mines, grenades, cluster
+  bombs, bazooka rockets and guided missiles caught in it, a frame later. Each one still
+  belongs to whoever placed it, so the kills go to its owner. Line three dynamites up and the
+  chain ripples through.
+- **Ticking explosives slow everyone near them.** Grenades, cluster bombs, dynamite, armed
+  mines and a landed Holy Hand Grenade drag nearby sheep to a crawl until they go off. A
+  swelling Baloonicide halves the speed of everyone around it. You are never slowed by your own.
+- **Trees grow back.** A tree felled by a blast returns after two minutes, with a growth
+  animation. Until now every explosion stripped the map permanently.
+- **The Villager Kid can be fought back.** It used to be untouchable. Now any blast, the
+  Baseball Bat, Fus Ro Dah and the Boomer Hammer knock it flying, a hurt kid flies further
+  than a fresh one, and enough damage kills it. It picks its chase back up on landing. Killing
+  one scores nothing, since it isn't a sheep.
+
+**Changed**
+- **Size is weight.** A bigger sheep is shifted less by the same blast, so the kill leader gets
+  harder to move as they level up and a fully swollen Baloonicide barely budges.
+- **Big sheep are easier to hit.** A grown sheep's hitbox grows with it.
+- Every blast sets off explosives, hard landings and Bladestorm waves included.
+
+### Under the hood
+- Sheep-on-sheep collision in `SheepEntity`: an elastic bounce along the contact line using
+  size-based mass, with impact damage mirroring fall damage. Each pair is resolved once per
+  tick by the lower-numbered sheep and then held off for 0.5 s (`470fe1e`).
+- Size-based mass (`MyUnitEntity.mass()`, `SIZE_MASS_EXPONENT`) divides the velocity
+  `vec3.knockback` adds, so it covers every `blast()` caller. The HP-based knockback factor
+  stays and multiplies with it. `MyProjectile.checkHit3` grows the hit distance with the
+  target's scale (`SHEEP_HIT_RADIUS_GROWTH`), and the unit search around a projectile was
+  widened to match (`3938a78`).
+- Live-projectile registry (`liveProjectiles` in `MyProjectile`), shared by the detonation and
+  slow-zone features (`413266a`).
+- Detonation runs off a `BlastAreaListener` hook that `MyProjectile` registers with
+  `SheepEntity`: the reverse dependency would be circular. Detonation defers through
+  `doAfterAlive(0)`, so an explosion can't set itself off and a chain spreads over frames
+  (`413266a`).
+- Slow zones report themselves to nearby sheep each tick (`vec3.reportSlowZone`) rather than
+  being polled, for the same dependency reason. A sheep keeps the strongest report of the tick;
+  nothing stacks and nothing lingers (`4488d65`).
+- New pure helpers in `GameMath` (`massFromScale`, `bounceVelN`, `collisionDamage`,
+  `hitRadius`, `slowedSpeed`) with 15 tests in `GameMathTest` (`3938a78`, `470fe1e`,
+  `4488d65`).
+- Tree regrowth: `blastArea` queues a regrow for each destructable the blast actually felled
+  (life above 0 before, at or below 0 after), restored with `restoreLife(getMaxLife(), true)`
+  after `TREE_REGROW_TIME`. A `HashSet<destructable>` keeps one pending timer per tree, and the
+  timer is plain so it outlives whatever felled it (`6148751`).
+- Villager Kid takes hits: `MyProjectile.knockable` plus a `takeBlast` hook that VillagerKid
+  overrides for hit points (`VILLAGER_KID_HP`) and sqrt(maxHP/HP) knockback scaling, matching
+  `SheepEntity.blast`. The velocity maths moved into `vec3.knockbackVel`, shared by sheep and
+  projectiles. `BlastAreaListener` widened to carry the blast's source and falloff parameters;
+  `forKnockablesInRange` serves blasts, the Bat and the new `onHitProjectile` listener used by
+  Fus Ro Dah and the Boomer Hammer (`146e4a7`).
+- Version bumped to 1.2.0 at the start of the work, so builds stop overwriting the previous
+  release; `CLAUDE.md` now says to do that, and what `X.Y.Z` means for a map (`60ebb7f`).
+
 ## 1.1.0 — unreleased
 
 Not yet playtested; the notes may change before release.
